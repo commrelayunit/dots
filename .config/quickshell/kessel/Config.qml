@@ -11,6 +11,8 @@ Singleton {
     readonly property string weatherUnits: "m"        // "m" metric, "u" imperial
     readonly property int    weatherIntervalMin: 30
 
+    // Launcher translation: source language for ">en …" when the text isn't Cyrillic
+    readonly property string translateFrom: "de"
     readonly property int nightTemperature: 4000       // night light colour temperature (K)
 
     readonly property int notifTimeoutMs: 5000        // when the app does not set one

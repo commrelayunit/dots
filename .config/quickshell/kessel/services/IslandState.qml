@@ -23,6 +23,7 @@ Singleton {
     property string panel: ""
     property bool hovered: false
     property bool summary: false
+    property string launcherText: ""   // prefill for the launcher (IPC 'search')
     property bool quitting: false    // graceful shutdown in progress (see shell.qml)
     property real restWidth: 0       // reported by RestView (for status / tests)
     property real pillWidth: 0       // live, animated width of the pill (tests)
@@ -86,6 +87,8 @@ Singleton {
         }
         // Show/hide the hover glance without a pointer (also handy for testing).
         // Rotate perspectives without a scroll wheel: step = 1 / -1
+        // open the launcher pre-filled, e.g.  search ">de good morning"
+        function search(text: string): string { root.launcherText = text; root.panel = ""; root.openPanel("launcher"); return "ok" }
         function perspectiveSet(name: string): string { Perspectives.set(name); return Perspectives.current }
         function perspective(step: int): string { Perspectives.rotate(step); return Perspectives.current }
         function pill(): string { return String(Math.round(root.pillWidth * 10) / 10) }

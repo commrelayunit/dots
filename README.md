@@ -74,6 +74,7 @@ Hardware-dependent sections (battery, power profiles, brightness, Wi‑Fi, Bluet
 - **If a locker ever dies** (Hyprland shows "the lockscreen app died"), recover from SSH or another TTY: `hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()'`, or start hyprlock (`allow_session_lock_restore` is on). Tested.
 - **Login (SDDM)**: `sddm-theme/kessel` is the same design for the Qt6 greeter, with a session picker and user switching. `~/Scripts/sddm-theme.sh test` previews it in a window; `install` / `uninstall` (sudo) copy the theme, current wallpaper and `~/.face`, and select it via `/etc/sddm.conf.d/10-kessel.conf`.
 - **Cursor**: Bibata-Modern-Classic, as in end-4 (AUR `bibata-cursor-theme-bin`, installed with `--with-aur`).
+- **Theme reach**: matugen colours flow into the island, Hyprland borders, kitty (16 colours), fish, Starship, fuzzel, Qt (qt6ct, Dolphin), KDE colour scheme, GTK 3/4 + libadwaita (`gtk.css`, e.g. OmniGlyph), btop, yazi, the lock screen and SDDM (on install).
 
 ## Performance note (VMs)
 
@@ -85,34 +86,43 @@ Without a GPU render node (Kessel has none), `general.lua` turns off blur and sh
 
 ## Install (fresh machine)
 
+A new Arch install with Hyprland and a display manager (SDDM) is all that's assumed.
+
 ```sh
 sudo pacman -S --needed git
 git clone <repo> ~/dot-files && cd ~/dot-files
 
-./install.sh --dry-run --profile minimal --apply-config   # 1. preview (changes nothing)
-./install.sh --profile minimal                           # 2. official packages (sudo pacman)
-./install.sh --profile minimal --apply-config            # 3. link configs (backs up what it replaces)
-./install.sh --check                                     # 4. verify
+./install.sh --dry-run --with-aur --with-translate --apply-config   # 1. preview everything (changes nothing)
+./install.sh --with-aur --apply-config                             # 2. packages (pacman + yay, bootstraps yay) + config links + theme
+./install.sh --skip-packages --with-translate                      # 3. optional: offline translation (downloads ~150 MB)
+./install.sh --set-shell                                           # 4. optional: fish as login shell
+~/Scripts/sddm-theme.sh install                                    # 5. optional: matching login screen (sudo)
+./install.sh --check                                               # 6. verify
 ```
 
-Optional extras, each one opt-in:
+Log out and back in once so Hyprland picks up the environment (Qt theme, cursor, menus).
+After that, `~/Scripts/update.sh` keeps everything current.
 
 | Flag | What it does |
 | --- | --- |
-| `--with-aur` | Installs `pkglist-aur.txt` with **yay** (currently: `omniglyph`) |
-| `--with-laptop` | Installs `pkglist-laptop.txt` (bluez, power-profiles-daemon). It does **not** enable their services |
-| `--set-shell` | `chsh -s /usr/bin/fish`. Run it only after the shell checks below |
-| `--skip-packages` | Config only |
-| `--rollback [ts]` | Undo a config deployment (latest, or the given timestamp) |
+| `--apply-config` | Link configs into `~` (backs up anything replaced) and generate the theme |
+| `--with-aur` | `pkglist-aur.txt` via **yay** (installs yay-bin first if needed): OmniGlyph, Bibata cursor |
+| `--with-laptop` | `pkglist-laptop.txt` (bluez, power-profiles-daemon). It does **not** enable their services |
+| `--with-translate` | Offline translation runtime + EN↔DE, EN↔BG models (see below) |
+| `--set-shell` | `chsh -s /usr/bin/fish` |
+| `--skip-packages` | Config / extras only |
+| `--rollback [ts]` | Undo a config deployment |
 
-**AUR helper (yay), one-time bootstrap:**
+### Offline translation (launcher)
+
+Type in the launcher (`SUPER+R`): `>de good morning` (EN→DE), `>bg …` (EN→BG), `>en …` (→EN, Cyrillic is detected as Bulgarian), or an explicit pair like `>de-bg Hallo`. Enter copies the result. It runs **entirely locally** using Bergamot, the same engine and models as translateLocally and Firefox's offline translation. A private Python 3.10 managed by `uv` holds it, so nothing needs compiling.
 
 ```sh
-sudo pacman -S --needed git base-devel
-git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin && (cd /tmp/yay-bin && makepkg -si)
+~/.config/hypr/scripts/translate.sh available     # every downloadable model
+~/.config/hypr/scripts/translate.sh add en-fr     # add a language (pairs via English are automatic)
+~/.config/hypr/scripts/translate.sh installed
+~/.config/hypr/scripts/translate.sh remove en-fr-tiny
 ```
-
-The installer **never** enables services, touches SSH, networking or the firewall, installs Flatpak/Snap, or handles secrets. Re-running it is safe: anything already correct is reported with ✓ and left alone.
 
 ### How config deployment works
 

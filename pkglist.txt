@@ -42,11 +42,15 @@ xdg-user-dirs
 xdg-utils
 # OmniGlyph (AUR) needs this at runtime but its package does not declare it
 gtk4-layer-shell
+# colour emoji (OmniGlyph, notifications, browsers) — without it emojis render as boxes
+noto-fonts-emoji
 # Island utilities: screen recording, colour picker, backlight, app icons
 wf-recorder
 hyprpicker
 brightnessctl
 papirus-icon-theme
+# Launcher translation runtime (scripts/translate.sh uses uv for a private Python 3.10)
+uv
 # Launcher calculator (qalc) + night light
 libqalculate
 hyprsunset
@@ -61,6 +65,11 @@ ffmpegthumbs
 archlinux-xdg-menu
 breeze
 obsidian
+# Browser (SUPER+W), terminal file manager, media player (+ MPRIS for the island)
+firefox
+yazi
+mpv
+mpv-mpris
 # Qt theming (palette from scripts/theme.sh)
 qt6ct
 neovim

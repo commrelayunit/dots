@@ -54,6 +54,14 @@ step_aur() {
     run yay -S --needed "${missing[@]}"
 }
 
+step_translate() {
+    step "Offline translation (--with-translate)"
+    local t="$REPO/.config/hypr/scripts/translate.sh"
+    info "private Python 3.10 + bergamot (via uv) and models: en↔de, en↔bg (de↔bg pivots via en)"
+    info "more languages later: ~/.config/hypr/scripts/translate.sh available | add <pair>"
+    run "$t" setup en-de de-en en-bg bg-en
+}
+
 step_laptop() {
     local manifest="$REPO/pkglist-laptop.txt"
     step "Laptop extras (--with-laptop)"

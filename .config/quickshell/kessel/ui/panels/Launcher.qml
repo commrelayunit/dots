@@ -25,29 +25,38 @@ PanelBase {
     // special rows (calculator result, open URL) come first, then apps
     readonly property var special: {
         const out = []
+        if (Translator.looksLikeTranslate(search.text)) {
+            const p = Translator.parse(search.text)
+            out.push({ kind: "tr", value: Translator.state !== "ready" ? "" : (Translator.busy ? "…" : (Translator.result || Translator.error)),
+                       label: p ? p.from + " → " + p.to : "" })
+            return out
+        }
         if (Calc.result !== "" && Calc.query === search.text) out.push({ kind: "calc", value: Calc.result })
         const u = asUrl(search.text)
         if (u !== "") out.push({ kind: "url", value: u })
         return out
     }
-    property var results: special.concat(Apps.query(search.text).map(a => ({ kind: "app", app: a })))
+    property var results: Translator.looksLikeTranslate(search.text) ? special
+        : special.concat(Apps.query(search.text).map(a => ({ kind: "app", app: a })))
 
     function launchCurrent() {
         if (list.currentIndex < 0 || list.currentIndex >= results.length) return
         const r = results[list.currentIndex]
-        if (r.kind === "calc") Calc.copy(r.value)
+        if (r.kind === "tr") { if (Translator.busy || Translator.result === "") return; Translator.copy() }
+        else if (r.kind === "calc") Calc.copy(r.value)
         else if (r.kind === "url") Quickshell.execDetached(["xdg-open", r.value])
         else Apps.launch(r.app)
         IslandState.closePanel()
     }
 
     onActiveFocusChanged: if (activeFocus) search.focusInput()
+    Component.onCompleted: if (IslandState.launcherText !== "") { search.text = IslandState.launcherText; IslandState.launcherText = "" }
 
     SearchField {
         id: search
         width: parent.width
-        placeholder: "Search apps · calculate (2+2, = 5 km in miles) · open a URL"
-        onTextChanged: { list.currentIndex = 0; Calc.evaluate(text) }
+        placeholder: "Apps · 2+2 · URL · >de translate"
+        onTextChanged: { list.currentIndex = 0; Calc.evaluate(text); Translator.request(text) }
         onAccepted: root.launchCurrent()
         onUp: list.decrementCurrentIndex()
         onDown: list.incrementCurrentIndex()
@@ -58,7 +67,7 @@ PanelBase {
         anchors.top: search.bottom
         anchors.topMargin: 10
         width: parent.width
-        height: Math.min(8, Math.max(1, count)) * 48
+        height: Math.min(8 * 48, Math.max(48, contentHeight))
         clip: true
         model: root.results
         currentIndex: 0
@@ -71,7 +80,7 @@ PanelBase {
             required property var modelData
             required property int index
             width: list.width
-            height: 48
+            height: d.modelData.kind === "tr" ? Math.max(48, textCol.implicitHeight + 18) : 48
             readonly property bool isApp: modelData.kind === "app"
             Image {
                 id: appIcon
@@ -92,9 +101,10 @@ PanelBase {
                 width: 30; height: 30; radius: 15
                 color: Theme.a(Theme.accent, 0.18)
                 Glyph { anchors.centerIn: parent; optical: true; size: Theme.fontUi + 1; color: Theme.accent
-                        text: d.modelData.kind === "calc" ? Icons.calculator : Icons.web }
+                        text: d.modelData.kind === "calc" ? Icons.calculator : d.modelData.kind === "tr" ? Icons.translate : Icons.web }
             }
             Column {
+                id: textCol
                 anchors.left: appIcon.right
                 anchors.leftMargin: 12
                 anchors.right: parent.right
@@ -102,7 +112,11 @@ PanelBase {
                 anchors.verticalCenter: parent.verticalCenter
                 Label {
                     width: parent.width
-                    text: d.modelData.kind === "calc" ? "= " + d.modelData.value
+                    wrapMode: d.modelData.kind === "tr" ? Text.Wrap : Text.NoWrap
+                    maximumLineCount: d.modelData.kind === "tr" ? 3 : 1
+                    elide: Text.ElideRight
+                    text: d.modelData.kind === "tr" ? (Translator.state === "ready" ? (d.modelData.value || "Type a sentence…") : "Offline translation isn't set up yet")
+                        : d.modelData.kind === "calc" ? "= " + d.modelData.value
                         : d.modelData.kind === "url" ? d.modelData.value
                         : d.modelData.app.name
                     font.bold: !d.isApp
@@ -110,7 +124,8 @@ PanelBase {
                 }
                 Label {
                     width: parent.width
-                    text: d.modelData.kind === "calc" ? "Enter to copy" + (Calc.qalcAvailable ? " · qalc" : "")
+                    text: d.modelData.kind === "tr" ? (Translator.state === "ready" ? d.modelData.label + " · offline · Enter to copy" : "Run: ~/.config/hypr/scripts/translate.sh setup")
+                        : d.modelData.kind === "calc" ? "Enter to copy" + (Calc.qalcAvailable ? " · qalc" : "")
                         : d.modelData.kind === "url" ? "Enter to open in your browser"
                         : (d.modelData.app.comment || d.modelData.app.genericName || "")
                     visible: text !== ""

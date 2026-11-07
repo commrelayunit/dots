@@ -84,6 +84,7 @@ Singleton {
     readonly property string drop:       g(0xF058E)
     readonly property string wind:       g(0xF059D)
     readonly property string place:      g(0xF034E)
+    readonly property string translate:  g(0xF05CA)
     readonly property string camera:     g(0xF0100)
     readonly property string screenShare: g(0xF0379)
     readonly property string shuffleOn:  g(0xF049D)

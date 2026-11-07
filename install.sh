@@ -7,6 +7,7 @@
 #   ./install.sh --profile minimal --apply-config                        # + deploy config links
 #   ./install.sh --with-aur                                              # + optional AUR (yay)
 #   ./install.sh --with-laptop                                           # + bluez, power-profiles-daemon
+#   ./install.sh --with-translate                                        # + offline translation (downloads models)
 #   ./install.sh --check                                                 # read-only verification
 #   ./install.sh --rollback [timestamp]                                  # undo a config deployment
 #
@@ -22,9 +23,9 @@ source "$REPO/installer/config.sh"
 source "$REPO/installer/checks.sh"
 
 PROFILE=minimal
-WITH_AUR=0 WITH_LAPTOP=0 APPLY_CONFIG=0 SET_SHELL=0 CHECK_ONLY=0 ROLLBACK=0 ROLLBACK_TS="" SKIP_PACKAGES=0
+WITH_AUR=0 WITH_LAPTOP=0 WITH_TRANSLATE=0 APPLY_CONFIG=0 SET_SHELL=0 CHECK_ONLY=0 ROLLBACK=0 ROLLBACK_TS="" SKIP_PACKAGES=0
 
-usage() { sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '3,16p' "$0" | sed 's/^# \{0,1\}//'; }
 
 while (( $# )); do
     case $1 in
@@ -33,6 +34,7 @@ while (( $# )); do
         --profile=*)     PROFILE="${1#*=}" ;;
         --with-aur)      WITH_AUR=1 ;;
         --with-laptop)   WITH_LAPTOP=1 ;;
+        --with-translate) WITH_TRANSLATE=1 ;;
         --apply-config)  APPLY_CONFIG=1 ;;
         --skip-packages) SKIP_PACKAGES=1 ;;
         --set-shell)     SET_SHELL=1 ;;
@@ -61,6 +63,7 @@ if (( APPLY_CONFIG )); then
 else
     step "Config links"; info "skipped (pass --apply-config to deploy)"
 fi
+(( WITH_TRANSLATE )) && { step_translate || warn "translation setup incomplete"; }
 
 if (( SET_SHELL )); then
     step "Login shell"
