@@ -10,7 +10,7 @@ local STRICT = os.getenv("KESSEL_STRICT") == "1"
 M.RESCUE = {
     { keys = "SUPER + Return",         cmd = "kitty",              desc = "Terminal (kitty)" },
     { keys = "SUPER + SHIFT + Return", cmd = "kitty bash --norc",  desc = "Recovery shell (kitty + bash)" },
-    { keys = "SUPER + R",              cmd = "fuzzel",             desc = "Launcher (fuzzel)" },
+    { keys = "SUPER + SHIFT + Space",  cmd = "fuzzel",             desc = "Launcher (fuzzel)" },
 }
 
 M.bound = {}  -- keys successfully bound, filled by lib/binder.lua

@@ -154,7 +154,8 @@ The essentials (end-4 layout; full list in `docs/SHORTCUTS.md` or **SUPER + /**)
 | --- | --- |
 | `SUPER + Return` / `SUPER + T` | Kitty |
 | `SUPER + SHIFT + Return` | Recovery shell (`kitty bash --norc`) |
-| `SUPER + Space` / `SUPER + R` | Island launcher / fuzzel |
+| `SUPER + R` / `SUPER + SHIFT + Space` | Island launcher / fuzzel |
+| `SUPER + Space` | Focus mode: hide / show the island |
 | `SUPER + Q` | Close window (**never** the terminal) |
 | `SUPER + C` / `SUPER + W` | Neovim / browser |
 | `SUPER + 1…0`, `CTRL + SUPER + 1…0` | Go to workspace |

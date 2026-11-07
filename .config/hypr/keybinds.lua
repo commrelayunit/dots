@@ -48,10 +48,11 @@ add { group = "Apps", keys = "SUPER + C",              exec = apps.editor,   des
 add { group = "Apps", keys = "SUPER + W",              exec = apps.browser,  desc = "Web browser" }
 add { group = "Apps", keys = "CTRL + SUPER + V",       exec = apps.mixer,    desc = "Volume mixer (pavucontrol)" }
 add { group = "Apps", keys = "CTRL + SHIFT + Escape",  exec = apps.taskmgr,  desc = "Task manager (htop)" }
-add { group = "Apps", keys = "SUPER + R",              exec = apps.launcher, desc = "App launcher (fuzzel, always available)" }
+add { group = "Apps", keys = "SUPER + SHIFT + Space",  exec = apps.launcher, desc = "App launcher: fuzzel (always available)" }
 
 -- Island (Quickshell) — each falls back when the island is not running --------
-add { group = "Island", keys = "SUPER + Space",     exec = island("open launcher", "fuzzel"), desc = "Launcher (fallback: fuzzel)" }
+add { group = "Island", keys = "SUPER + R",         exec = island("open launcher", "fuzzel"), desc = "Launcher (fallback: fuzzel)" }
+add { group = "Island", keys = "SUPER + Space",     exec = "qs -c kessel ipc call island toggle", desc = "Focus mode: hide / show the island (frees its screen space)" }
 add { group = "Island", keys = "SUPER + V",         exec = island("open clipboard", S .. "clipboard.sh"), desc = "Clipboard history (fallback: fuzzel)" }
 add { group = "Island", keys = "SUPER + Tab",       exec = island("open overview"), desc = "Overview: workspaces + window previews" }
 add { group = "Island", keys = "SUPER + A",         exec = island("open control"), desc = "Quick settings (Wi-Fi, BT, audio, brightness, power)" }
@@ -63,7 +64,7 @@ add { group = "Island", keys = "CTRL + ALT + Delete", exec = island("open power"
 add { group = "Island", keys = "SUPER + Escape",    exec = island("open power"), desc = "Session menu", hidden = true }
 add { group = "Island", keys = "CTRL + SUPER + T",  exec = island("open wallpaper"), desc = "Wallpaper & theme picker" }
 add { group = "Island", keys = "CTRL + SUPER + SHIFT + D", exec = S .. "theme.sh mode toggle", desc = "Toggle light / dark theme" }
-add { group = "Island", keys = "SUPER + J",         exec = "qs -c kessel ipc call island toggle", desc = "Show / hide the island" }
+add { group = "Island", keys = "SUPER + J",         exec = "qs -c kessel ipc call island toggle", desc = "Show / hide the island", hidden = true }
 add { group = "Island", keys = "CTRL + SUPER + R",  exec = S .. "island.sh restart", desc = "Restart the island" }
 add { group = "Island", keys = "SUPER + slash",     exec = S .. "shortcuts.sh", desc = "Shortcuts (this list)" }
 

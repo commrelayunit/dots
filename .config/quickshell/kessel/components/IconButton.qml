@@ -21,6 +21,7 @@ Rectangle {
         anchors.centerIn: parent
         text: root.icon
         size: root.iconSize
+        optical: true
         color: root.active ? root.tint : Theme.text
     }
     MouseArea {

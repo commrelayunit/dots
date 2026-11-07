@@ -12,13 +12,14 @@
 | `SUPER + W` | Web browser |
 | `CTRL + SUPER + V` | Volume mixer (pavucontrol) |
 | `CTRL + SHIFT + Escape` | Task manager (htop) |
-| `SUPER + R` | App launcher (fuzzel, always available) |
+| `SUPER + SHIFT + Space` | App launcher: fuzzel (always available) |
 
 ## Island
 
 | Keys | Action |
 | --- | --- |
-| `SUPER + Space` | Launcher (fallback: fuzzel) |
+| `SUPER + R` | Launcher (fallback: fuzzel) |
+| `SUPER + Space` | Focus mode: hide / show the island (frees its screen space) |
 | `SUPER + V` | Clipboard history (fallback: fuzzel) |
 | `SUPER + Tab` | Overview: workspaces + window previews |
 | `SUPER + A` | Quick settings (Wi-Fi, BT, audio, brightness, power) |
@@ -28,7 +29,6 @@
 | `CTRL + ALT + Delete` | Session menu (lock, standby, logout, restart, shutdown) |
 | `CTRL + SUPER + T` | Wallpaper & theme picker |
 | `CTRL + SUPER + SHIFT + D` | Toggle light / dark theme |
-| `SUPER + J` | Show / hide the island |
 | `CTRL + SUPER + R` | Restart the island |
 | `SUPER + slash` | Shortcuts (this list) |
 

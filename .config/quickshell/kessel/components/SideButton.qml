@@ -23,6 +23,7 @@ Rectangle {
         anchors.centerIn: parent
         text: root.icon
         size: Theme.fontUi + 3
+        optical: true
         color: root.active ? root.tint : Theme.text
     }
     // count badge
