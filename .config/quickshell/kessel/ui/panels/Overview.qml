@@ -37,7 +37,7 @@ PanelBase {
     Keys.onRightPressed: sel = (sel + 1) % count
     Keys.onUpPressed:    sel = (sel - cols + count) % count
     Keys.onDownPressed:  sel = (sel + cols) % count
-    Keys.onReturnPressed: { Hypr.focus(sel + 1); IslandState.closePanel() }
+    Keys.onReturnPressed: { const id = sel + 1; Hypr.afterPanel(() => Hypr.focus(id)) }
 
     Grid {
         columns: root.cols
@@ -67,7 +67,7 @@ PanelBase {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onEntered: root.sel = ws.index
-                        onClicked: { Hypr.focus(ws.wsId); IslandState.closePanel() }
+                        onClicked: { const id = ws.wsId; Hypr.afterPanel(() => Hypr.focus(id)) }
                     }
                     DropArea {
                         id: drop
@@ -120,7 +120,7 @@ PanelBase {
                                 onReleased: {
                                     const moved = win.Drag.target !== null
                                     win.Drag.drop()
-                                    if (!moved) { Hypr.focusWindow(win.modelData); IslandState.closePanel() }
+                                    if (!moved) { const t = win.modelData; Hypr.afterPanel(() => Hypr.focusWindow(t)) }
                                     else IslandState.closePanel()
                                 }
                             }

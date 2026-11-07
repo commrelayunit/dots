@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Hyprland
 
 Singleton {
+    id: root
     readonly property var workspaces: Hyprland.workspaces.values.filter(w => w.id > 0)
     readonly property int focusedId: Hyprland.focusedWorkspace?.id ?? 1
     readonly property int maxId: {
@@ -37,6 +38,13 @@ Singleton {
         if (t) focusWindow(t)
         return t !== undefined
     }
+    // From inside an open panel: close it first, then act. While the panel's
+    // focus grab is active Hyprland drops the workspace switch, so wait until
+    // the grab has been released.
+    property var pending: null
+    function afterPanel(fn) { pending = fn; IslandState.closePanel(); pendingTimer.restart() }
+    Timer { id: pendingTimer; interval: 120; onTriggered: { const f = root.pending; root.pending = null; if (f) f() } }
+
     function focus(id) {
         // Hyprland 0.57 uses Lua dispatchers.
         Hyprland.dispatch(Hyprland.usingLua ? `hl.dsp.focus({ workspace = ${id} })` : `workspace ${id}`)
