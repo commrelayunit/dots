@@ -103,6 +103,18 @@ Each entry in `profiles/minimal.links` becomes a **symlink** from `~` into this 
 - Every run that changes something writes `backups/<timestamp>/MANIFEST`, which is what `--rollback` replays.
 - gsettings font and colour values are recorded too, so rollback restores the previous values.
 
+## ~/Scripts
+
+`~/Scripts` is a symlink to this repo's `scripts/`, so you can edit it in either place. Every script supports `--dry-run`.
+
+| Script | What it does |
+| --- | --- |
+| `~/Scripts/install.sh` | Fresh install / re-apply (packages + config links). Passes any `install.sh` flag through |
+| `~/Scripts/update.sh` | Pull (if a remote exists) → re-apply config → regenerate shortcuts → reload Hyprland, restart island, re-apply theme. `--system` adds `pacman -Syu`, `--aur` adds `yay -Sua` |
+| `~/Scripts/backup.sh` | `~/Backups/kessel/kessel-<ts>.tar.zst`: repo as a git bundle, package lists, theme/install state, notes, `~/.face`, wallpapers. Keeps 10 (`--keep N`). No secrets |
+| `~/Scripts/uninstall.sh` | Undo every deployment newest-first, restoring the original files. Asks first; `--purge` also removes generated state. Never removes packages |
+| `~/Scripts/gen-shortcuts.sh` | Rebuild `docs/SHORTCUTS.md` from `keybinds.lua` |
+
 ## Update
 
 ```sh

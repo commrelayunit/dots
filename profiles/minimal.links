@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Config links for the "minimal" profile: <repo path>  <live path relative to $HOME>
+# (~/Scripts → scripts/: install, update, uninstall, backup, gen-shortcuts)
 # Each live path becomes a symlink into this repo. Anything already there is
 # moved to ~/.local/state/dot-files/backups/<timestamp>/ first.
 .config/hypr                 .config/hypr
@@ -16,3 +17,4 @@
 .config/gtk-4.0/settings.ini .config/gtk-4.0/settings.ini
 .config/quickshell/kessel    .config/quickshell/kessel
 .config/omniglyph/config.toml .config/omniglyph/config.toml
+scripts                      Scripts

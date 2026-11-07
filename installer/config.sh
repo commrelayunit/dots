@@ -132,15 +132,16 @@ step_rollback() {
                     warn "~/$a is no longer our link — leaving it alone"
                     continue
                 fi
+                local verb; (( DRY_RUN )) && verb="would " || verb=""
                 if [[ $action == REPLACE ]]; then
                     run mv "$bdir/$a" "$dest"
-                    ok "restored ~/$a"
+                    ok "${verb}restore ~/$a"
                 else
-                    ok "removed link ~/$a"
+                    ok "${verb}remove link ~/$a"
                 fi ;;
             GSETTINGS)
                 run gsettings set "$a" "$b" "$(sed "s/^'//; s/'$//" <<<"$c")"
-                ok "gsettings $b ← $c" ;;
+                ok "$( (( DRY_RUN )) && echo "would set " )gsettings $b ← $c" ;;
         esac
     done < <(tac "$bdir/MANIFEST")
     (( DRY_RUN )) || mv "$bdir/MANIFEST" "$bdir/MANIFEST.rolled-back"
