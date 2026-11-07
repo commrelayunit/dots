@@ -1,11 +1,77 @@
 -- SPDX-License-Identifier: GPL-3.0-or-later
--- Displays. Kessel: QEMU/VirtIO GPU, output "Virtual-1".
--- Current mode chosen by the user: 1920x1080 (was 2560x1440). Auto scale → 1.5.
--- Rollback/alternative: set mode = "2560x1440" (auto scale → 1.6).
+-- Displays. Arranged left→right automatically, re-applied on hot-plug:
+--
+--   1 display   it is the origin
+--   2 displays  [laptop] [external]          external always to the RIGHT
+--   3 displays  [left]   [MAIN]   [right]    the main display in the MIDDLE
+--               (laptop, if present, goes left; MAIN_MONITOR picks the middle one,
+--                otherwise the first external is used)
+--
+-- Find a display's description with:  hyprctl monitors | grep description
 
-hl.monitor({
-    output   = "",          -- any monitor (only Virtual-1 exists)
-    mode     = "1920x1080",
-    position = "0x0",
-    scale    = "auto",
-})
+local MAIN_MONITOR = ""      -- e.g. "Dell Inc. DELL U2723QE" (substring match)
+
+-- Kessel (VM): VirtIO "Virtual-1", user-chosen 1920x1080 (was 2560x1440). Auto scale → 1.5.
+hl.monitor({ output = "Virtual-1", mode = "1920x1080", position = "0x0", scale = "auto" })
+-- Everything else: preferred mode, auto scale; position set by arrange() below.
+hl.monitor({ output = "", mode = "preferred", position = "auto-right", scale = "auto" })
+
+local function is_internal(m)
+    local n = m.name or ""
+    return n:match("^eDP") or n:match("^LVDS") or n:match("^DSI") or n:match("^Virtual")
+end
+
+local function logical_width(m)
+    local w, h, s = m.width or 0, m.height or 0, (m.scale and m.scale > 0) and m.scale or 1
+    if m.transform == 1 or m.transform == 3 or m.transform == 5 or m.transform == 7 then w = h end
+    return math.floor(w / s + 0.5)
+end
+
+local function arrange()
+    local ok, mons = pcall(hl.get_monitors)
+    if not ok or type(mons) ~= "table" then return end
+
+    local internal, externals = nil, {}
+    for _, m in ipairs(mons) do
+        if m.enabled ~= false and not m.is_mirror then
+            if is_internal(m) and not internal then internal = m else table.insert(externals, m) end
+        end
+    end
+    table.sort(externals, function(a, b) return (a.name or "") < (b.name or "") end)
+    if #externals == 0 then return end   -- single display: rules above are enough
+
+    local order
+    if internal and #externals == 1 then
+        order = { internal, externals[1] }
+    else
+        local main = externals[1]
+        if MAIN_MONITOR ~= "" then
+            for _, m in ipairs(externals) do
+                if (m.description or ""):find(MAIN_MONITOR, 1, true) then main = m end
+            end
+        end
+        local rest = {}
+        for _, m in ipairs(externals) do if m ~= main then table.insert(rest, m) end end
+        local left = internal or table.remove(rest, 1)
+        order = { left, main }
+        for _, m in ipairs(rest) do table.insert(order, m) end
+    end
+
+    local x = 0
+    for _, m in ipairs(order) do
+        if m.name == "Virtual-1" then
+            hl.monitor({ output = m.name, mode = "1920x1080", position = x .. "x0", scale = "auto" })
+        else
+            hl.monitor({ output = m.name, mode = "preferred", position = x .. "x0", scale = "auto" })
+        end
+        x = x + logical_width(m)
+    end
+end
+
+arrange()
+hl.on("monitor.added", function()
+    arrange()
+    -- the new display's auto scale is known only after it is configured; settle once more
+    hl.timer(arrange, { timeout = 600, type = "oneshot" })
+end)
+hl.on("monitor.removed", arrange)

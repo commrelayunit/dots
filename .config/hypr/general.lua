@@ -1,6 +1,17 @@
 -- SPDX-License-Identifier: GPL-3.0-or-later
--- UI / general aesthetic. Restrained "Kessel" palette:
---   base #11131a  surface #1b1e27  overlay #2a2e3a  text #d8dae1  accent #8aadf4  accent2 #a6da95
+-- UI / general aesthetic. Border colours come from the current theme
+-- (~/.local/state/kessel/theme/hyprland.lua, written by scripts/theme.sh).
+
+local theme = { active = { "rgba(8aadf4ee)", "rgba(c6a0f6ee)" }, inactive = "rgba(262626aa)" }
+do
+    local path = os.getenv("HOME") .. "/.local/state/kessel/theme/hyprland.lua"
+    local f = io.open(path, "r")
+    if f then
+        f:close()
+        local ok, t = pcall(dofile, path)
+        if ok and type(t) == "table" then theme = t end
+    end
+end
 
 hl.config({
     general = {
@@ -8,8 +19,8 @@ hl.config({
         gaps_out    = 10,
         border_size = 2,
         col = {
-            active_border   = { colors = { "rgba(8aadf4ee)", "rgba(a6da95ee)" }, angle = 45 },
-            inactive_border = "rgba(2a2e3aaa)",
+            active_border   = { colors = theme.active, angle = 45 },
+            inactive_border = theme.inactive,
         },
         resize_on_border = true,
         allow_tearing    = false,

@@ -61,6 +61,8 @@ add { group = "Island", keys = "SUPER + M",         exec = island("open control"
 add { group = "Island", keys = "SUPER + ALT + T",   exec = island("open timer"), desc = "Timer / stopwatch" }
 add { group = "Island", keys = "CTRL + ALT + Delete", exec = island("open power"), desc = "Session menu (lock, standby, logout, restart, shutdown)" }
 add { group = "Island", keys = "SUPER + Escape",    exec = island("open power"), desc = "Session menu", hidden = true }
+add { group = "Island", keys = "CTRL + SUPER + T",  exec = island("open wallpaper"), desc = "Wallpaper & theme picker" }
+add { group = "Island", keys = "CTRL + SUPER + SHIFT + D", exec = S .. "theme.sh mode toggle", desc = "Toggle light / dark theme" }
 add { group = "Island", keys = "SUPER + J",         exec = "qs -c kessel ipc call island toggle", desc = "Show / hide the island" }
 add { group = "Island", keys = "CTRL + SUPER + R",  exec = S .. "island.sh restart", desc = "Restart the island" }
 add { group = "Island", keys = "SUPER + slash",     exec = S .. "shortcuts.sh", desc = "Shortcuts (this list)" }

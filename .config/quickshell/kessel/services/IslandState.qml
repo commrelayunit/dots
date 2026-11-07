@@ -29,7 +29,7 @@ Singleton {
     property string osdLabel: ""
     property real osdValue: 0
 
-    readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer"]
+    readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer", "wallpaper"]
 
     readonly property string layer: panel !== "" ? "panel"
         : Notifs.popup !== null ? "notification"
@@ -52,10 +52,13 @@ Singleton {
     }
 
     Timer { id: osdTimer; interval: Config.osdMs; onTriggered: root.osdActive = false }
+    // Hysteresis: open after the pointer rests, close only after it has been
+    // gone for a moment (the pill changes size under the cursor while morphing).
     Timer { id: hoverTimer; interval: Config.hoverDelayMs; onTriggered: root.summary = root.hovered }
+    Timer { id: leaveTimer; interval: 350; onTriggered: if (!root.hovered) root.summary = false }
     onHoveredChanged: {
-        if (hovered) hoverTimer.restart()
-        else { hoverTimer.stop(); summary = false }
+        if (hovered) { leaveTimer.stop(); hoverTimer.restart() }
+        else { hoverTimer.stop(); leaveTimer.restart() }
     }
 
     IpcHandler {
@@ -72,6 +75,8 @@ Singleton {
         function dnd(): string { Notifs.dnd = !Notifs.dnd; return Notifs.dnd ? "dnd on" : "dnd off" }
         function record(): string { Recorder.toggle(false); return "ok" }
         function recordRegion(): string { Recorder.toggle(true); return "ok" }
+        function reloadTheme(): string { Theme.reload(); return "ok" }
+        function toggleTheme(): string { Themes.toggleMode(); return "ok" }
         function status(): string {
             return JSON.stringify({
                 shown: root.shown, layer: root.layer, panel: root.panel,

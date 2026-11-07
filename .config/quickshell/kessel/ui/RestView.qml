@@ -48,10 +48,15 @@ View {
             }
         }
 
-        Row {
-            visible: Media.active
+        Item {
+          visible: Media.active
+          implicitWidth: mediaRow.implicitWidth
+          implicitHeight: mediaRow.implicitHeight
+          anchors.verticalCenter: parent.verticalCenter
+          MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Media.toggle() }
+          Row {
+            id: mediaRow
             spacing: 7
-            anchors.verticalCenter: parent.verticalCenter
             Rectangle {
                 width: 20; height: 20; radius: 10
                 color: Theme.overlay
@@ -67,30 +72,37 @@ View {
                 anchors.verticalCenter: parent.verticalCenter
             }
             EqBars { playing: Media.playing; anchors.verticalCenter: parent.verticalCenter }
+          }
         }
 
         // ── centre ──────────────────────────────────────────────────
-        Row {
-            spacing: 8
+        Item {
+            implicitWidth: clockRow.implicitWidth
+            implicitHeight: clockRow.implicitHeight
             anchors.verticalCenter: parent.verticalCenter
-            Label { text: Time.time; font.bold: true; size: Theme.fontUi + 1; anchors.verticalCenter: parent.verticalCenter }
-            Label { text: Time.dateShort; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+            Row {
+                id: clockRow
+                spacing: 8
+                Label { text: Time.time; font.bold: true; size: Theme.fontUi + 1; anchors.verticalCenter: parent.verticalCenter }
+                Label { text: Time.dateShort; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+            }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: IslandState.openPanel("notifications") }
         }
 
         // ── right wing ──────────────────────────────────────────────
-        Chip { visible: Weather.ok; icon: Weather.icon; text: Weather.temp; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
-        Chip { icon: Icons.cpu; text: Math.round(Stats.cpu * 100) + "%"; tint: Stats.cpu > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-        Chip { icon: Icons.memory; text: Math.round(Stats.mem * 100) + "%"; tint: Stats.mem > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-        Chip { icon: Net.icon; text: Net.online ? Stats.human(Stats.rxRate) : ""; tint: Net.online ? Theme.subtext : Theme.red; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: Weather.ok; icon: Weather.icon; text: Weather.temp; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.cpu; text: Math.round(Stats.cpu * 100) + "%"; tint: Stats.cpu > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.memory; text: Math.round(Stats.mem * 100) + "%"; tint: Stats.mem > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Net.icon; text: Net.online ? Stats.human(Stats.rxRate) : ""; tint: Net.online ? Theme.subtext : Theme.red; anchors.verticalCenter: parent.verticalCenter }
         Chip { visible: Power.hasBattery; icon: Power.icon; text: Math.round(Power.percent * 100) + "%"
                tint: Power.charging ? Theme.green : Power.percent < 0.15 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
 
         // live activities
-        Chip { visible: Recorder.recording; icon: Icons.record; text: Time.hms(Recorder.elapsed); tint: Theme.red; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Timers.cdActive; icon: Icons.sand; text: Time.hms(Timers.cdLeft); tint: Theme.purple; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: Recorder.stop(); visible: Recorder.recording; icon: Icons.record; text: Time.hms(Recorder.elapsed); tint: Theme.red; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("timer"); visible: Timers.cdActive; icon: Icons.sand; text: Time.hms(Timers.cdLeft); tint: Theme.purple; anchors.verticalCenter: parent.verticalCenter }
         Chip { visible: Timers.swRunning; icon: Icons.timer; text: Time.hms(Timers.swMs / 1000); tint: Theme.purple; anchors.verticalCenter: parent.verticalCenter }
         Chip { visible: Session.inhibitIdle; icon: Icons.coffee; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Notifs.dnd; icon: Icons.bellOff; tint: Theme.red; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: !Notifs.dnd && Notifs.count > 0; icon: Icons.bell; text: Notifs.count; tint: Theme.accent; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: Notifs.dnd; icon: Icons.bellOff; tint: Theme.red; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: !Notifs.dnd && Notifs.count > 0; icon: Icons.bell; text: Notifs.count; tint: Theme.accent; anchors.verticalCenter: parent.verticalCenter }
     }
 }

@@ -137,3 +137,14 @@ Each one would be a separate opt-in stage with its own unit review, a dry run, a
 2. Validate the new tree with `--verify-config` in a scratch location.
 3. Deploy the Hyprland symlinks; Hyprland auto-reloads. Verify `SUPER+Return` and SSH, and confirm WayVNC is still on `127.0.0.1:5900` (Hyprland does not restart WayVNC on reload).
 4. Shell: test fish interactively and over SSH (`ssh kessel fish -c true`) before any `chsh`.
+
+## 8. Decisions changed by the user (2026-11-07, after milestone 1)
+
+| Original brief | Now | Why / safeguard |
+| --- | --- | --- |
+| Minimal clock/date island; no dashboard | Feature-rich island (quick settings, notifications, launcher, clipboard, overview, notes, timer, session, wallpaper/theme) | User request after reviewing Panacea / ActivSpot / Impasto / Brain_Shell. All written from scratch; Brain_Shell (AGPL-3.0) used as visual reference only |
+| dunst = single notification path | Island owns notifications while it runs; dunst D-Bus activates when it doesn't | Still one active server at a time; the desktop keeps notifications if Quickshell dies |
+| Fuzzel = only launcher | Island launcher on SUPER+Space, fuzzel on SUPER+R and as its fallback | Quickshell-independent launching preserved |
+| Original bind layout | end-4/dots-hyprland layout | User muscle memory. Binds were re-implemented, not copied |
+| Static palette | Wallpaper-derived accents (matugen, official repo) on fixed pitch-black / eggshell bases | `theme.sh`; state in `~/.local/state/kessel/theme` |
+| Single display | Automatic 2- and 3-display arrangement | Tested on Kessel with headless outputs |

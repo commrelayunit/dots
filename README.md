@@ -2,7 +2,7 @@
 
 A minimal, modular Arch Linux + Hyprland (Lua) + Quickshell desktop for **Kessel**, a persistent Arch VM. This README covers installing, updating, verifying and rolling back. GPL-3.0-or-later.
 
-Fixed choices: **Kitty** is the only terminal and **Fuzzel** is the only launcher. Neither depends on Quickshell.
+Fixed choices: **Kitty** is the only terminal. **Fuzzel** is the Quickshell-independent launcher (SUPER+R, and the fallback for SUPER+Space). Keybindings follow the **end-4/dots-hyprland** layout.
 
 ```
 dot-files/
@@ -33,6 +33,37 @@ dot-files/
 └── docs/                      # MIGRATION_PLAN.md, SHORTCUTS.md, THEME.md
 ```
 
+## The island
+
+A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`). It **rests** on workspaces · music · clock · weather · CPU/RAM/network · battery, with live chips for recording, timers, Do Not Disturb and notifications. It **morphs** into:
+
+| Opens with | Panel |
+| --- | --- |
+| hover | Glance: avatar, time/date, weather, music controller, system |
+| `SUPER+A` (or click it) | Quick settings: you (`~/.face`), Wi‑Fi, Bluetooth, output + mic sliders with device pickers, brightness, battery + power modes, wallpaper strip, Do Not Disturb, stay-awake, light/dark, notes, colour picker, screenshot, region/screen recording, timer, session |
+| `SUPER+N` | Notifications (click = focus the app, × = dismiss) + calendar + weather forecast |
+| `SUPER+Space` | Launcher (fuzzel if the island is down) |
+| `SUPER+V` | Clipboard history with image thumbnails |
+| `SUPER+Tab` | Overview: every workspace with live window previews; click to focus, drag to move |
+| `SUPER+G` | Notes (`~/Documents/notes/kessel.md`) |
+| `CTRL+SUPER+T` | Wallpaper & theme picker |
+| `CTRL+ALT+Delete` | Session: lock · standby · log out · restart · shut down (destructive ones need a second press) |
+| `SUPER+ALT+T` | Timer + stopwatch |
+
+Hardware-dependent sections (battery, power profiles, brightness, Wi‑Fi, Bluetooth) appear only when the hardware and its service exist, so the same config runs on Kessel (VM) and on a laptop. **Notifications:** while the island runs, it is the notification server. dunst stays installed and D-Bus activates automatically whenever the island is stopped or has crashed.
+
+## Theme: light / dark from the wallpaper
+
+`~/.config/hypr/scripts/theme.sh` (also `CTRL+SUPER+SHIFT+D`, the quick-settings tile, the wallpaper picker):
+
+- **Dark** = pitch black (`#000000`). **Light** = eggshell (`#F0EAD6`). Only the *accents* come from the wallpaper (matugen, cached per image).
+- It writes `~/.local/state/kessel/theme/{colors.json,kitty.conf,fuzzel.ini,hyprland.lua}`. kitty reloads live, and fish + the Starship prompt follow kitty's palette. Hyprland borders, fuzzel, the island and GTK's colour scheme follow too.
+- Wallpapers: drop images in `~/Pictures/Wallpapers`.
+
+## Displays
+
+`monitors.lua` arranges displays left→right and re-applies on hot-plug. With **2** displays the external goes to the right of the laptop. With **3**, the main display sits in the middle (set `MAIN_MONITOR` to its description to choose which one). Every display gets an island; panels open on the focused one.
+
 ## Install (fresh machine)
 
 ```sh
@@ -50,6 +81,7 @@ Optional extras, each one opt-in:
 | Flag | What it does |
 | --- | --- |
 | `--with-aur` | Installs `pkglist-aur.txt` with **yay** (currently: `omniglyph`) |
+| `--with-laptop` | Installs `pkglist-laptop.txt` (bluez, power-profiles-daemon). It does **not** enable their services |
 | `--set-shell` | `chsh -s /usr/bin/fish`. Run it only after the shell checks below |
 | `--skip-packages` | Config only |
 | `--rollback [ts]` | Undo a config deployment (latest, or the given timestamp) |
@@ -96,20 +128,24 @@ There is a single source of truth: `.config/hypr/keybinds.lua`. From that regist
 
 Duplicate keys in the registry are reported as config errors.
 
-The essentials:
+The essentials (end-4 layout; full list in `docs/SHORTCUTS.md` or **SUPER + /**):
 
 | Keys | Action |
 | --- | --- |
-| `SUPER + Return` | Kitty |
+| `SUPER + Return` / `SUPER + T` | Kitty |
 | `SUPER + SHIFT + Return` | Recovery shell (`kitty bash --norc`) |
-| `SUPER + R` | Fuzzel |
-| `SUPER + /` | Show all shortcuts |
+| `SUPER + Space` / `SUPER + R` | Island launcher / fuzzel |
 | `SUPER + Q` | Close window (**never** the terminal) |
-| `SUPER + V` | Clipboard history |
-| `SUPER + SHIFT + S` / `Print` | Region screenshot → clipboard + `~/Pictures/Screenshots` |
-| `SUPER + L` | Lock |
-| `SUPER + .` | OmniGlyph (optional; shows a notification if not installed) |
-| `SUPER + CTRL + R` | Reload Hyprland |
+| `SUPER + C` / `SUPER + W` | Neovim / browser |
+| `SUPER + 1…0`, `CTRL + SUPER + 1…0` | Go to workspace |
+| `SUPER + ALT + 1…0` | Send window to workspace |
+| `SUPER + S` / `SUPER + ALT + S` | Toggle scratchpad / send window there |
+| `SUPER + ←↑→↓` / `SUPER + SHIFT + ←↑→↓` | Focus / move window |
+| `SUPER + ;` / `SUPER + '` | Narrower / wider |
+| `SUPER + V`, `SUPER + .` | Clipboard, emoji picker |
+| `SUPER + SHIFT + S`, `SUPER + SHIFT + C`, `SUPER + SHIFT + R` | Screenshot region, colour picker, record region |
+| `SUPER + L` / `SUPER + SHIFT + L` | Lock / standby |
+| `SUPER + /` | All shortcuts |
 
 ## Operational verification
 
@@ -130,8 +166,8 @@ ssh -L 5900:127.0.0.1:5900 velitchko@kessel   # then point a VNC client at local
 
 | Problem | Fix |
 | --- | --- |
-| Quickshell broken or missing | Nothing else depends on it. `SUPER + CTRL + Q` restarts it; `~/.config/hypr/scripts/island.sh stop` stops it; set `ENABLE_ISLAND = false` in `exec.lua` to disable |
-| Hyprland module error | A red banner names the file. Other modules and the **rescue binds** (`SUPER+Return`, `SUPER+SHIFT+Return`, `SUPER+R`) still work. Fix the file and press `SUPER+CTRL+R` |
+| Quickshell broken or missing | Nothing else depends on it: every island bind falls back (fuzzel, cliphist) and dunst takes over notifications. `CTRL + SUPER + R` restarts it; `~/.config/hypr/scripts/island.sh stop` stops it (works over SSH too); set `ENABLE_ISLAND = false` in `exec.lua` to disable |
+| Hyprland module error | A red banner names the file. Other modules and the **rescue binds** (`SUPER+Return`, `SUPER+SHIFT+Return`, `SUPER+R`) still work. Fix the file; Hyprland reloads on save (or `CTRL+SHIFT+SUPER+R`) |
 | Keybinds gone entirely | SSH in and run `KESSEL_STRICT=1 Hyprland --verify-config -c ~/.config/hypr/hyprland.lua` to see the error |
 | Fish broken | `SUPER + SHIFT + Return` gives plain bash. Over SSH: `ssh -t kessel bash --norc`. Revert the login shell with `chsh -s /usr/bin/bash` |
 | Locked out of the lock screen | SSH in: `pkill -USR1 hyprlock` (unlocks) |

@@ -33,6 +33,8 @@ step_check() {
     else
         info "not inside Hyprland — live checks skipped"
     fi
+    _c "theme files generated" "[[ -s \"\${XDG_STATE_HOME:-\$HOME/.local/state}/kessel/theme/kitty.conf\" ]]"
+    _w "matugen installed (wallpaper accents)" "command -v matugen"
     _w "omniglyph installed (AUR)" "command -v omniglyph"
     return $failed
 }

@@ -20,7 +20,7 @@ vimcmd_symbol = "[󰅁](bold green)"
 [cmd_duration]
 min_time = 0
 show_milliseconds = false
-format = "[](fg:bright-black)[󰪢 $duration](bold fg:black bg:bright-black)[](fg:bright-black) "
+format = "[](fg:bright-black)[󰪢 $duration](bold fg:bright-white bg:bright-black)[](fg:bright-black) "
 
 [username]
 show_always = true

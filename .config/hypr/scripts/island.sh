@@ -26,7 +26,11 @@ case "${1:-start}" in
         systemctl --user stop dunst.service 2>/dev/null || true
         export QS_ICON_THEME="${QS_ICON_THEME:-Papirus-Dark}"
         qs -n -c "$cfg" -d >/dev/null 2>&1 ;;
-    stop)    qs kill -c "$cfg" >/dev/null 2>&1 || true ;;   # never pkill -f: too broad
+    stop)
+        # Close any open panel first: tearing down a focused text field crashes
+        # Qt 6.12 at shutdown (QInputMethod::commit in ~QQuickItem).
+        qs -c "$cfg" ipc call island close >/dev/null 2>&1 && sleep 0.3
+        qs kill -c "$cfg" >/dev/null 2>&1 || true ;;   # never pkill -f: too broad
     restart) "$0" stop; sleep 0.4; "$0" start ;;
     status)  qs list --all 2>/dev/null ;;
     *)       echo "usage: $0 start|stop|restart|status" >&2; exit 2 ;;

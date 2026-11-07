@@ -78,9 +78,9 @@ PanelWindow {
         }
 
         RestView    { id: restView;    shown: win.current === restView }
-        SummaryView { id: summaryView; shown: win.current === summaryView }
+        SummaryView { id: summaryView; shown: win.current === summaryView; minWidth: restView.implicitWidth }
         OsdView     { id: osdView;     shown: win.current === osdView }
-        NotificationView { id: notifView; shown: win.current === notifView }
+        NotificationView { id: notifView; shown: win.current === notifView; minWidth: restView.implicitWidth }
 
         Loader {
             id: panelLoader
@@ -100,6 +100,7 @@ PanelWindow {
                 case "overview":  return "panels/Overview.qml"
                 case "power":     return "panels/PowerPanel.qml"
                 case "timer":     return "panels/TimerPanel.qml"
+                case "wallpaper": return "panels/WallpaperPanel.qml"
                 default:          return ""
                 }
             }

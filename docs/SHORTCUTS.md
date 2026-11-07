@@ -26,6 +26,8 @@
 | `SUPER + G` | Notes |
 | `SUPER + ALT + T` | Timer / stopwatch |
 | `CTRL + ALT + Delete` | Session menu (lock, standby, logout, restart, shutdown) |
+| `CTRL + SUPER + T` | Wallpaper & theme picker |
+| `CTRL + SUPER + SHIFT + D` | Toggle light / dark theme |
 | `SUPER + J` | Show / hide the island |
 | `CTRL + SUPER + R` | Restart the island |
 | `SUPER + slash` | Shortcuts (this list) |

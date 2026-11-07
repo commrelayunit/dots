@@ -17,6 +17,8 @@ hl.on("hyprland.start", function()
     -- Desktop plumbing
     hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
     hl.exec_cmd("hyprpaper")
+    -- wallpaper + light/dark theme from the last session (needs hyprpaper up first)
+    hl.exec_cmd("sleep 1; " .. HOME .. "/.config/hypr/scripts/theme.sh restore")
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     -- Notifications: dunst is D-Bus activated on first notification; nothing to start.

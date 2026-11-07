@@ -6,6 +6,7 @@
 #   ./install.sh --profile minimal                                       # official packages only
 #   ./install.sh --profile minimal --apply-config                        # + deploy config links
 #   ./install.sh --with-aur                                              # + optional AUR (yay)
+#   ./install.sh --with-laptop                                           # + bluez, power-profiles-daemon
 #   ./install.sh --check                                                 # read-only verification
 #   ./install.sh --rollback [timestamp]                                  # undo a config deployment
 #
@@ -21,9 +22,9 @@ source "$REPO/installer/config.sh"
 source "$REPO/installer/checks.sh"
 
 PROFILE=minimal
-WITH_AUR=0 APPLY_CONFIG=0 SET_SHELL=0 CHECK_ONLY=0 ROLLBACK=0 ROLLBACK_TS="" SKIP_PACKAGES=0
+WITH_AUR=0 WITH_LAPTOP=0 APPLY_CONFIG=0 SET_SHELL=0 CHECK_ONLY=0 ROLLBACK=0 ROLLBACK_TS="" SKIP_PACKAGES=0
 
-usage() { sed -n '3,14p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'; }
 
 while (( $# )); do
     case $1 in
@@ -31,6 +32,7 @@ while (( $# )); do
         --profile)       PROFILE="${2:?--profile needs a value}"; shift ;;
         --profile=*)     PROFILE="${1#*=}" ;;
         --with-aur)      WITH_AUR=1 ;;
+        --with-laptop)   WITH_LAPTOP=1 ;;
         --apply-config)  APPLY_CONFIG=1 ;;
         --skip-packages) SKIP_PACKAGES=1 ;;
         --set-shell)     SET_SHELL=1 ;;
@@ -53,6 +55,7 @@ if (( CHECK_ONLY )); then step_check; exit $?; fi
 
 (( SKIP_PACKAGES )) || step_packages
 (( WITH_AUR )) && { step_aur || warn "AUR step incomplete"; }
+(( WITH_LAPTOP )) && step_laptop
 if (( APPLY_CONFIG )); then
     step_config
 else

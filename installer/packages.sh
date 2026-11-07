@@ -41,3 +41,16 @@ step_aur() {
     fi
     run yay -S --needed "${missing[@]}"
 }
+
+step_laptop() {
+    local manifest="$REPO/pkglist-laptop.txt"
+    step "Laptop extras (--with-laptop)"
+    local missing
+    mapfile -t missing < <(missing_pkgs "$manifest")
+    if (( ${#missing[@]} == 0 )); then ok "all installed"; else
+        info "missing: ${missing[*]}"
+        run sudo pacman -S --needed "${missing[@]}"
+    fi
+    info "services are NOT enabled by the installer; if wanted:"
+    info "  sudo systemctl enable --now bluetooth.service power-profiles-daemon.service"
+}

@@ -3,24 +3,45 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 Singleton {
-    readonly property color base:    "#11131a"
-    readonly property color surface: "#1b1e27"
-    readonly property color overlay: "#2a2e3a"
-    readonly property color muted:   "#4a5063"
-    readonly property color text:    "#d8dae1"
-    readonly property color subtext: "#8b90a0"
-    readonly property color accent:  "#8aadf4"
-    readonly property color green:   "#a6da95"
-    readonly property color red:     "#e06c75"
-    readonly property color yellow:  "#eed49f"
-    readonly property color purple:  "#c6a0f6"
+    id: root
+    // Colours come from ~/.local/state/kessel/theme/colors.json, written by
+    // ~/.config/hypr/scripts/theme.sh (dark = pitch black, light = eggshell,
+    // accents from the wallpaper). Watched live; defaults = dark.
+    property var c: ({})
+    readonly property bool dark: (c.mode ?? "dark") !== "light"
 
-    // The island is near-black so it reads as one object over any wallpaper.
-    readonly property color island:  Qt.rgba(0.043, 0.047, 0.063, 0.96)
-    readonly property color card:    Qt.rgba(1, 1, 1, 0.045)
-    readonly property color cardHi:  Qt.rgba(1, 1, 1, 0.09)
+    readonly property color base:    c.bg ?? "#000000"
+    readonly property color surface: c.surface ?? "#0b0b0b"
+    readonly property color overlay: c.overlay ?? "#262626"
+    readonly property color muted:   c.muted ?? "#5a5a5a"
+    readonly property color text:    c.text ?? "#e8e8e8"
+    readonly property color subtext: c.subtext ?? "#9a9a9a"
+    readonly property color accent:  c.accent ?? "#8aadf4"
+    readonly property color accent2: c.accent2 ?? "#a6da95"
+    readonly property color accent3: c.accent3 ?? "#c6a0f6"
+    readonly property color green:   c.green ?? "#a6da95"
+    readonly property color red:     c.red ?? "#e06c75"
+    readonly property color yellow:  c.yellow ?? "#eed49f"
+    readonly property color purple:  c.purple ?? "#c6a0f6"
+
+    // The island is the mode's base colour, nearly opaque.
+    readonly property color island:  a(base, dark ? 0.97 : 0.96)
+    readonly property color card:    a(text, dark ? 0.06 : 0.06)
+    readonly property color cardHi:  a(text, dark ? 0.11 : 0.10)
+
+    function reload() { colorsFile.reload() }
+
+    FileView {
+        id: colorsFile
+        path: Quickshell.env("HOME") + "/.local/state/kessel/theme/colors.json"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: { try { root.c = JSON.parse(text()) } catch (e) { console.warn("theme: bad colors.json") } }
+    }
 
     readonly property string font: "JetBrainsMono Nerd Font"
     readonly property real fontUi: 11

@@ -61,10 +61,23 @@ step_config() {
     done < <(read_links "$links")
 
     step_gsettings "$bdir" && changed=1 || true
+    step_theme
 
     if (( changed )) && (( ! DRY_RUN )); then
         ok "backup + rollback manifest: $bdir/MANIFEST"
         info "rollback: ./install.sh --rollback $ts"
+    fi
+}
+
+# Generate the theme files that kitty/fuzzel/Hyprland include (first run only;
+# afterwards theme.sh owns them). They live in ~/.local/state, not ~/.config.
+step_theme() {
+    local state="${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme"
+    if [[ -s $state/kitty.conf && -s $state/colors.json ]]; then
+        ok "theme files present ($(jq -r '.mode + " · accent " + .accent' "$state/colors.json" 2>/dev/null))"
+    else
+        info "generate initial theme (dark, pitch black) in $state"
+        run "$REPO/.config/hypr/scripts/theme.sh" apply
     fi
 }
 
@@ -78,7 +91,7 @@ record() { # record BDIR LINE
 GSETTINGS_WANT=(
     "org.gnome.desktop.interface font-name 'JetBrainsMono Nerd Font 11'"
     "org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font 12'"
-    "org.gnome.desktop.interface color-scheme 'prefer-dark'"
+    "org.gnome.desktop.interface color-scheme 'prefer-dark'"   # theme.sh flips this for light mode
     "org.gnome.desktop.interface icon-theme 'Papirus-Dark'"
 )
 

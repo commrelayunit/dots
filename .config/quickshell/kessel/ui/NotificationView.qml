@@ -6,7 +6,8 @@ import "../services"
 import "../components"
 
 View {
-    implicitWidth: 440
+    property real minWidth: 0
+    implicitWidth: Math.max(440, minWidth)
     implicitHeight: Notifs.popup ? card.implicitHeight + 16 : Theme.islandHeight
     NotificationCard {
         id: card
@@ -15,6 +16,6 @@ View {
         anchors.top: parent.top
         anchors.topMargin: 8
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 424
+        width: Math.min(560, parent.implicitWidth - 16)
     }
 }

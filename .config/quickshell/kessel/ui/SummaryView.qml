@@ -6,24 +6,33 @@ import "../services"
 import "../components"
 
 View {
-    implicitWidth: 440
+    id: root
+    property real minWidth: 0          // the resting island's width (never shrink under the cursor)
+    implicitWidth: Math.max(460, minWidth)
     implicitHeight: col.implicitHeight + 24
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: IslandState.openPanel(Media.active ? "control" : "notifications")
+    }
 
     Column {
         id: col
         anchors.top: parent.top
         anchors.topMargin: 12
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 416
+        width: root.implicitWidth - 24
         spacing: 10
 
         Row {
             width: parent.width
             spacing: 10
-            Label { text: Time.time; size: Theme.fontBig; font.bold: true }
+            Avatar { size: 40; anchors.verticalCenter: parent.verticalCenter }
+            Label { text: Time.time; size: Theme.fontBig; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                Label { text: Time.dateLong; color: Theme.subtext; size: Theme.fontSmall }
+                Label { text: `${User.name} · ${Time.dateLong}`; color: Theme.subtext; size: Theme.fontSmall }
                 Label {
                     visible: Weather.ok
                     text: `${Weather.icon} ${Weather.temp} ${Weather.desc}${Weather.area ? " · " + Weather.area : ""}`

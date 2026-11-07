@@ -16,6 +16,7 @@ PanelBase {
     contentHeight: Math.max(left.height, right.height)
 
     headerExtra: [
+        IconButton { icon: Icons.overview; size: 26; iconSize: Theme.fontSmall + 2; onClicked: IslandState.openPanel("overview") },
         IconButton { icon: Icons.bell; size: 26; iconSize: Theme.fontSmall + 2; onClicked: IslandState.openPanel("notifications") },
         IconButton { icon: Icons.power; size: 26; iconSize: Theme.fontSmall + 2; tint: Theme.red; onClicked: IslandState.openPanel("power") }
     ]
@@ -35,6 +36,23 @@ PanelBase {
             id: leftCol
             width: parent.width
             spacing: 8
+
+            // You
+            Rectangle {
+                width: parent.width
+                height: 64
+                radius: Theme.radiusCard
+                color: Theme.card
+                Avatar { id: avatar; x: 10; anchors.verticalCenter: parent.verticalCenter; size: 44 }
+                Column {
+                    anchors.left: avatar.right
+                    anchors.leftMargin: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 2
+                    Label { text: User.realName || User.name; font.bold: true }
+                    Label { text: `${User.name}@${User.host || "localhost"} · up ${User.uptime}`; color: Theme.subtext; size: Theme.fontSmall }
+                }
+            }
 
             // Network
             SectionRow {
@@ -283,16 +301,17 @@ PanelBase {
         spacing: 10
 
         MediaCard { visible: Media.active; width: parent.width }
+        WallpaperStrip { width: parent.width }
 
         Grid {
             columns: 3
             spacing: 8
             Tile { width: 119; icon: Notifs.dnd ? Icons.bellOff : Icons.bell; label: "Silence"; active: Notifs.dnd; tint: Theme.red; onClicked: Notifs.dnd = !Notifs.dnd }
             Tile { width: 119; icon: Icons.coffee; label: "Stay awake"; active: Session.inhibitIdle; tint: Theme.yellow; onClicked: Session.inhibitIdle = !Session.inhibitIdle }
+            Tile { width: 119; icon: Theme.dark ? Icons.night : Icons.sunny; label: Theme.dark ? "Dark" : "Light"; active: true; onClicked: Themes.toggleMode() }
             Tile { width: 119; icon: Icons.notes; label: "Notes"; onClicked: IslandState.openPanel("notes") }
             Tile { width: 119; icon: Icons.picker; label: "Color picker"; onClicked: Utils.colorPicker() }
             Tile { width: 119; icon: Icons.screenshot; label: "Screenshot"; onClicked: Utils.screenshotRegion() }
-            Tile { width: 119; icon: Icons.overview; label: "Overview"; onClicked: IslandState.openPanel("overview") }
             Tile {
                 width: 119
                 icon: Recorder.recording ? Icons.stop : Icons.region
