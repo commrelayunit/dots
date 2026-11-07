@@ -18,6 +18,8 @@ Item {
         Row {
             id: workspaces
             spacing: 5
+            // Keep the dots on screen while the pointer is on them (no glance).
+            HoverHandler { margin: 8; onHoveredChanged: IslandState.holdRest = hovered }
             anchors.verticalCenter: parent.verticalCenter
             Repeater {
                 model: Hypr.maxId
@@ -81,13 +83,13 @@ Item {
 
         // ── right wing ──────────────────────────────────────────────
         Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: Weather.ok; icon: Weather.icon; text: Weather.temp; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.cpu; text: Stats.pct(Stats.cpu); tint: Stats.cpu > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.memory; text: Stats.pct(Stats.mem); tint: Stats.mem > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.cpu; text: Stats.pct(Stats.cpu); reserve: "100%"; tint: Stats.cpu > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.memory; text: Stats.pct(Stats.mem); reserve: "100%"; tint: Stats.mem > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
         // network: link icon, then fixed-width ↓ / ↑ so the island never changes size
         Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Net.icon; tint: Net.online ? Theme.subtext : Theme.red; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.download; text: Stats.compact(Stats.rxRate); anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.upload; text: Stats.compact(Stats.txRate); anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Power.hasBattery; icon: Power.icon; text: Stats.pct(Power.percent)
+        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.download; text: Stats.compact(Stats.rxRate); reserve: "999K"; anchors.verticalCenter: parent.verticalCenter }
+        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.upload; text: Stats.compact(Stats.txRate); reserve: "999K"; anchors.verticalCenter: parent.verticalCenter }
+        Chip { visible: Power.hasBattery; icon: Power.icon; text: Stats.pct(Power.percent); reserve: "100%"
                tint: Power.charging ? Theme.green : Power.percent < 0.15 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
 
         // live activities

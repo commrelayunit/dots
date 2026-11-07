@@ -54,18 +54,6 @@ PanelBase {
                 }
             }
 
-            // Appearance: dark / light (the base colour; accents follow the wallpaper)
-            SectionRow {
-                width: parent.width
-                icon: Theme.dark ? Icons.night : Icons.sunny
-                title: "Dark mode"
-                sub: Theme.dark ? "Pitch black · accents from the wallpaper" : "Eggshell · accents from the wallpaper"
-                showSwitch: true
-                checked: Theme.dark
-                tint: Theme.accent
-                onToggled: Themes.setMode(Theme.dark ? "light" : "dark")
-            }
-
             // Network
             SectionRow {
                 id: wifiRow
@@ -123,13 +111,14 @@ PanelBase {
                 width: parent.width
                 icon: Bt.enabled ? Icons.bluetooth : Icons.btOff
                 title: "Bluetooth"
-                sub: !Bt.available ? "No adapter" : !Bt.enabled ? "Off"
+                sub: !Bt.available ? Bt.missingReason : !Bt.enabled ? "Off"
                     : Bt.connected.length > 0 ? Bt.connected.map(d => d.name).join(", ") : "On"
                 showSwitch: Bt.available
                 checked: Bt.enabled
                 expandable: Bt.enabled
                 onToggled: Bt.setEnabled(!Bt.enabled)
                 onExpandedChanged: Bt.scan(expanded)
+                Component.onCompleted: Bt.refresh()
 
                 Column {
                     width: parent.width
@@ -273,31 +262,31 @@ PanelBase {
                     spacing: 8
                     Row {
                         width: parent.width; spacing: 8
-                        Glyph { text: Icons.cpu; width: 18; color: Theme.subtext }
-                        Bar { width: parent.width - 80; value: Stats.cpu; anchors.verticalCenter: parent.verticalCenter; fill: Stats.cpu > 0.85 ? Theme.red : Theme.accent }
-                        Label { text: Math.round(Stats.cpu * 100) + "%"; size: Theme.fontSmall; color: Theme.subtext }
+                        Glyph { text: Icons.cpu; width: 18; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+                        Bar { width: parent.width - 18 - 96 - 16; value: Stats.cpu; anchors.verticalCenter: parent.verticalCenter; fill: Stats.cpu > 0.85 ? Theme.red : Theme.accent }
+                        Label { text: Math.round(Stats.cpu * 100) + "%"; size: Theme.fontSmall; color: Theme.subtext; width: 96; horizontalAlignment: Text.AlignRight; anchors.verticalCenter: parent.verticalCenter }
                     }
                     Row {
                         width: parent.width; spacing: 8
-                        Glyph { text: Icons.memory; width: 18; color: Theme.subtext }
-                        Bar { width: parent.width - 80; value: Stats.mem; anchors.verticalCenter: parent.verticalCenter; fill: Stats.mem > 0.85 ? Theme.red : Theme.purple }
-                        Label { text: Stats.memUsedGiB.toFixed(1) + "G"; size: Theme.fontSmall; color: Theme.subtext }
+                        Glyph { text: Icons.memory; width: 18; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+                        Bar { width: parent.width - 18 - 96 - 16; value: Stats.mem; anchors.verticalCenter: parent.verticalCenter; fill: Stats.mem > 0.85 ? Theme.red : Theme.purple }
+                        Label { text: Stats.memUsedGiB.toFixed(1) + "G"; size: Theme.fontSmall; color: Theme.subtext; width: 96; horizontalAlignment: Text.AlignRight; anchors.verticalCenter: parent.verticalCenter }
                     }
                     Row {
                         visible: Stats.temp >= 0
                         width: parent.width; spacing: 8
-                        Glyph { text: Icons.thermo; width: 18; color: Theme.subtext }
-                        Bar { width: parent.width - 80; value: Math.min(1, Stats.temp / 100); anchors.verticalCenter: parent.verticalCenter; fill: Stats.temp > 85 ? Theme.red : Theme.yellow }
-                        Label { text: Math.round(Stats.temp) + "°C"; size: Theme.fontSmall; color: Theme.subtext }
+                        Glyph { text: Icons.thermo; width: 18; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+                        Bar { width: parent.width - 18 - 96 - 16; value: Math.min(1, Stats.temp / 100); anchors.verticalCenter: parent.verticalCenter; fill: Stats.temp > 85 ? Theme.red : Theme.yellow }
+                        Label { text: Math.round(Stats.temp) + "°C"; size: Theme.fontSmall; color: Theme.subtext; width: 96; horizontalAlignment: Text.AlignRight; anchors.verticalCenter: parent.verticalCenter }
                     }
                     Repeater {
                         model: Stats.disks.slice(0, 3)
                         Row {
                             required property var modelData
                             width: sys.width; spacing: 8
-                            Glyph { text: Icons.disk; width: 18; color: Theme.subtext }
-                            Bar { width: parent.width - 80; value: modelData.frac; anchors.verticalCenter: parent.verticalCenter; fill: modelData.frac > 0.9 ? Theme.red : Theme.accent2 }
-                            Label { text: Stats.gib(modelData.size - modelData.used) + " free"; size: Theme.fontSmall; color: Theme.subtext }
+                            Glyph { text: Icons.disk; width: 18; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+                            Bar { width: parent.width - 18 - 96 - 16; value: modelData.frac; anchors.verticalCenter: parent.verticalCenter; fill: modelData.frac > 0.9 ? Theme.red : Theme.accent2 }
+                            Label { text: Stats.gib(modelData.size - modelData.used) + " free"; size: Theme.fontSmall; color: Theme.subtext; width: 96; horizontalAlignment: Text.AlignRight; anchors.verticalCenter: parent.verticalCenter }
                         }
                     }
                     Row {
@@ -338,6 +327,8 @@ PanelBase {
             Tile { width: 119; icon: Notifs.dnd ? Icons.bellOff : Icons.bell; label: "Silence"; active: Notifs.dnd; tint: Theme.red; onClicked: Notifs.dnd = !Notifs.dnd }
             Tile { width: 119; visible: NightLight.available; icon: Icons.night; label: NightLight.active ? (NightLight.manual ? "Night · on" : "Night · auto") : (NightLight.manual ? "Night · off" : "Night light")
                    active: NightLight.active; tint: Theme.yellow; onClicked: NightLight.toggle() }
+            // Appearance: pitch black ↔ eggshell (accents always follow the wallpaper)
+            Tile { width: 119; icon: Icons.lightDark; label: Theme.dark ? "Dark mode" : "Light mode"; active: Theme.dark; tint: Theme.accent; onClicked: Themes.setMode(Theme.dark ? "light" : "dark") }
             Tile { width: 119; icon: Icons.coffee; label: "Stay awake"; active: Session.inhibitIdle; tint: Theme.yellow; onClicked: Session.inhibitIdle = !Session.inhibitIdle }
             Tile { width: 119; icon: Session.floatMode ? Icons.floating : Icons.tiling; label: Session.floatMode ? "Floating" : "Tiling"; active: Session.floatMode; tint: Theme.accent3; onClicked: Session.toggleFloatMode() }
             Tile { width: 119; icon: Icons.notes; label: "Notes"; onClicked: IslandState.openPanel("notes") }

@@ -35,7 +35,7 @@ Rectangle {
             Image {
                 anchors.fill: parent
                 anchors.margins: parent.border.width
-                source: "file://" + parent.modelData
+                source: Themes.thumb(parent.modelData)
                 sourceSize: Qt.size(168, 96)
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true

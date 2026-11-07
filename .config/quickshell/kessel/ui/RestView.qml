@@ -27,18 +27,7 @@ View {
         cursorShape: Qt.PointingHandCursor
         onClicked: IslandState.openPanel("control")
     }
-    // Scroll → next / previous perspective
-    WheelHandler {
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        property real acc: 0
-        onWheel: e => {
-            acc += e.angleDelta.y
-            if (Math.abs(acc) >= 120) {
-                Perspectives.rotate(acc > 0 ? -1 : 1)
-                acc = 0
-            }
-        }
-    }
+    // Scrolling (wheel or touchpad) is handled by Island.qml for the whole pill.
 
     component Slot: Item {
         property bool on: false

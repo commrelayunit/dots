@@ -26,6 +26,22 @@ export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
     HYPRLAND_INSTANCE_SIGNATURE="$(ls -t "$XDG_RUNTIME_DIR/hypr" 2>/dev/null | head -1)"; export HYPRLAND_INSTANCE_SIGNATURE
 fi
+if [[ -z ${WAYLAND_DISPLAY:-} ]]; then   # awww finds its daemon by the Wayland socket name
+    for s in "$XDG_RUNTIME_DIR"/wayland-*; do
+        [[ -S $s ]] && { WAYLAND_DISPLAY="$(basename "$s")"; export WAYLAND_DISPLAY; break; }
+    done
+fi
+
+# GTK3 theme. adw-gtk3 reads the libadwaita colour names that gtk.css defines below,
+# so GTK3 apps (and Firefox's default "System theme", which follows GTK) pick up the
+# wallpaper colours. Plain Adwaita ignores most of them.
+gtk_theme() {
+    local d
+    for d in "$HOME/.local/share/themes" "$HOME/.themes" /usr/share/themes; do
+        if [[ -d $d/adw-gtk3 ]]; then [[ $1 == dark ]] && echo adw-gtk3-dark || echo adw-gtk3; return; fi
+    done
+    [[ $1 == dark ]] && echo Adwaita-dark || echo Adwaita
+}
 
 state_get() { jq -r --arg k "$1" '.[$k] // empty' "$STATE_FILE" 2>/dev/null || true; }
 state_set() {
@@ -96,13 +112,13 @@ apply() {
         RED="#e06c75"; GREEN="#a6da95"; YELLOW="#eed49f"; PURPLE="#c6a0f6"; CYAN="#8bd5ca"
         # ANSI: 0 black, 7 white, 8 bright-black, 15 bright-white (prompt pills rely on these)
         C0="#000000"; C7="#c8c8c8"; C8="#3a3a3a"; C15="#f2f2f2"
-        GTK_SCHEME="prefer-dark"; GTK_THEME="Adwaita-dark"
+        GTK_SCHEME="prefer-dark"; GTK_THEME="$(gtk_theme dark)"
     else
         BG="#f0ead6"; SURFACE="#e8e1cb"; SURFACE2="#ddd5bc"; OVERLAY="#cfc6aa"
         TEXT="#1d1b16"; SUBTEXT="#5d584b"; MUTED="#9a937f"
         RED="#c0392b"; GREEN="#5f9e4a"; YELLOW="#a07800"; PURPLE="#7e57c2"; CYAN="#2a8a7e"
         C0="#1d1b16"; C7="#d6cdb2"; C8="#6b6556"; C15="#ffffff"
-        GTK_SCHEME="prefer-light"; GTK_THEME="Adwaita"
+        GTK_SCHEME="prefer-light"; GTK_THEME="$(gtk_theme light)"
     fi
 
     # Material roles with sensible fallbacks
@@ -425,8 +441,58 @@ EOG
         fi
     done
 
+    # ── OnlyOffice: a custom UI theme "Kessel" (pick it once in Settings → Theme) ──
+    # OnlyOffice ignores GTK/Qt colours. It loads custom themes from
+    # <appdata>/uithemes; tokens we don't set start from its built-in Night/White
+    # values (read from its own CSS), because missing tokens fall back to light defaults.
+    local oo=/opt/onlyoffice/desktopeditors oodir="${XDG_DATA_HOME:-$HOME/.local/share}/onlyoffice/desktopeditors/uithemes"
+    if [[ -d $oo ]]; then
+        local base_id=theme-white oo_type=light
+        [[ $mode == dark ]] && { base_id=theme-night; oo_type=dark; }
+        local base_json
+        base_json="$(grep -o "\.$base_id{[^}]*}" "$oo/editors/web-apps/apps/documenteditor/main/resources/css/app.css" 2>/dev/null | head -1 |
+            sed 's/^[^{]*{//; s/}$//' | tr ';' '\n' | sed -n 's/^--\([a-z0-9-]*\):\(.*\)$/\1\t\2/p' |
+            jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}')" || base_json='{}'
+        mkdir -p "$oodir"
+        jq -n --argjson base "${base_json:-{\}}" --arg type "$oo_type" \
+            --arg bg "$BG" --arg s1 "$SURFACE" --arg s2 "$SURFACE2" --arg ov "$OVERLAY" \
+            --arg tx "$TEXT" --arg sub "$SUBTEXT" --arg mu "$MUTED" --arg p "$P" --arg onp "$ONP" \
+            --arg pc "$PC" --arg onpc "$ONPC" --arg out "$OUT" --arg sv "$SV" '
+          def each(prefix; v): ["document","spreadsheet","presentation","pdf","visio"] | map({(prefix + .): v}) | add;
+          { name: "Kessel", id: "theme-kessel", type: $type,
+            colors: ($base
+              + each("toolbar-header-"; $bg) + each("text-toolbar-header-on-background-"; $bg)
+              + each("highlight-toolbar-tab-underline-"; $p) + each("highlight-header-tab-underline-"; $p)
+              + { "background-normal": $s1, "background-toolbar": $s1, "background-toolbar-additional": $s1,
+                  "background-pane": $s1, "background-pane-additional": $s2, "background-toolbar-tab": $s2,
+                  "background-notification-popover": $s2, "background-contrast-popover": $s2,
+                  "background-primary-dialog-button": $p, "background-accent-button": $p, "background-fill-button": $s2,
+                  "background-loader": $s2, "background-alt-key-hint": $pc,
+                  "highlight-button-hover": $ov, "highlight-button-pressed": $pc, "highlight-button-pressed-hover": $pc,
+                  "highlight-primary-dialog-button-hover": $pc, "highlight-header-button-hover": $s2,
+                  "highlight-header-button-pressed": $pc, "highlight-text-select": $p,
+                  "border-toolbar": $sv, "border-divider": $sv, "border-regular-control": $out,
+                  "border-control-focus": $p, "border-preview-select": $p, "border-toolbar-active-tab": $sv,
+                  "text-normal": $tx, "text-normal-pressed": $onpc, "text-secondary": $sub, "text-tertiary": $mu,
+                  "text-link": $p, "text-link-hover": $p, "text-link-active": $p, "text-inverse": $onp,
+                  "text-toolbar-header": $tx, "text-contrast-background": $tx, "text-alt-key-hint": $onpc,
+                  "icon-toolbar-header": $tx,
+                  "canvas-background": $bg, "canvas-page-border": $sv,
+                  "canvas-ruler-background": $s1, "canvas-ruler-border": $sv, "canvas-ruler-margins-background": $s2,
+                  "canvas-cell-title-background": $s1, "canvas-cell-title-background-selected": $pc,
+                  "canvas-cell-title-border": $sv, "canvas-cell-title-text": $sub }) }' \
+            | write "$oodir/kessel.json"
+    fi
+
     # ── reload consumers (each optional) ──
-    pkill -USR1 -x kitty 2>/dev/null || true                     # kitty re-reads its config
+    # kitty: push the colours to every running instance and window (smooth, no
+    # restart). Kittys started before remote control was enabled get SIGUSR1 instead.
+    local sock pushed=0
+    for sock in "$XDG_RUNTIME_DIR"/kitty-*.sock; do
+        [[ -S $sock ]] || continue
+        kitten @ --to "unix:$sock" set-colors --all --configured "$STATE/kitty.conf" >/dev/null 2>&1 && pushed=1
+    done
+    (( pushed )) || pkill -USR1 -x kitty 2>/dev/null || true
     if command -v gsettings >/dev/null; then
         gsettings set org.gnome.desktop.interface color-scheme "$GTK_SCHEME" 2>/dev/null || true
         gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME" 2>/dev/null || true
@@ -451,10 +517,39 @@ set_wallpaper() {
     local wall=$1
     [[ -r $wall ]] || { echo "theme: cannot read $wall" >&2; exit 1; }
     wall="$(realpath "$wall")"
-    if [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
-        hyprctl hyprpaper wallpaper ",$wall" >/dev/null 2>&1 || true
-    fi
     state_set wallpaper "$wall"
+    show_wallpaper "$wall" || echo "theme: no wallpaper daemon answered (awww-daemon / hyprpaper)" >&2
+}
+
+# Put $1 on every display. Retries for up to ~5 s so a call right after login
+# doesn't lose the race against the daemon starting (that used to fail silently).
+show_wallpaper() {
+    local wall=$1 i
+    [[ -n ${WAYLAND_DISPLAY:-} || -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || return 0
+    for (( i = 0; i < 25; i++ )); do
+        if command -v awww >/dev/null && awww query >/dev/null 2>&1; then
+            awww img "$wall" --transition-type grow --transition-pos 0.5,0.97 \
+                --transition-duration 1 --transition-fps 60 >/dev/null 2>&1 && return 0
+        elif ! command -v awww-daemon >/dev/null && pgrep -x hyprpaper >/dev/null &&
+             hyprctl hyprpaper wallpaper ",$wall" >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 0.2
+    done
+    return 1
+}
+
+# Smooth switch: the island shows a frozen snapshot of each screen (freeze), we
+# change everything underneath, then it fades the snapshot out (thaw). Without the
+# island this is a no-op and the switch is simply instant.
+freeze() {
+    [[ -n ${KESSEL_NO_FADE:-} ]] && return 0
+    qs -c kessel ipc call island freeze >/dev/null 2>&1 && FROZEN=1 && sleep 0.15 || true
+}
+thaw() {
+    [[ -n ${FROZEN:-} ]] || return 0
+    sleep 0.2                      # let kitty / GTK repaint before revealing them
+    qs -c kessel ipc call island thaw >/dev/null 2>&1 || true
 }
 
 case "${1:-status}" in
@@ -464,10 +559,10 @@ case "${1:-status}" in
             toggle) [[ "$(state_get mode)" == light ]] && m=dark || m=light ;;
             *) echo "usage: $0 mode dark|light|toggle" >&2; exit 2 ;;
         esac
-        state_set mode "$m"; apply ;;
+        state_set mode "$m"; freeze; apply; thaw ;;
     wallpaper)
         [[ -n ${2:-} ]] || { echo "usage: $0 wallpaper <image>" >&2; exit 2; }
-        set_wallpaper "$2"; apply ;;
+        freeze; set_wallpaper "$2"; apply; thaw ;;
     restore)
         w="$(state_get wallpaper)"; [[ -r $w ]] || w="$DEFAULT_WALL"
         set_wallpaper "$w"; apply ;;

@@ -23,7 +23,7 @@ dots/
 │   │   │                          #   input · workspaces · exec · keybinds (THE registry) · custom
 │   │   ├── lib/                   #   safety (rescue binds) · binder · floatmode
 │   │   ├── scripts/               #   island · theme · lock · translate · screenshot · clipboard · …
-│   │   └── hypridle.conf hyprlock.conf hyprpaper.conf
+│   │   └── hypridle.conf hyprlock.conf hyprpaper.conf (fallback)
 │   ├── quickshell/kessel/         # the island: services/ (logic) · ui/ (views, panels, perspectives) · components/
 │   ├── quickshell/kessel-lock/    # lock screen (separate process; hyprlock fallback)
 │   ├── kitty/ fish/ starship.toml fuzzel/ dunst/
@@ -44,7 +44,7 @@ A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`).
 **Music** (spinning cover, scrolling title · artist, a live cava visualizer that rests as a dot row when paused, time left, play/pause, and a progress line along the bottom edge; only while a player is open),
 **Metrics** (CPU/RAM/↓/↑ sparklines, uptime) and
 **Minimal** (time and date only).
-Music switches in by itself when playback starts and back out after 8 s paused. Morphing uses spring physics (`springStiffness` / `springDamping` in `Theme.qml`).
+Music switches in by itself when playback starts and back out after 8 s paused. Panels opened from another panel get a **← back** button (where the gear sits; also `Alt+←` or the mouse back button). Morphing uses spring physics (`springStiffness` / `springDamping` in `Theme.qml`).
 
 Two round buttons float beside it: **⚙ left** opens quick settings, and **🔔 right** opens notifications (with a count badge; it shows a crossed-out bell while Do Not Disturb is on). It **morphs** into:
 
@@ -69,7 +69,8 @@ Hardware-dependent sections (battery, power profiles, brightness, Wi‑Fi, Bluet
 
 - **Dark** = pitch black (`#000000`). **Light** = eggshell (`#F0EAD6`). Only the *accents* come from the wallpaper (matugen, cached per image).
 - It writes `~/.local/state/kessel/theme/{colors.json,kitty.conf,fuzzel.ini,hyprland.lua}`. kitty reloads live, and fish + the Starship prompt follow kitty's palette. Hyprland borders, fuzzel, the island and GTK's colour scheme follow too.
-- Wallpapers: drop images in `~/Pictures/Wallpapers`.
+- Wallpapers: drop images in `~/Pictures/Wallpapers`. **awww** draws them with an animated transition and remembers the last one (hyprpaper is the fallback); the island caches small thumbnails in `~/.cache/kessel/thumbs`.
+- Switching is smooth: island colours animate, and the whole screen crossfades from a snapshot while apps repaint.
 
 ## Lock screen & login screen
 
@@ -110,7 +111,7 @@ After that, `~/Scripts/update.sh` keeps everything current.
 | --- | --- |
 | `--apply-config` | Link configs into `~` (backs up anything replaced) and generate the theme |
 | `--with-aur` | `pkglist-aur.txt` via **yay** (installs yay-bin first if needed): OmniGlyph, Bibata cursor |
-| `--with-laptop` | `pkglist-laptop.txt` (bluez, power-profiles-daemon). It does **not** enable their services |
+| `--with-laptop` | `pkglist-laptop.txt` (bluez, power-profiles-daemon, laptop audio firmware). It does **not** enable their services: run `sudo systemctl enable --now bluetooth` yourself |
 | `--with-translate` | Offline translation runtime + EN↔DE, EN↔BG models (see below) |
 | `--set-shell` | `chsh -s /usr/bin/fish` |
 | `--skip-packages` | Config / extras only |
@@ -181,7 +182,7 @@ The essentials (end-4 layout; full list in `docs/SHORTCUTS.md` or **SUPER + /**)
 | --- | --- |
 | `SUPER + Return` / `SUPER + T` | Kitty (runs fish) |
 | `SUPER + SHIFT + Return` | Recovery shell (`kitty bash --norc`) |
-| `SUPER + R` / `SUPER + SHIFT + Space` | Island launcher (calculator, URLs) / fuzzel |
+| tap `SUPER` · `SUPER + R` / `SUPER + SHIFT + Space` | Island launcher (calculator, URLs) / fuzzel |
 | `SUPER + E` · `SUPER + O` · `SUPER + C` · `SUPER + W` | Dolphin · Obsidian · Neovim · browser |
 | `SUPER + Q` | Close window (**never** the terminal) |
 | `SUPER + F` / `SUPER + D` / `SUPER + SHIFT + F` | Fullscreen / detach (float) this window / all windows floating |
@@ -191,6 +192,7 @@ The essentials (end-4 layout; full list in `docs/SHORTCUTS.md` or **SUPER + /**)
 | `SUPER + LMB drag` / `SUPER + RMB drag` | Move / resize window |
 | `SUPER + ;` / `SUPER + '` | Narrower / wider |
 | `SUPER + Space` | Focus mode (hide the island) |
+| `SUPER + ALT + ←/→` | Previous / next island perspective (or scroll / two-finger swipe on the island) |
 | `SUPER + A` / `SUPER + ALT + N` | Quick settings / notifications |
 | `SUPER + G` / `SUPER + SHIFT + G` | Notes / kanban board |
 | `SUPER + M` / `SUPER + SHIFT + V` | Media player / volume mixer |

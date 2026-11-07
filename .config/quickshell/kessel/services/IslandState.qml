@@ -14,6 +14,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Hyprland
 import ".."
 
 Singleton {
@@ -43,13 +44,53 @@ Singleton {
         : summary ? "summary"
         : "rest"
 
+    // Panels opened from inside another panel remember where they came from,
+    // so back() (← button, Alt+Left, mouse back button) returns there.
+    property var history: []
+    readonly property bool canGoBack: panel !== "" && history.length > 0
+
     function openPanel(name) {
         if (panels.indexOf(name) < 0) return false
         shown = true
-        panel = (panel === name) ? "" : name
+        if (panel === name) { closePanel(); return true }
+        if (panel !== "") history = history.concat([panel])
+        panel = name
         return true
     }
-    function closePanel() { panel = "" }
+    function closePanel() { history = []; panel = "" }
+    function back() {
+        if (history.length === 0) { closePanel(); return }
+        const prev = history[history.length - 1]
+        history = history.slice(0, -1)
+        panel = prev
+    }
+
+    // Scrolling the island rotates perspectives. It also hides the hover glance
+    // until the pointer leaves, so you can see what you scrolled to.
+    // Theme crossfade: theme.sh calls freeze() before switching and thaw() after.
+    // While frozen, ThemeFade shows a still snapshot of each screen over everything;
+    // thaw() fades it out, so every app appears to glide to the new colours.
+    property bool frozen: false
+    property bool thawing: false
+    function freeze() { thawing = false; frozen = true; freezeGuard.restart() }
+    function thaw() { if (frozen) thawing = true }
+    function fadeDone() { frozen = false; thawing = false }
+    Timer { id: freezeGuard; interval: 6000; onTriggered: root.thaw() }   // never stay frozen
+
+    property bool glanceSuppressed: false
+    // True while the pointer is over something clickable in the resting view
+    // (workspace dots): the glance must not replace it under the cursor.
+    property bool holdRest: false
+    onHoldRestChanged: {
+        if (holdRest) { hoverTimer.stop(); summary = false }
+        else if (hovered) hoverTimer.restart()
+    }
+    function scrollPerspective(step) {
+        Perspectives.rotate(step)
+        glanceSuppressed = true
+        hoverTimer.stop()
+        summary = false
+    }
 
     function showOsd(icon, label, value) {
         osdIcon = icon; osdLabel = label; osdValue = value
@@ -60,9 +101,10 @@ Singleton {
     Timer { id: osdTimer; interval: Config.osdMs; onTriggered: root.osdActive = false }
     // Hysteresis: open after the pointer rests, close only after it has been
     // gone for a moment (the pill changes size under the cursor while morphing).
-    Timer { id: hoverTimer; interval: Config.hoverDelayMs; onTriggered: root.summary = root.hovered }
+    Timer { id: hoverTimer; interval: Config.hoverDelayMs; onTriggered: root.summary = root.hovered && !root.glanceSuppressed && !root.holdRest }
     Timer { id: leaveTimer; interval: 350; onTriggered: if (!root.hovered) root.summary = false }
     onHoveredChanged: {
+        if (!hovered) glanceSuppressed = false
         if (hovered) { leaveTimer.stop(); hoverTimer.restart() }
         else { hoverTimer.stop(); leaveTimer.restart() }
     }
@@ -75,6 +117,9 @@ Singleton {
             return root.openPanel(name) ? "ok" : "unknown panel"
         }
         function close(): string { root.closePanel(); return "ok" }
+        function freeze(): string { root.freeze(); return "ok" }
+        function thaw(): string { root.thaw(); return "ok" }
+        function back(): string { root.back(); return root.panel === "" ? "closed" : root.panel }
         function toggle(): string { root.shown = !root.shown; if (!root.shown) root.closePanel(); return root.shown ? "shown" : "hidden" }
         function show(): string { root.shown = true; return "ok" }
         function hide(): string { root.shown = false; root.closePanel(); return "ok" }
@@ -92,6 +137,8 @@ Singleton {
         function search(text: string): string { root.launcherText = text; root.panel = ""; root.openPanel("launcher"); return "ok" }
         function perspectiveSet(name: string): string { Perspectives.set(name); return Perspectives.current }
         function perspective(step: int): string { Perspectives.rotate(step); return Perspectives.current }
+        function perspectiveNext(): string { Perspectives.rotate(1); return Perspectives.current }
+        function perspectivePrev(): string { Perspectives.rotate(-1); return Perspectives.current }
         function pill(): string { return String(Math.round(root.pillWidth * 10) / 10) }
         // Graceful exit: drop keyboard focus from every text field first —
         // Qt 6.12 crashes tearing down a focused text input (QInputMethod::commit).
@@ -107,7 +154,7 @@ Singleton {
         function toggleTheme(): string { Themes.toggleMode(); return "ok" }
         function status(): string {
             return JSON.stringify({
-                shown: root.shown, layer: root.layer, panel: root.panel, restWidth: root.restWidth, perspective: Perspectives.current,
+                shown: root.shown, layer: root.layer, panel: root.panel, restWidth: root.restWidth, perspective: Perspectives.current, hyprLua: Hyprland.usingLua,
                 dnd: Notifs.dnd, notifications: Notifs.count, updates: Updates.count, polkit: Polkit.registered,
                 media: Media.active ? Media.title : null,
                 recording: Recorder.recording, weather: Weather.ok ? Weather.temp : null

@@ -64,17 +64,17 @@ Singleton {
     property var _prevNet: null
     property real _prevT: 0
 
-    // Fixed 4-character rate for the resting island (monospace → constant width):
-    // "999B", "9.9K", " 42K", "1.2M", "120M", "1.1G"
+    // Short rate for the resting island: "999B", "9.9K", "42K", "1.2M", "120M", "1.1G".
+    // Chips reserve the widest form ("999K") so the island doesn't jitter.
     function compact(bps) {
         const units = ["B", "K", "M", "G"]
         let v = Math.max(0, bps), i = 0
         while (v >= 999.5 && i < units.length - 1) { v /= 1024; i++ }
         const n = (i > 0 && v < 9.95) ? v.toFixed(1) : String(Math.round(v))
-        return n.padStart(3, " ") + units[i]
+        return n + units[i]
     }
-    // Fixed 4-character percentage: "  7%", " 42%", "100%"
-    function pct(f) { return (String(Math.round(Math.max(0, Math.min(1, f)) * 100)) + "%").padStart(4, " ") }
+    // Percentage: "7%", "42%", "100%" (chips reserve "100%")
+    function pct(f) { return String(Math.round(Math.max(0, Math.min(1, f)) * 100)) + "%" }
 
     function human(bps) {
         if (bps < 1024) return Math.round(bps) + " B/s"

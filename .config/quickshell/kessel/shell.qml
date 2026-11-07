@@ -21,6 +21,12 @@ ShellRoot {
         }
     }
 
+    // Whole-screen crossfade while the theme switches (see ui/ThemeFade.qml).
+    Variants {
+        model: IslandState.frozen ? Quickshell.screens : []
+        ThemeFade { required property var modelData; screen: modelData }
+    }
+
     // Graceful quit (island.sh stop): give the windows a moment to drop focus
     // and unload panels, then exit normally.
     Timer {

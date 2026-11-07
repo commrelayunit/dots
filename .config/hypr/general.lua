@@ -64,7 +64,7 @@ hl.config({
     scrolling = { fullscreen_on_one_column = true },
 
     misc = {
-        force_default_wallpaper = 0,     -- hyprpaper draws the wallpaper
+        force_default_wallpaper = 0,     -- awww (or hyprpaper) draws the wallpaper
         disable_hyprland_logo   = true,
         disable_splash_rendering = true,
         allow_session_lock_restore = true, -- a new locker (hyprlock) may take over a crashed one

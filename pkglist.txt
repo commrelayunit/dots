@@ -17,7 +17,8 @@ fish
 starship
 ttf-jetbrains-mono-nerd
 # Wallpaper, idle, lock
-hyprpaper
+awww                    # wallpaper daemon (animated switches, remembers the image)
+hyprpaper               # fallback wallpaper daemon if awww is missing
 hypridle
 hyprlock
 # Clipboard + screenshots
@@ -58,6 +59,7 @@ libqalculate
 hyprsunset
 # Music perspective visualizer
 cava
+ffmpeg                  # wallpaper thumbnails for the island (fast previews of huge images)
 # Wallpaper-derived theme accents (scripts/theme.sh)
 matugen
 # Apps bound in keybinds.lua (SUPER+C editor, CTRL+SHIFT+Esc task manager, SUPER+E files, SUPER+O notes)
@@ -69,6 +71,7 @@ breeze
 obsidian
 # Browser (SUPER+W), terminal file manager, media player (+ MPRIS for the island)
 firefox
+adw-gtk-theme           # GTK3 theme that takes the wallpaper colours (Firefox follows it)
 yazi
 mpv
 mpv-mpris

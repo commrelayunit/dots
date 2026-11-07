@@ -18,9 +18,11 @@ hl.on("hyprland.start", function()
     -- Polkit agent: the island registers itself; island.sh starts polkit-gnome
     -- whenever the island isn't running (exactly one agent per session).
     if not ENABLE_ISLAND then hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1") end
-    hl.exec_cmd("hyprpaper")
-    -- wallpaper + light/dark theme from the last session (needs hyprpaper up first)
-    hl.exec_cmd("sleep 1; " .. HOME .. "/.config/hypr/scripts/theme.sh restore")
+    -- Wallpaper daemon: awww (remembers the last image per display, animated
+    -- transitions); hyprpaper only if awww isn't installed.
+    hl.exec_cmd("if command -v awww-daemon >/dev/null; then exec awww-daemon; else exec hyprpaper; fi")
+    -- wallpaper + light/dark theme from the last session (theme.sh waits for the daemon)
+    hl.exec_cmd(HOME .. "/.config/hypr/scripts/theme.sh restore")
     hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")      -- cursor (no-op if not installed)
     hl.exec_cmd("kbuildsycoca6 --noincremental >/dev/null 2>&1")   -- Dolphin's "Open with" database
     hl.exec_cmd("wl-paste --type text --watch cliphist store")

@@ -55,6 +55,10 @@ add { group = "Apps", keys = "SUPER + SHIFT + Space",  exec = apps.launcher, des
 
 -- Island (Quickshell) — each falls back when the island is not running --------
 add { group = "Island", keys = "SUPER + R",         exec = island("open launcher", "fuzzel"), desc = "Launcher (fallback: fuzzel)" }
+-- Tap SUPER alone (end-4 style): fires on release, and Hyprland skips it if another key was pressed meanwhile.
+add { group = "Island", keys = "SUPER + SUPER_L",   exec = island("open launcher", "fuzzel"), desc = "Tap Super: launcher (fallback: fuzzel)", opts = { release = true } }
+add { group = "Island", keys = "SUPER + ALT + right", exec = "qs -c kessel ipc call island perspectiveNext", desc = "Island: next perspective" }
+add { group = "Island", keys = "SUPER + ALT + left",  exec = "qs -c kessel ipc call island perspectivePrev", desc = "Island: previous perspective" }
 add { group = "Island", keys = "SUPER + Space",     exec = "qs -c kessel ipc call island toggle", desc = "Focus mode: hide / show the island (frees its screen space)" }
 add { group = "Island", keys = "SUPER + V",         exec = island("open clipboard", S .. "clipboard.sh"), desc = "Clipboard history (fallback: fuzzel)" }
 add { group = "Island", keys = "SUPER + Tab",       exec = island("open overview"), desc = "Overview: workspaces + window previews" }

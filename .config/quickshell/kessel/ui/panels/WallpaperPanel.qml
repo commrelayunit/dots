@@ -41,8 +41,8 @@ PanelBase {
                 Row {
                     anchors.centerIn: parent
                     spacing: 8
-                    Glyph { text: modelData.icon; color: parent.parent.on ? Theme.accent : Theme.text }
-                    Label { text: modelData.label; size: Theme.fontSmall + 0.5 }
+                    Glyph { text: modelData.icon; color: parent.parent.on ? Theme.accent : Theme.text; anchors.verticalCenter: parent.verticalCenter }
+                    Label { text: modelData.label; size: Theme.fontSmall + 0.5; anchors.verticalCenter: parent.verticalCenter }
                 }
                 MouseArea { id: mm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Themes.setMode(modelData.m) }
             }
@@ -81,7 +81,7 @@ PanelBase {
             Image {
                 anchors.fill: parent
                 anchors.margins: parent.border.width
-                source: "file://" + modelData
+                source: Themes.thumb(modelData)
                 sourceSize: Qt.size(340, 192)
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true

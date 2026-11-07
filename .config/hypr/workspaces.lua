@@ -30,6 +30,6 @@ hl.window_rule({
     opacity = "1.0 override 1.0 override",   -- fully opaque, even when unfocused
 })
 
--- Blur behind the launcher and the Quickshell island.
+-- Blur behind fuzzel. Not behind the island: it is fully opaque, and blurring its
+-- (mostly transparent) surface only smeared a gradient around open panels.
 hl.layer_rule({ name = "blur-fuzzel", match = { namespace = "^launcher$" }, blur = true, ignore_alpha = 0.3 })
-hl.layer_rule({ name = "blur-island", match = { namespace = "^kessel-island$" }, blur = true, ignore_alpha = 0.3 })

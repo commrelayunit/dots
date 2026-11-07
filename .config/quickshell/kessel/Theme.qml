@@ -11,21 +11,36 @@ Singleton {
     // ~/.config/hypr/scripts/theme.sh (dark = pitch black, light = eggshell,
     // accents from the wallpaper). Watched live; defaults = dark.
     property var c: ({})
+    // Colour changes (light/dark, new wallpaper) glide instead of snapping.
+    readonly property int themeMs: 550
     readonly property bool dark: (c.mode ?? "dark") !== "light"
 
-    readonly property color base:    c.bg ?? "#000000"
-    readonly property color surface: c.surface ?? "#0b0b0b"
-    readonly property color overlay: c.overlay ?? "#262626"
-    readonly property color muted:   c.muted ?? "#5a5a5a"
-    readonly property color text:    c.text ?? "#e8e8e8"
-    readonly property color subtext: c.subtext ?? "#9a9a9a"
-    readonly property color accent:  c.accent ?? "#8aadf4"
-    readonly property color accent2: c.accent2 ?? "#a6da95"
-    readonly property color accent3: c.accent3 ?? "#c6a0f6"
-    readonly property color green:   c.green ?? "#a6da95"
-    readonly property color red:     c.red ?? "#e06c75"
-    readonly property color yellow:  c.yellow ?? "#eed49f"
-    readonly property color purple:  c.purple ?? "#c6a0f6"
+    property color base:    c.bg ?? "#000000"
+    Behavior on base { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color surface: c.surface ?? "#0b0b0b"
+    Behavior on surface { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color overlay: c.overlay ?? "#262626"
+    Behavior on overlay { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color muted:   c.muted ?? "#5a5a5a"
+    Behavior on muted { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color text:    c.text ?? "#e8e8e8"
+    Behavior on text { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color subtext: c.subtext ?? "#9a9a9a"
+    Behavior on subtext { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color accent:  c.accent ?? "#8aadf4"
+    Behavior on accent { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color accent2: c.accent2 ?? "#a6da95"
+    Behavior on accent2 { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color accent3: c.accent3 ?? "#c6a0f6"
+    Behavior on accent3 { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color green:   c.green ?? "#a6da95"
+    Behavior on green { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color red:     c.red ?? "#e06c75"
+    Behavior on red { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color yellow:  c.yellow ?? "#eed49f"
+    Behavior on yellow { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
+    property color purple:  c.purple ?? "#c6a0f6"
+    Behavior on purple { ColorAnimation { duration: root.themeMs; easing.type: Easing.InOutCubic } }
 
     // The island is the mode's base colour (pitch black / eggshell), opaque.
     readonly property color island:  base     // fully opaque: even 3% lets bright text behind ghost through

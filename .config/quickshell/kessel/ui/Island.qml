@@ -20,7 +20,9 @@ PanelWindow {
     visible: IslandState.shown
     anchors.top: true
     margins.top: Theme.islandMargin
-    implicitWidth: 1100           // pill (≤ ~800) + the two side buttons
+    // pill (≤ ~800) + the two side buttons, but never wider than the screen:
+    // a layer surface wider than its output can't be centred (narrow / high-scale laptops).
+    implicitWidth: Math.min(1100, screen ? screen.width : 1100)
     // Keep the surface a small strip while resting (the compositor blurs behind the
     // whole surface every frame — expensive without a GPU). Grow at once when
     // something tall opens; shrink only after the closing spring has settled.
@@ -85,9 +87,10 @@ PanelWindow {
         id: gearBtn
         y: 0
         x: pill.x - width - 8
-        icon: Icons.settings
-        active: IslandState.panel === "control"
-        onClicked: IslandState.openPanel("control")
+        // Becomes a back arrow while a panel was opened from another panel.
+        icon: IslandState.canGoBack ? Icons.back : Icons.settings
+        active: IslandState.panel === "control" || IslandState.canGoBack
+        onClicked: IslandState.canGoBack ? IslandState.back() : IslandState.openPanel("control")
     }
     SideButton {
         id: bellBtn
@@ -105,14 +108,15 @@ PanelWindow {
     // Privacy: red pill while the mic, camera or screen is in use
     Rectangle {
         id: privacyPill
-        y: (Theme.islandHeight - height) / 2
+        y: 0
         x: bellBtn.x + bellBtn.width + 8
-        height: 26
-        width: privRow.implicitWidth + 16
-        radius: 13
-        color: Theme.a(Theme.red, 0.18)
+        height: Theme.islandHeight
+        width: Math.max(height, privRow.implicitWidth + 22)
+        radius: height / 2
+        // Same material as the island (opaque), tinted with the theme's error colour.
+        color: Qt.tint(Theme.island, Theme.a(Theme.red, 0.16))
         border.width: 1
-        border.color: Theme.a(Theme.red, 0.7)
+        border.color: Theme.a(Theme.red, 0.6)
         opacity: Privacy.any ? 1 : 0
         visible: opacity > 0.01
         scale: Privacy.any ? 1 : 0.6
@@ -130,17 +134,18 @@ PanelWindow {
         Hint { visible: privHover.hovered && text !== ""; text: [Privacy.mic ? "Microphone: " + Privacy.micApps : "", Privacy.camera ? "Camera in use" : "", Privacy.screen ? "Screen is being shared" : ""].filter(s => s).join("\n") }
     }
 
-    // Pending updates: green pill (after the privacy pill when that's showing)
+    // Pending updates: accent pill (after the privacy pill when that's showing)
     Rectangle {
         id: updatesPill
-        y: (Theme.islandHeight - height) / 2
-        x: privacyPill.visible ? privacyPill.x + privacyPill.width + 6 : bellBtn.x + bellBtn.width + 8
-        height: 26
-        width: updRow.implicitWidth + 16
-        radius: 13
-        color: Theme.a(Theme.green, uma.containsMouse ? 0.28 : 0.18)
+        y: 0
+        x: privacyPill.visible ? privacyPill.x + privacyPill.width + 8 : bellBtn.x + bellBtn.width + 8
+        height: Theme.islandHeight
+        width: Math.max(height, updRow.implicitWidth + 22)
+        radius: height / 2
+        // Same material as the island (opaque), in the wallpaper accent.
+        color: uma.containsMouse ? Qt.tint(Theme.island, Theme.a(Theme.accent, 0.22)) : Theme.island
         border.width: 1
-        border.color: Theme.a(Theme.green, 0.7)
+        border.color: Theme.a(Theme.accent, uma.containsMouse ? 0.7 : 0.45)
         opacity: Updates.count > 0 ? 1 : 0
         visible: opacity > 0.01
         scale: Updates.count > 0 ? 1 : 0.6
@@ -151,8 +156,8 @@ PanelWindow {
             id: updRow
             anchors.centerIn: parent
             spacing: 5
-            Glyph { text: Icons.packageUp; color: Theme.green; size: Theme.fontSmall + 1; optical: true; anchors.verticalCenter: parent.verticalCenter }
-            Label { text: Updates.count; color: Theme.green; size: Theme.fontSmall; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+            Glyph { text: Icons.packageUp; color: Theme.accent; size: Theme.fontSmall + 1; optical: true; anchors.verticalCenter: parent.verticalCenter }
+            Label { text: Updates.count; color: Theme.text; size: Theme.fontSmall; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
         }
         MouseArea { id: uma; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Updates.runUpdate() }
         Hint {
@@ -242,6 +247,32 @@ PanelWindow {
             id: hover
             onHoveredChanged: IslandState.hovered = hovered
         }
+        // Scroll anywhere on the pill (rest or glance) → next / previous perspective.
+        // Mouse wheels send 120 per notch; touchpads send small pixel deltas, in
+        // either axis (two-finger swipe up/down or left/right).
+        WheelHandler {
+            enabled: win.layer === "rest" || win.layer === "summary"
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+            property real acc: 0
+            onWheel: e => {
+                const touch = e.pixelDelta.x !== 0 || e.pixelDelta.y !== 0
+                const d = touch
+                    ? (Math.abs(e.pixelDelta.y) >= Math.abs(e.pixelDelta.x) ? e.pixelDelta.y : e.pixelDelta.x)
+                    : (Math.abs(e.angleDelta.y) >= Math.abs(e.angleDelta.x) ? e.angleDelta.y : e.angleDelta.x)
+                acc += d
+                const step = touch ? 60 : 120
+                if (Math.abs(acc) >= step) {
+                    IslandState.scrollPerspective(acc > 0 ? -1 : 1)
+                    acc = 0
+                }
+            }
+        }
+        // Mouse "back" side button while a panel is open.
+        TapHandler {
+            acceptedButtons: Qt.BackButton
+            enabled: win.panelOpen
+            onTapped: IslandState.back()
+        }
 
         RestView    { id: restView;    shown: win.current === restView }
         SummaryView { id: summaryView; shown: win.current === summaryView; minWidth: restView.implicitWidth }
@@ -280,6 +311,11 @@ PanelWindow {
             }
             onLoaded: item.forceActiveFocus()
             Keys.onEscapePressed: IslandState.closePanel()
+            Keys.onPressed: e => {
+                if (e.key === Qt.Key_Back || (e.key === Qt.Key_Left && (e.modifiers & Qt.AltModifier))) {
+                    IslandState.back(); e.accepted = true
+                }
+            }
         }
     }
 }

@@ -41,6 +41,7 @@ Singleton {
     readonly property string check:      g(0xF012C)
     readonly property string plus:       g(0xF0415)
     readonly property string minus:      g(0xF0374)
+    readonly property string back:       g(0xF004D)   // md-arrow_left
     readonly property string chevronL:   g(0xF0141)
     readonly property string chevronR:   g(0xF0142)
     readonly property string settings:   g(0xF0493)
@@ -104,6 +105,7 @@ Singleton {
     // weather
     readonly property string sunny:      g(0xF0599)
     readonly property string night:      g(0xF0594)
+    readonly property string lightDark:  g(0xF050E)   // md-theme_light_dark
     readonly property string partly:     g(0xF0595)
     readonly property string cloudy:     g(0xF0590)
     readonly property string fog:        g(0xF0591)

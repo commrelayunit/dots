@@ -7,3 +7,8 @@
 bluez
 bluez-utils
 power-profiles-daemon
+# Audio firmware: most laptops from ~2018 on (Intel SOF DSPs) show no sound
+# devices at all without these. Harmless on machines that don't need them.
+sof-firmware
+alsa-ucm-conf
+alsa-firmware

@@ -20,6 +20,9 @@
 | Keys | Action |
 | --- | --- |
 | `SUPER + R` | Launcher (fallback: fuzzel) |
+| `SUPER + SUPER_L` | Tap Super: launcher (fallback: fuzzel) |
+| `SUPER + ALT + right` | Island: next perspective |
+| `SUPER + ALT + left` | Island: previous perspective |
 | `SUPER + Space` | Focus mode: hide / show the island (frees its screen space) |
 | `SUPER + V` | Clipboard history (fallback: fuzzel) |
 | `SUPER + Tab` | Overview: workspaces + window previews |
