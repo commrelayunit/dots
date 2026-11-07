@@ -11,8 +11,9 @@ Singleton {
     id: root
     readonly property var all: [
         { id: "overview", label: "Overview", icon: Icons.apps },
+        { id: "time",     label: "Time",     icon: Icons.calendar },
         { id: "music",    label: "Music",    icon: Icons.music },
-        { id: "system",   label: "System",   icon: Icons.cpu },
+        { id: "system",   label: "Metrics",  icon: Icons.cpu },
         { id: "minimal",  label: "Minimal",  icon: Icons.clock }
     ]
     readonly property var available: all.filter(p => p.id !== "music" || Media.active)

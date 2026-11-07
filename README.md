@@ -35,7 +35,13 @@ dot-files/
 
 ## The island
 
-A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`). It **rests** on workspaces · music · clock · weather · CPU/RAM/network · battery, with live chips for recording, timers, Do Not Disturb and notifications. **Perspectives:** scroll over the island to rotate between them: **Overview** (the default), **Music** (spinning cover, scrolling title · artist, a live cava visualizer that rests as a dot row when paused, time left, play/pause, and a progress line along the bottom edge), **System** (CPU/RAM/↓/↑ sparklines, uptime) and **Minimal** (time and date). Music switches in by itself when playback starts and back out after 8 s paused. Morphing uses spring physics (`springStiffness` / `springDamping` in `Theme.qml`).
+A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`). It **rests** on workspaces · music · clock · weather · CPU/RAM/network · battery, with live chips for recording, timers, Do Not Disturb and notifications. **Perspectives:** scroll over the island to rotate between them:
+**Overview** (the default: workspaces, clock, weather, system),
+**Time** (clock, full date, current weather, the next three days, any running timer),
+**Music** (spinning cover, scrolling title · artist, a live cava visualizer that rests as a dot row when paused, time left, play/pause, and a progress line along the bottom edge; only while a player is open),
+**Metrics** (CPU/RAM/↓/↑ sparklines, uptime) and
+**Minimal** (time and date only).
+Music switches in by itself when playback starts and back out after 8 s paused. Morphing uses spring physics (`springStiffness` / `springDamping` in `Theme.qml`).
 
 Two round buttons float beside it: **⚙ left** opens quick settings, and **🔔 right** opens notifications (with a count badge; it shows a crossed-out bell while Do Not Disturb is on). It **morphs** into:
 

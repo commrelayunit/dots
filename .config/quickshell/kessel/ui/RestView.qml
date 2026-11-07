@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Resting island. Shows one "perspective" (Overview · Music · System · Minimal);
+// Resting island. Shows one "perspective" (Overview · Time · Music · Metrics · Minimal);
 // scroll over the island to rotate between them. Music appears while a player
 // exists and is entered automatically when playback starts.
 import QtQuick
@@ -14,6 +14,7 @@ View {
     readonly property Item cur: Perspectives.current === "music" ? music
         : Perspectives.current === "system" ? system
         : Perspectives.current === "minimal" ? minimal
+        : Perspectives.current === "time" ? timeRow
         : overview
     implicitWidth: cur.implicitWidth + 32
     implicitHeight: Theme.islandHeight
@@ -52,6 +53,8 @@ View {
            MusicRow { id: music; active: root.cur === music && root.shown } }
     Slot { on: root.cur === system; width: system.implicitWidth; height: system.implicitHeight
            SystemRow { id: system } }
+    Slot { on: root.cur === timeRow; width: timeRow.implicitWidth; height: timeRow.implicitHeight
+           TimeRow { id: timeRow } }
     Slot { on: root.cur === minimal; width: minimal.implicitWidth; height: minimal.implicitHeight
            MinimalRow { id: minimal } }
 
