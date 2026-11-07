@@ -1,0 +1,6 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
+-- Personal tweaks, loaded last (after keybinds). Put experiments here so the
+-- core modules stay clean. A failure here never breaks the rest.
+--
+-- Example:
+--   hl.config({ decoration = { rounding = 14 } })

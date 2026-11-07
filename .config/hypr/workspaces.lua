@@ -1,0 +1,34 @@
+-- SPDX-License-Identifier: GPL-3.0-or-later
+-- Workspace, window and layer rules.
+
+hl.window_rule({
+    name  = "suppress-maximize-events",
+    match = { class = ".*" },
+    suppress_event = "maximize",
+})
+
+hl.window_rule({
+    name  = "fix-xwayland-drags",
+    match = { class = "^$", title = "^$", xwayland = true, float = true, fullscreen = false, pin = false },
+    no_focus = true,
+})
+
+-- Small utility windows float.
+for _, class in ipairs({
+    "^(org.pulseaudio.pavucontrol|pavucontrol)$",
+    "^(polkit-gnome-authentication-agent-1)$",
+    "^(xdg-desktop-portal-gtk)$",
+}) do
+    hl.window_rule({ name = "float-" .. class, match = { class = class }, float = true, center = true })
+end
+
+-- OmniGlyph picker: floating overlay.
+hl.window_rule({
+    name  = "omniglyph-float",
+    match = { class = "(?i).*omniglyph.*" },
+    float = true, center = true, pin = true,
+})
+
+-- Blur behind the launcher and the Quickshell island.
+hl.layer_rule({ name = "blur-fuzzel", match = { namespace = "^launcher$" }, blur = true, ignore_alpha = 0.3 })
+hl.layer_rule({ name = "blur-island", match = { namespace = "^kessel-island$" }, blur = true, ignore_alpha = 0.3 })
