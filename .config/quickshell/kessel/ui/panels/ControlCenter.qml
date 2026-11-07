@@ -307,6 +307,8 @@ PanelBase {
             columns: 3
             spacing: 8
             Tile { width: 119; icon: Notifs.dnd ? Icons.bellOff : Icons.bell; label: "Silence"; active: Notifs.dnd; tint: Theme.red; onClicked: Notifs.dnd = !Notifs.dnd }
+            Tile { width: 119; visible: NightLight.available; icon: Icons.night; label: NightLight.active ? (NightLight.manual ? "Night · on" : "Night · auto") : (NightLight.manual ? "Night · off" : "Night light")
+                   active: NightLight.active; tint: Theme.yellow; onClicked: NightLight.toggle() }
             Tile { width: 119; icon: Icons.coffee; label: "Stay awake"; active: Session.inhibitIdle; tint: Theme.yellow; onClicked: Session.inhibitIdle = !Session.inhibitIdle }
             Tile { width: 119; icon: Theme.dark ? Icons.night : Icons.sunny; label: Theme.dark ? "Dark" : "Light"; active: true; onClicked: Themes.toggleMode() }
             Tile { width: 119; icon: Session.floatMode ? Icons.floating : Icons.tiling; label: Session.floatMode ? "Floating" : "Tiling"; active: Session.floatMode; tint: Theme.accent3; onClicked: Session.toggleFloatMode() }

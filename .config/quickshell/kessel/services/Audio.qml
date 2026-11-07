@@ -29,12 +29,13 @@ Singleton {
 
     // Per-app streams. Playback = apps making sound; recorders = apps capturing
     // (cava and monitor captures are not "microphone use").
-    function mclass(n) { return (n.properties ?? {})["media.class"] ?? "" }
-    readonly property var streams: Pipewire.nodes.values.filter(n => n.isStream && n.audio && mclass(n) === "Stream/Output/Audio")
-    readonly property var recorders: Pipewire.nodes.values.filter(n => n.isStream && mclass(n) === "Stream/Input/Audio"
-        && (n.properties["stream.capture.sink"] ?? "") !== "true"
-        && !/cava/i.test(n.properties["application.name"] ?? n.name ?? ""))
-    readonly property var cameras: Pipewire.nodes.values.filter(n => n.isStream && mclass(n) === "Stream/Input/Video")
+    // Classified by PwNodeType (properties are only filled in once a node is tracked).
+    function isType(n, t) { return (n.type & t) === t }
+    readonly property var streams: Pipewire.nodes.values.filter(n => n.audio && n.type === PwNodeType.AudioOutStream)
+    readonly property var recorders: Pipewire.nodes.values.filter(n => n.type === PwNodeType.AudioInStream
+        && !/cava/i.test(n.name ?? "")
+        && ((n.properties ?? {})["stream.capture.sink"] ?? "") !== "true")
+    readonly property var cameras: Pipewire.nodes.values.filter(n => isType(n, PwNodeType.Video) && isType(n, PwNodeType.Stream))
     function appName(n) { const p = n.properties ?? {}; return p["application.name"] || p["application.process.binary"] || n.description || n.name || "App" }
     function appIcon(n) { const p = n.properties ?? {}; return p["application.icon-name"] || (p["application.process.binary"] ?? "").toLowerCase() || "audio-x-generic" }
     function mediaName(n) { return (n.properties ?? {})["media.name"] ?? "" }

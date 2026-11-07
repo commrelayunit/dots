@@ -36,6 +36,7 @@ PanelWindow {
         item: pill
         Region { item: gearBtn }
         Region { item: bellBtn }
+        Region { item: privacyPill }
     }
 
     WlrLayershell.namespace: "kessel-island"
@@ -99,6 +100,34 @@ PanelWindow {
 
     // Perspective name, shown briefly *below* the island while scrolling through
     // perspectives (it never takes over the pill, so the morph goes straight on).
+    // Privacy: red pill while the mic, camera or screen is in use
+    Rectangle {
+        id: privacyPill
+        y: (Theme.islandHeight - height) / 2
+        x: bellBtn.x + bellBtn.width + 8
+        height: 26
+        width: privRow.implicitWidth + 16
+        radius: 13
+        color: Theme.a(Theme.red, 0.18)
+        border.width: 1
+        border.color: Theme.a(Theme.red, 0.7)
+        opacity: Privacy.any ? 1 : 0
+        visible: opacity > 0.01
+        scale: Privacy.any ? 1 : 0.6
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Behavior on scale { SpringAnimation { spring: Theme.springStiffness; damping: 0.4; epsilon: 0.01 } }
+        Row {
+            id: privRow
+            anchors.centerIn: parent
+            spacing: 6
+            Glyph { visible: Privacy.mic; text: Icons.mic; color: Theme.red; size: Theme.fontSmall + 1; optical: true }
+            Glyph { visible: Privacy.camera; text: Icons.camera; color: Theme.red; size: Theme.fontSmall + 1; optical: true }
+            Glyph { visible: Privacy.screen; text: Icons.screenShare; color: Theme.red; size: Theme.fontSmall + 1; optical: true }
+        }
+        HoverHandler { id: privHover }
+        Hint { visible: privHover.hovered && text !== ""; text: [Privacy.mic ? "Microphone: " + Privacy.micApps : "", Privacy.camera ? "Camera in use" : "", Privacy.screen ? "Screen is being shared" : ""].filter(s => s).join("\n") }
+    }
+
     Rectangle {
         id: perspTag
         readonly property bool on: Perspectives.recentlyScrolled && win.layer === "rest"

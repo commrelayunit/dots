@@ -21,6 +21,8 @@ Singleton {
     property int code: 0
     property var forecast: []      // [{ day, max, min, icon }]
     property string lat: ""
+    property var sunrise: null     // today's, as Date
+    property var sunset: null
     property string lon: ""
 
     readonly property string icon: iconFor(code, Time.now.getHours())
@@ -91,12 +93,13 @@ Singleton {
         command: ["curl", "-fsS", "--max-time", "15",
                   "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(root.lat)
                   + "&longitude=" + encodeURIComponent(root.lon)
-                  + "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7"
+                  + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&forecast_days=7"
                   + (Config.weatherUnits === "u" ? "&temperature_unit=fahrenheit" : "")]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
                     const d = JSON.parse(text).daily
+                    if (d.sunrise && d.sunset) { root.sunrise = new Date(d.sunrise[0]); root.sunset = new Date(d.sunset[0]) }
                     const t = v => String(Math.round(v) || 0) + "°"
                     root.forecast = d.time.map((day, i) => ({
                         day: i === 0 ? "Today" : Qt.formatDate(new Date(day + "T12:00:00"), "ddd"),

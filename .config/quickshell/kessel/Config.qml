@@ -11,6 +11,8 @@ Singleton {
     readonly property string weatherUnits: "m"        // "m" metric, "u" imperial
     readonly property int    weatherIntervalMin: 30
 
+    readonly property int nightTemperature: 4000       // night light colour temperature (K)
+
     readonly property int notifTimeoutMs: 5000        // when the app does not set one
     readonly property int osdMs: 1400
     readonly property int hoverDelayMs: 300           // pointer rest before the summary opens
