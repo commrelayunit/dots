@@ -58,4 +58,4 @@ ok "$(du -h "$out" | cut -f1)  $(tar --zstd -tf "$out" | wc -l) entries"
 step "Rotation (keep $KEEP)"
 mapfile -t old < <(ls -1t "$DEST"/kessel-*.tar.zst 2>/dev/null | tail -n +$((KEEP + 1)))
 for f in "${old[@]}"; do rm -f "$f"; info "removed $(basename "$f")"; done
-info "restore: tar --zstd -xf <archive> -C ~   ·   git clone dot-files.bundle ~/dot-files"
+info "restore: tar --zstd -xf <archive> -C ~   ·   git clone dot-files.bundle <folder>"
