@@ -46,6 +46,7 @@ brightnessctl
 papirus-icon-theme
 # Apps bound in keybinds.lua (SUPER+C editor, CTRL+SHIFT+Esc task manager)
 neovim
+eza
 htop
 # Tooling used by scripts / installer
 jq

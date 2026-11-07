@@ -1,64 +1,77 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Starship — end-4-inspired layout (clean-room): context line, then a bare
-# prompt character; fish shows the transient (collapsed) prompt for history.
+# Starship — end-4/dots-hyprland *style* prompt, written from scratch:
+# rounded "pills" on line 1 (duration · user•host · directory · git), a bare
+# glyph on line 2, transient prompt in fish. Colours use the terminal palette
+# (white/black/bright-*), so the prompt follows the wallpaper theme that the
+# theme switcher writes into kitty.
 "$schema" = "https://starship.rs/config-schema.json"
-add_newline = true
+add_newline = false
 command_timeout = 800
 
-format = """$username$hostname$directory$git_branch$git_state$git_status$python$nodejs$rust$golang$cmd_duration$jobs
-$character"""
-
-[username]
-style_user = "bold #c6a0f6"
-style_root = "bold #e06c75"
-format = "[$user]($style) "
-show_always = false
-
-[hostname]
-ssh_only = true
-ssh_symbol = "󰣀 "
-style = "bold #8bd5ca"
-format = "[$ssh_symbol$hostname]($style) "
-
-[directory]
-style = "bold #8aadf4"
-read_only = " 󰌾"
-truncation_length = 3
-truncate_to_repo = true
-format = "[ $path]($style)[$read_only]($read_only_style) "
-
-[git_branch]
-symbol = " "
-style = "bold #a6da95"
-format = "[$symbol$branch]($style) "
-
-[git_status]
-style = "#eed49f"
-format = "([$all_status$ahead_behind]($style) )"
-
-[cmd_duration]
-min_time = 2000
-style = "#4a5063"
-format = "[ $duration]($style) "
-
-[jobs]
-symbol = " "
-style = "#c6a0f6"
+format = """
+$cmd_duration$username$hostname $directory$git_branch$git_status$python$nodejs$rust$jobs
+  $character"""
 
 [character]
-success_symbol = "[❯](bold #8aadf4)"
-error_symbol = "[❯](bold #e06c75)"
-vimcmd_symbol = "[❮](bold #a6da95)"
+success_symbol = "[󰅂](bold bright-black)"
+error_symbol = "[󰅂](bold red)"
+vimcmd_symbol = "[󰅁](bold green)"
+
+[cmd_duration]
+min_time = 0
+show_milliseconds = false
+format = "[](fg:bright-black)[󰪢 $duration](bold fg:black bg:bright-black)[](fg:bright-black) "
+
+[username]
+show_always = true
+style_user = "bold fg:black bg:white"
+style_root = "bold fg:black bg:red"
+format = "[](fg:white)[$user]($style)"
+
+[hostname]
+ssh_only = false
+ssh_symbol = " 󰌘"
+format = "[•$hostname$ssh_symbol](bold fg:black bg:white)[](fg:white)"
+
+[directory]
+home_symbol = " "
+read_only = " 󰌾"
+truncation_length = 2
+truncation_symbol = "…/"
+style = "fg:black bg:bright-white"
+format = "[](fg:bright-white)[󰉋 → $path]($style)[$read_only](fg:red bg:bright-white)[](fg:bright-white)"
+
+[directory.substitutions]
+"Desktop" = "󰇄 "
+"Documents" = "󰈙 "
+"Downloads" = "󰇚 "
+"Music" = "󰎈 "
+"Pictures" = "󰋩 "
+"Videos" = "󰕧 "
+"Projects" = "󰝰 "
+"dot-files" = "󰒓 dot-files"
+
+[git_branch]
+symbol = "󰘬"
+truncation_length = 16
+truncation_symbol = "…"
+format = " [](fg:green)[$symbol $branch](bold fg:black bg:green)[](fg:green)"
+
+[git_status]
+style = "bold yellow"
+format = "( [$all_status$ahead_behind]($style))"
 
 [python]
-symbol = " "
-format = "[$symbol$version( \\($virtualenv\\))]($style) "
+symbol = " "
+format = " [$symbol$version( \\($virtualenv\\))](yellow)"
 [nodejs]
-symbol = " "
-format = "[$symbol$version]($style) "
+symbol = " "
+format = " [$symbol$version](green)"
 [rust]
-symbol = " "
-format = "[$symbol$version]($style) "
-[golang]
-symbol = " "
-format = "[$symbol$version]($style) "
+symbol = " "
+format = " [$symbol$version](red)"
+[jobs]
+symbol = "󰻰 "
+format = " [$symbol$number](purple)"
+[package]
+disabled = true
