@@ -1,0 +1,11 @@
+# Never commit secrets or machine state
+*.key
+*.pem
+*.token
+.env
+*.secret
+# OmniGlyph runtime state (history, notification prefs)
+.config/omniglyph/settings.json
+# Generated at runtime
+*.log
+/backups/
