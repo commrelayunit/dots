@@ -35,8 +35,11 @@ case "${1:-start}" in
     stop)
         # Close any open panel first: tearing down a focused text field crashes
         # Qt 6.12 at shutdown (QInputMethod::commit in ~QQuickItem).
-        qs -c "$cfg" ipc call island close >/dev/null 2>&1 && sleep 0.3
-        qs kill -c "$cfg" >/dev/null 2>&1 || true ;;   # never pkill -f: too broad
+        # Graceful: the island drops focus from text fields, then quits itself.
+        if qs -c "$cfg" ipc call island quit >/dev/null 2>&1; then
+            for _ in $(seq 1 20); do running || exit 0; sleep 0.1; done
+        fi
+        qs kill -c "$cfg" >/dev/null 2>&1 || true ;;   # fallback; never pkill -f: too broad
     restart) "$0" stop; sleep 0.4; "$0" start ;;
     status)  qs list --all 2>/dev/null ;;
     *)       echo "usage: $0 start|stop|restart|status" >&2; exit 2 ;;

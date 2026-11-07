@@ -27,6 +27,21 @@ Singleton {
     readonly property var sources: Pipewire.nodes.values.filter(n => !n.isSink && !n.isStream && n.audio
                                                                    && !(n.name || "").endsWith(".monitor"))
 
+    // Per-app streams. Playback = apps making sound; recorders = apps capturing
+    // (cava and monitor captures are not "microphone use").
+    function mclass(n) { return (n.properties ?? {})["media.class"] ?? "" }
+    readonly property var streams: Pipewire.nodes.values.filter(n => n.isStream && n.audio && mclass(n) === "Stream/Output/Audio")
+    readonly property var recorders: Pipewire.nodes.values.filter(n => n.isStream && mclass(n) === "Stream/Input/Audio"
+        && (n.properties["stream.capture.sink"] ?? "") !== "true"
+        && !/cava/i.test(n.properties["application.name"] ?? n.name ?? ""))
+    readonly property var cameras: Pipewire.nodes.values.filter(n => n.isStream && mclass(n) === "Stream/Input/Video")
+    function appName(n) { const p = n.properties ?? {}; return p["application.name"] || p["application.process.binary"] || n.description || n.name || "App" }
+    function appIcon(n) { const p = n.properties ?? {}; return p["application.icon-name"] || (p["application.process.binary"] ?? "").toLowerCase() || "audio-x-generic" }
+    function mediaName(n) { return (n.properties ?? {})["media.name"] ?? "" }
+    function setStreamVolume(n, v) { if (n.audio) { n.audio.muted = false; n.audio.volume = clamp(v) } }
+    function toggleStreamMute(n) { if (n.audio) n.audio.muted = !n.audio.muted }
+    PwObjectTracker { objects: root.streams }
+
     readonly property string icon: muted || volume <= 0.001 ? Icons.volOff
         : volume < 0.34 ? Icons.volLow : volume < 0.67 ? Icons.volMid : Icons.volHigh
     readonly property string micIcon: micMuted ? Icons.micOff : Icons.mic

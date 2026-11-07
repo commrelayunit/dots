@@ -23,6 +23,7 @@ Singleton {
     property string panel: ""
     property bool hovered: false
     property bool summary: false
+    property bool quitting: false    // graceful shutdown in progress (see shell.qml)
     property real restWidth: 0       // reported by RestView (for status / tests)
     property real pillWidth: 0       // live, animated width of the pill (tests)
 
@@ -31,7 +32,7 @@ Singleton {
     property string osdLabel: ""
     property real osdValue: 0
 
-    readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer", "wallpaper", "board"]
+    readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer", "wallpaper", "board", "media", "mixer"]
 
     readonly property string layer: Alarm.ringing ? "alarm"
         : panel !== "" ? "panel"
@@ -87,6 +88,9 @@ Singleton {
         // Rotate perspectives without a scroll wheel: step = 1 / -1
         function perspective(step: int): string { Perspectives.rotate(step); return Perspectives.current }
         function pill(): string { return String(Math.round(root.pillWidth * 10) / 10) }
+        // Graceful exit: drop keyboard focus from every text field first —
+        // Qt 6.12 crashes tearing down a focused text input (QInputMethod::commit).
+        function quit(): string { root.panel = ""; root.quitting = true; return "ok" }
         function timer(seconds: int): string { Timers.startSeconds(seconds); return "ok" }
         function dismissAlarm(): string { Alarm.dismiss(); return "ok" }
         function glance(on: bool): string { root.summary = on; return "ok" }

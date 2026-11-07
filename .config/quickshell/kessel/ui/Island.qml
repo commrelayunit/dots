@@ -15,7 +15,7 @@ PanelWindow {
     // Only the island on the focused monitor shows panels / notifications.
     readonly property bool live: !Hyprland.focusedMonitor || Hyprland.focusedMonitor.name === screen?.name
     readonly property string layer: live ? IslandState.layer : "rest"
-    readonly property bool panelOpen: layer === "panel"
+    readonly property bool panelOpen: layer === "panel" && !IslandState.quitting
 
     visible: IslandState.shown
     anchors.top: true
@@ -43,6 +43,13 @@ PanelWindow {
     WlrLayershell.keyboardFocus: panelOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     IdleInhibitor { window: win; enabled: Session.inhibitIdle }
+
+    // takes keyboard focus away from text fields before a graceful quit
+    Item { id: focusSink; focus: false }
+    Connections {
+        target: IslandState
+        function onQuittingChanged() { if (IslandState.quitting) focusSink.forceActiveFocus() }
+    }
 
     // Click outside an open panel closes it.
     // The grab can report "cleared" while the panel is still being created and
@@ -199,6 +206,8 @@ PanelWindow {
                 case "notifications": return "panels/NotificationsPanel.qml"
                 case "notes":     return "panels/NotesPanel.qml"
                 case "board":     return "panels/NotesPanel.qml"
+                case "media":     return "panels/MediaPanel.qml"
+                case "mixer":     return "panels/MixerPanel.qml"
                 case "overview":  return "panels/Overview.qml"
                 case "power":     return "panels/PowerPanel.qml"
                 case "timer":     return "panels/TimerPanel.qml"

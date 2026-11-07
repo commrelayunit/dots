@@ -15,6 +15,14 @@ ShellRoot {
         }
     }
 
+    // Graceful quit (island.sh stop): give the windows a moment to drop focus
+    // and unload panels, then exit normally.
+    Timer {
+        running: IslandState.quitting
+        interval: 250
+        onTriggered: Qt.quit()
+    }
+
     // Instantiate services that must run even before any UI reads them.
     Component.onCompleted: {
         IslandState.shown = true
