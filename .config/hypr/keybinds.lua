@@ -138,6 +138,18 @@ add { group = "Workspaces", keys = "SUPER + S",        dsp = function() return h
 add { group = "Workspaces", keys = "CTRL + SUPER + S", dsp = function() return hl.dsp.workspace.toggle_special("scratch") end, desc = "Toggle scratchpad", hidden = true }
 add { group = "Workspaces", keys = "SUPER + ALT + S",  dsp = function() return hl.dsp.window.move({ workspace = "special:scratch", follow = false }) end, desc = "Send window to scratchpad" }
 
+-- Zoom (like end-4): magnifies around the cursor; repeats while held -----------
+local function zoom(f)
+    return function()
+        local z = hl.get_config("cursor.zoom_factor") or 1
+        z = math.max(1, math.min(8, z * f))
+        if z < 1.05 then z = 1 end
+        hl.config({ cursor = { zoom_factor = z } })
+    end
+end
+add { group = "Utilities", keys = "SUPER + equal", dsp = function() return zoom(1.25) end, opts = { repeating = true }, desc = "Zoom in" }
+add { group = "Utilities", keys = "SUPER + minus", dsp = function() return zoom(0.8) end,  opts = { repeating = true }, desc = "Zoom out (back to normal)" }
+
 -- Session ----------------------------------------------------------------------
 add { group = "Session", keys = "SUPER + L",          exec = apps.lock, desc = "Lock" }
 add { group = "Session", keys = "SUPER + SHIFT + L",  exec = S .. "lock.sh; sleep 1; systemctl suspend", opts = { locked = true }, desc = "Standby (suspend)" }

@@ -62,12 +62,13 @@ PanelBase {
             width: list.width
             height: modelData.image ? 92 : 40
 
+            readonly property string url: !modelData.image && /^https?:\/\/\S+$/i.test(modelData.text.trim()) ? modelData.text.trim() : ""
             Label {
                 visible: !d.modelData.image
                 anchors.left: parent.left
                 anchors.leftMargin: 12
                 anchors.right: parent.right
-                anchors.rightMargin: 12
+                anchors.rightMargin: d.url !== "" ? 44 : 12
                 anchors.verticalCenter: parent.verticalCenter
                 text: d.modelData.text
                 textFormat: Text.PlainText
@@ -105,6 +106,16 @@ PanelBase {
                 cursorShape: Qt.PointingHandCursor
                 onEntered: list.currentIndex = d.index
                 onClicked: { list.currentIndex = d.index; root.copyCurrent() }
+            }
+            IconButton {
+                visible: d.url !== ""
+                anchors.right: parent.right
+                anchors.rightMargin: 8
+                anchors.verticalCenter: parent.verticalCenter
+                size: 28
+                iconSize: Theme.fontSmall + 1
+                icon: Icons.openExt
+                onClicked: { Quickshell.execDetached(["xdg-open", d.url]); IslandState.closePanel() }
             }
         }
         Label { visible: list.count === 0; anchors.centerIn: parent; text: "Clipboard history is empty"; color: Theme.subtext }

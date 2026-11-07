@@ -44,6 +44,8 @@
 | `CTRL + ALT + R` | Record screen (again to stop) |
 | `SUPER + period` | Emoji / symbol picker (OmniGlyph) |
 | `SUPER + SHIFT + D` | Do not disturb on/off |
+| `SUPER + equal` | Zoom in |
+| `SUPER + minus` | Zoom out (back to normal) |
 
 ## Windows
 

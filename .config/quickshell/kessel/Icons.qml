@@ -84,6 +84,9 @@ Singleton {
     readonly property string drop:       g(0xF058E)
     readonly property string wind:       g(0xF059D)
     readonly property string place:      g(0xF034E)
+    readonly property string calculator: g(0xF00EC)
+    readonly property string web:        g(0xF059F)
+    readonly property string openExt:    g(0xF03CC)
 
     // weather
     readonly property string sunny:      g(0xF0599)

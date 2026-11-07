@@ -45,6 +45,9 @@ wf-recorder
 hyprpicker
 brightnessctl
 papirus-icon-theme
+# Launcher calculator (qalc) + night light
+libqalculate
+hyprsunset
 # Music perspective visualizer
 cava
 # Wallpaper-derived theme accents (scripts/theme.sh)

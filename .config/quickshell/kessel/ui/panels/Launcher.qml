@@ -14,11 +14,30 @@ PanelBase {
     contentWidth: 520
     contentHeight: search.height + 10 + list.height
 
-    property var results: Apps.query(search.text)
+    // URL-ish: "https://…", "www.…", or "name.tld/…"
+    function asUrl(q) {
+        q = (q || "").trim()
+        if (/\s/.test(q) || q.length < 4) return ""
+        if (/^https?:\/\//i.test(q)) return q
+        if (/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(:\d+)?(\/\S*)?$/i.test(q)) return "https://" + q
+        return ""
+    }
+    // special rows (calculator result, open URL) come first, then apps
+    readonly property var special: {
+        const out = []
+        if (Calc.result !== "" && Calc.query === search.text) out.push({ kind: "calc", value: Calc.result })
+        const u = asUrl(search.text)
+        if (u !== "") out.push({ kind: "url", value: u })
+        return out
+    }
+    property var results: special.concat(Apps.query(search.text).map(a => ({ kind: "app", app: a })))
 
     function launchCurrent() {
         if (list.currentIndex < 0 || list.currentIndex >= results.length) return
-        Apps.launch(results[list.currentIndex])
+        const r = results[list.currentIndex]
+        if (r.kind === "calc") Calc.copy(r.value)
+        else if (r.kind === "url") Quickshell.execDetached(["xdg-open", r.value])
+        else Apps.launch(r.app)
         IslandState.closePanel()
     }
 
@@ -27,8 +46,8 @@ PanelBase {
     SearchField {
         id: search
         width: parent.width
-        placeholder: "Search applications"
-        onTextChanged: list.currentIndex = 0
+        placeholder: "Search apps · calculate (2+2, = 5 km in miles) · open a URL"
+        onTextChanged: { list.currentIndex = 0; Calc.evaluate(text) }
         onAccepted: root.launchCurrent()
         onUp: list.decrementCurrentIndex()
         onDown: list.incrementCurrentIndex()
@@ -53,15 +72,27 @@ PanelBase {
             required property int index
             width: list.width
             height: 48
+            readonly property bool isApp: modelData.kind === "app"
             Image {
                 id: appIcon
+                visible: d.isApp
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
                 width: 30; height: 30
                 sourceSize: Qt.size(60, 60)
-                source: Quickshell.iconPath(d.modelData.icon, "application-x-executable")
+                source: d.isApp ? Quickshell.iconPath(d.modelData.app.icon, "application-x-executable") : ""
                 asynchronous: true
+            }
+            Rectangle {
+                visible: !d.isApp
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                width: 30; height: 30; radius: 15
+                color: Theme.a(Theme.accent, 0.18)
+                Glyph { anchors.centerIn: parent; optical: true; size: Theme.fontUi + 1; color: Theme.accent
+                        text: d.modelData.kind === "calc" ? Icons.calculator : Icons.web }
             }
             Column {
                 anchors.left: appIcon.right
@@ -69,8 +100,23 @@ PanelBase {
                 anchors.right: parent.right
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                Label { text: d.modelData.name; width: parent.width }
-                Label { text: d.modelData.comment || d.modelData.genericName || ""; visible: text !== ""; color: Theme.subtext; size: Theme.fontSmall; width: parent.width }
+                Label {
+                    width: parent.width
+                    text: d.modelData.kind === "calc" ? "= " + d.modelData.value
+                        : d.modelData.kind === "url" ? d.modelData.value
+                        : d.modelData.app.name
+                    font.bold: !d.isApp
+                    color: d.modelData.kind === "calc" ? Theme.accent : Theme.text
+                }
+                Label {
+                    width: parent.width
+                    text: d.modelData.kind === "calc" ? "Enter to copy" + (Calc.qalcAvailable ? " · qalc" : "")
+                        : d.modelData.kind === "url" ? "Enter to open in your browser"
+                        : (d.modelData.app.comment || d.modelData.app.genericName || "")
+                    visible: text !== ""
+                    color: Theme.subtext
+                    size: Theme.fontSmall
+                }
             }
             MouseArea {
                 anchors.fill: parent
