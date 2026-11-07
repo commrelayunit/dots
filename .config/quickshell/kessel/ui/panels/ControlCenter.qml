@@ -54,6 +54,18 @@ PanelBase {
                 }
             }
 
+            // Appearance: dark / light (the base colour; accents follow the wallpaper)
+            SectionRow {
+                width: parent.width
+                icon: Theme.dark ? Icons.night : Icons.sunny
+                title: "Dark mode"
+                sub: Theme.dark ? "Pitch black · accents from the wallpaper" : "Eggshell · accents from the wallpaper"
+                showSwitch: true
+                checked: Theme.dark
+                tint: Theme.accent
+                onToggled: Themes.setMode(Theme.dark ? "light" : "dark")
+            }
+
             // Network
             SectionRow {
                 id: wifiRow
@@ -310,7 +322,6 @@ PanelBase {
             Tile { width: 119; visible: NightLight.available; icon: Icons.night; label: NightLight.active ? (NightLight.manual ? "Night · on" : "Night · auto") : (NightLight.manual ? "Night · off" : "Night light")
                    active: NightLight.active; tint: Theme.yellow; onClicked: NightLight.toggle() }
             Tile { width: 119; icon: Icons.coffee; label: "Stay awake"; active: Session.inhibitIdle; tint: Theme.yellow; onClicked: Session.inhibitIdle = !Session.inhibitIdle }
-            Tile { width: 119; icon: Theme.dark ? Icons.night : Icons.sunny; label: Theme.dark ? "Dark" : "Light"; active: true; onClicked: Themes.toggleMode() }
             Tile { width: 119; icon: Session.floatMode ? Icons.floating : Icons.tiling; label: Session.floatMode ? "Floating" : "Tiling"; active: Session.floatMode; tint: Theme.accent3; onClicked: Session.toggleFloatMode() }
             Tile { width: 119; icon: Icons.notes; label: "Notes"; onClicked: IslandState.openPanel("notes") }
             Tile { width: 119; icon: Icons.picker; label: "Color picker"; onClicked: Utils.colorPicker() }
