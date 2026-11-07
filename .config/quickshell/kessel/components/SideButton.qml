@@ -29,9 +29,9 @@ Rectangle {
     Rectangle {
         visible: root.badge > 0
         anchors.right: parent.right
-        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.rightMargin: -3
-        anchors.topMargin: -3
+        anchors.bottomMargin: -3
         width: Math.max(16, badgeText.implicitWidth + 8)
         height: 16
         radius: 8
