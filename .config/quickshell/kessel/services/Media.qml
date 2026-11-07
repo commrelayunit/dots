@@ -32,7 +32,9 @@ Singleton {
                          : player.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
     }
     readonly property real length: player?.length ?? 0
-    readonly property real position: player?.position ?? 0
+    // Some players (mpv looping a file) keep counting past the end: wrap it.
+    readonly property real rawPosition: player?.position ?? 0
+    readonly property real position: length > 0 && rawPosition > length ? rawPosition % length : rawPosition
     readonly property real progress: length > 0 ? Math.min(1, position / length) : 0
 
     function toggle() { if (player?.canTogglePlaying) player.togglePlaying() }

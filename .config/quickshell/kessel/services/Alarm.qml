@@ -25,7 +25,7 @@ Singleton {
 
     Process {
         running: root.ringing
-        command: ["sh", "-c", 'command -v pw-play >/dev/null && [ -r "$1" ] || exit 0; for i in $(seq 20); do pw-play "$1" 2>/dev/null || exit 0; sleep 0.6; done', "sh", root.sound]
+        command: ["sh", "-c", 'command -v pw-play >/dev/null && [ -r "$1" ] || exit 0; for i in $(seq 20); do timeout 5 pw-play "$1" 2>/dev/null || exit 0; sleep 0.6; done', "sh", root.sound]
     }
     // give up after 5 minutes so a forgotten alarm doesn't buzz forever
     Timer { running: root.ringing; interval: 300000; onTriggered: root.ringing = false }

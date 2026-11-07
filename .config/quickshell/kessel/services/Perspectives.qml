@@ -44,6 +44,9 @@ Singleton {
         }
         function onActiveChanged() { if (!Media.active && root.current === "music") root.current = "overview" }
     }
+    // the island may (re)start while something is already playing
+    Timer { interval: 1500; running: true; onTriggered: if (Media.playing && root.current === "overview") { root.current = "music"; root.autoEntered = true } }
+
     // paused for a while → go back to where we were
     Timer { id: stopTimer; interval: 8000; onTriggered: if (!Media.playing && root.autoEntered) { root.current = "overview"; root.autoEntered = false } }
 }

@@ -73,7 +73,7 @@ PanelBase {
                 color: Theme.overlay
                 clip: true
                 Image { anchors.fill: parent; source: Media.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize: Qt.size(380, 380) }
-                Glyph { anchors.centerIn: parent; text: Icons.album; size: 48; color: Theme.subtext; visible: Media.art === "" }
+                Glyph { anchors.centerIn: parent; optical: true; text: Icons.album; size: 48; color: Theme.subtext; visible: Media.art === "" }
                 layer.enabled: true
                 layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 0.8; shadowOpacity: 0.5; shadowVerticalOffset: 6 }
             }
@@ -92,12 +92,13 @@ PanelBase {
 
                 Item { width: 1; height: 10 }
 
-                Bar {
+                WavyBar {
                     width: parent.width
                     value: Media.progress
+                    playing: Media.playing
                     interactive: Media.player?.canSeek ?? false
-                    thickness: 6
-                    fill: Theme.accent
+                    thickness: 5
+                    amplitude: 3.5
                     onMoved: v => Media.seekTo(v)
                 }
                 Item {

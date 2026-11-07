@@ -43,7 +43,7 @@ accents() {
         key="$(sha1sum "$wall" | cut -c1-16)"
         json="$CACHE/$key.json"
         if [[ ! -s $json ]]; then
-            matugen image "$wall" --json hex --dry-run > "$json.tmp" 2>/dev/null && mv "$json.tmp" "$json" || rm -f "$json.tmp"
+            matugen image "$wall" --json hex --dry-run --prefer saturation > "$json.tmp" 2>/dev/null && mv "$json.tmp" "$json" || rm -f "$json.tmp"
         fi
         if [[ -s $json ]]; then
             # matugen's JSON has used both .colors.<mode>.<role> and .colors.<role>.<mode>

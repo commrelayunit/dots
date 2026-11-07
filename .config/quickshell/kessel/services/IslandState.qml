@@ -86,6 +86,7 @@ Singleton {
         }
         // Show/hide the hover glance without a pointer (also handy for testing).
         // Rotate perspectives without a scroll wheel: step = 1 / -1
+        function perspectiveSet(name: string): string { Perspectives.set(name); return Perspectives.current }
         function perspective(step: int): string { Perspectives.rotate(step); return Perspectives.current }
         function pill(): string { return String(Math.round(root.pillWidth * 10) / 10) }
         // Graceful exit: drop keyboard focus from every text field first —

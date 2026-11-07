@@ -53,7 +53,7 @@ Item {
                 clip: true
                 anchors.verticalCenter: parent.verticalCenter
                 Image { anchors.fill: parent; source: Media.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: status === Image.Ready }
-                Glyph { anchors.centerIn: parent; text: Icons.music; size: Theme.fontSmall; visible: Media.art === ""; color: Theme.subtext }
+                Glyph { anchors.centerIn: parent; optical: true; text: Icons.music; size: Theme.fontSmall; visible: Media.art === ""; color: Theme.subtext }
             }
             Label {
                 text: Media.title

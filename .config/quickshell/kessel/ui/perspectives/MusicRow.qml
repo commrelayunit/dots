@@ -29,7 +29,7 @@ Item {
             clip: true
             anchors.verticalCenter: parent.verticalCenter
             Image { anchors.fill: parent; source: Media.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: status === Image.Ready }
-            Glyph { anchors.centerIn: parent; text: Icons.music; size: Theme.fontSmall; color: Theme.subtext; visible: Media.art === "" }
+            Glyph { anchors.centerIn: parent; optical: true; text: Icons.music; size: Theme.fontSmall; color: Theme.subtext; visible: Media.art === "" }
             RotationAnimation on rotation { running: Media.playing; from: 0; to: 360; duration: 12000; loops: Animation.Infinite }
         }
 

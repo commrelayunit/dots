@@ -5,7 +5,7 @@ import ".."
 
 Row {
     property bool playing: false
-    property color tint: Theme.green
+    property color tint: Theme.accent2
     spacing: 2
     height: 12
     Repeater {
