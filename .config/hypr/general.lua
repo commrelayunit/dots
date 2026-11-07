@@ -41,19 +41,31 @@ hl.config({
     decoration = {
         rounding       = 10,
         rounding_power = 2,
+        -- Focused windows keep their own look (kitty is slightly translucent by
+        -- itself); unfocused ones fade a little so the frosted blur shows through.
         active_opacity   = 1.0,
-        inactive_opacity = 0.97,
+        inactive_opacity = 0.90,
         shadow = {
             enabled      = not SOFTWARE,
             range        = 8,
             render_power = 3,
             color        = 0x99000000,
         },
+        -- Frosted glass behind every translucent window, popup and layer. Off in
+        -- software rendering (no GPU), where it costs a whole CPU core.
         blur = {
-            enabled  = not SOFTWARE,
-            size     = 5,
-            passes   = 2,
-            vibrancy = 0.17,
+            enabled           = not SOFTWARE,
+            size              = 7,
+            passes            = 3,      -- smooth, no visible boxes
+            noise             = 0.02,   -- a little grain reads as "frosted", hides banding
+            contrast          = 0.95,
+            brightness        = 0.85,   -- keep text on top readable
+            vibrancy          = 0.20,
+            vibrancy_darkness = 0.25,
+            new_optimizations = true,
+            xray              = false,  -- blur the real windows behind, not only the wallpaper
+            popups            = true,   -- menus and tooltips too
+            special           = true,   -- scratchpad
         },
     },
 

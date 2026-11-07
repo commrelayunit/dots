@@ -441,47 +441,55 @@ EOG
         fi
     done
 
-    # ── OnlyOffice: a custom UI theme "Kessel" (pick it once in Settings → Theme) ──
-    # OnlyOffice ignores GTK/Qt colours. It loads custom themes from
-    # <appdata>/uithemes; tokens we don't set start from its built-in Night/White
-    # values (read from its own CSS), because missing tokens fall back to light defaults.
-    local oo=/opt/onlyoffice/desktopeditors oodir="${XDG_DATA_HOME:-$HOME/.local/share}/onlyoffice/desktopeditors/uithemes"
+    # ── OnlyOffice ──
+    # 1. A custom "Kessel" UI theme (Settings → Theme → Kessel). It starts from
+    #    OnlyOffice's own Night/White tokens (read from its CSS) and only swaps the
+    #    backgrounds for ours and the highlights for the wallpaper accent, so text,
+    #    icons and the document canvas keep OnlyOffice's tested contrast.
+    # 2. If a built-in theme is selected instead, pick one matching light/dark
+    #    (keeping the user's choice when it already matches, e.g. Dark Contrast).
+    # 3. System title bar: the custom one draws a transparent shadow margin inside
+    #    the tiled window.
+    # OnlyOffice reads all of this at start-up: a running instance changes on restart.
+    local oo=/opt/onlyoffice/desktopeditors
+    local ooconf="${XDG_CONFIG_HOME:-$HOME/.config}/onlyoffice/DesktopEditors.conf"
+    local oodir="${XDG_DATA_HOME:-$HOME/.local/share}/onlyoffice/desktopeditors/uithemes"
     if [[ -d $oo ]]; then
-        local base_id=theme-white oo_type=light
+        local base_id=theme-white oo_type=light base_json
         [[ $mode == dark ]] && { base_id=theme-night; oo_type=dark; }
-        local base_json
         base_json="$(grep -o "\.$base_id{[^}]*}" "$oo/editors/web-apps/apps/documenteditor/main/resources/css/app.css" 2>/dev/null | head -1 |
             sed 's/^[^{]*{//; s/}$//' | tr ';' '\n' | sed -n 's/^--\([a-z0-9-]*\):\(.*\)$/\1\t\2/p' |
-            jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}')" || base_json='{}'
-        mkdir -p "$oodir"
-        jq -n --argjson base "${base_json:-{\}}" --arg type "$oo_type" \
-            --arg bg "$BG" --arg s1 "$SURFACE" --arg s2 "$SURFACE2" --arg ov "$OVERLAY" \
-            --arg tx "$TEXT" --arg sub "$SUBTEXT" --arg mu "$MUTED" --arg p "$P" --arg onp "$ONP" \
-            --arg pc "$PC" --arg onpc "$ONPC" --arg out "$OUT" --arg sv "$SV" '
-          def each(prefix; v): ["document","spreadsheet","presentation","pdf","visio"] | map({(prefix + .): v}) | add;
-          { name: "Kessel", id: "theme-kessel", type: $type,
-            colors: ($base
-              + each("toolbar-header-"; $bg) + each("text-toolbar-header-on-background-"; $bg)
-              + each("highlight-toolbar-tab-underline-"; $p) + each("highlight-header-tab-underline-"; $p)
-              + { "background-normal": $s1, "background-toolbar": $s1, "background-toolbar-additional": $s1,
-                  "background-pane": $s1, "background-pane-additional": $s2, "background-toolbar-tab": $s2,
-                  "background-notification-popover": $s2, "background-contrast-popover": $s2,
-                  "background-primary-dialog-button": $p, "background-accent-button": $p, "background-fill-button": $s2,
-                  "background-loader": $s2, "background-alt-key-hint": $pc,
-                  "highlight-button-hover": $ov, "highlight-button-pressed": $pc, "highlight-button-pressed-hover": $pc,
-                  "highlight-primary-dialog-button-hover": $pc, "highlight-header-button-hover": $s2,
-                  "highlight-header-button-pressed": $pc, "highlight-text-select": $p,
-                  "border-toolbar": $sv, "border-divider": $sv, "border-regular-control": $out,
-                  "border-control-focus": $p, "border-preview-select": $p, "border-toolbar-active-tab": $sv,
-                  "text-normal": $tx, "text-normal-pressed": $onpc, "text-secondary": $sub, "text-tertiary": $mu,
-                  "text-link": $p, "text-link-hover": $p, "text-link-active": $p, "text-inverse": $onp,
-                  "text-toolbar-header": $tx, "text-contrast-background": $tx, "text-alt-key-hint": $onpc,
-                  "icon-toolbar-header": $tx,
-                  "canvas-background": $bg, "canvas-page-border": $sv,
-                  "canvas-ruler-background": $s1, "canvas-ruler-border": $sv, "canvas-ruler-margins-background": $s2,
-                  "canvas-cell-title-background": $s1, "canvas-cell-title-background-selected": $pc,
-                  "canvas-cell-title-border": $sv, "canvas-cell-title-text": $sub }) }' \
-            | write "$oodir/kessel.json"
+            jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}')"
+        if [[ -n $base_json && $base_json != '{}' && $base_json != null ]]; then
+            mkdir -p "$oodir"
+            jq -n --argjson base "$base_json" --arg type "$oo_type" \
+                --arg bg "$BG" --arg s1 "$SURFACE" --arg s2 "$SURFACE2" --arg p "$P" '
+              def each(prefix; v): ["document","spreadsheet","presentation","pdf","visio"] | map({(prefix + .): v}) | add;
+              { name: "Kessel", id: "theme-kessel", type: $type,
+                colors: ($base
+                  + each("toolbar-header-"; $bg)
+                  + each("highlight-toolbar-tab-underline-"; $p) + each("highlight-header-tab-underline-"; $p)
+                  + { "background-toolbar": $s1, "background-toolbar-additional": $s1,
+                      "background-normal": $s1, "background-pane": $s1, "background-pane-additional": $s2,
+                      "background-primary-dialog-button": $p, "background-accent-button": $p,
+                      "border-control-focus": $p, "border-preview-select": $p,
+                      "text-link": $p, "text-link-hover": $p, "text-link-active": $p }) }' \
+                | write "$oodir/kessel.json"
+        fi
+    fi
+    if [[ -f $ooconf ]]; then
+        local cur want
+        cur="$(sed -n 's/^UITheme=//p' "$ooconf")"
+        if [[ $cur == theme-kessel ]]; then want=$cur
+        elif [[ $mode == dark ]]; then
+            case $cur in theme-night|theme-dark|theme-contrast-dark) want=$cur ;; *) want=theme-night ;; esac
+        else
+            case $cur in theme-white|theme-light|theme-classic-light|theme-gray) want=$cur ;; *) want=theme-white ;; esac
+        fi
+        if grep -q '^UITheme=' "$ooconf"; then sed -i "s/^UITheme=.*/UITheme=$want/" "$ooconf"
+        else sed -i "/^\[General\]/a UITheme=$want" "$ooconf"; fi
+        if grep -q '^titlebar=' "$ooconf"; then sed -i 's/^titlebar=.*/titlebar=system/' "$ooconf"
+        else sed -i '/^\[General\]/a titlebar=system' "$ooconf"; fi
     fi
 
     # ── reload consumers (each optional) ──

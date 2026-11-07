@@ -117,6 +117,7 @@ Singleton {
             return root.openPanel(name) ? "ok" : "unknown panel"
         }
         function close(): string { root.closePanel(); return "ok" }
+        function workspace(id: int): string { Hypr.focus(id); return "ok" }
         function freeze(): string { root.freeze(); return "ok" }
         function thaw(): string { root.thaw(); return "ok" }
         function back(): string { root.back(); return root.panel === "" ? "closed" : root.panel }
