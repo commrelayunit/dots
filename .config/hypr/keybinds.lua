@@ -80,6 +80,9 @@ add { group = "Screenshots", keys = "SHIFT + Print",     exec = S .. "screenshot
 add { group = "Session", keys = "SUPER + L",           exec = apps.lock, desc = "Lock screen (hyprlock)" }
 add { group = "Session", keys = "SUPER + CTRL + R",    dsp = function() return hl.dsp.reload_config() end, desc = "Reload Hyprland config" }
 add { group = "Session", keys = "SUPER + CTRL + Q",    exec = S .. "island.sh restart", desc = "Restart Quickshell island" }
+-- Quickshell IPC (named handler "island"); harmless no-op if the island is not running.
+add { group = "Session", keys = "SUPER + ALT + I",     exec = "qs -c kessel ipc call island toggle", desc = "Show / hide the island" }
+add { group = "Session", keys = "SUPER + ALT + D",     exec = "qs -c kessel ipc call island toggleExpanded", desc = "Island: toggle long date" }
 add { group = "Session", keys = "SUPER + SHIFT + M",   dsp = function() return hl.dsp.exit() end, desc = "Exit Hyprland" }
 
 -- Media / hardware keys (work while locked) ------------------------------------

@@ -7,7 +7,7 @@ cfg=kessel
 have() { command -v qs >/dev/null 2>&1 && [[ -f "$HOME/.config/quickshell/$cfg/shell.qml" ]]; }
 case "${1:-start}" in
     start)   have || exit 0; qs -n -c "$cfg" -d >/dev/null 2>&1 ;;
-    stop)    qs kill -c "$cfg" >/dev/null 2>&1 || pkill -f "qs -c $cfg" ;;
+    stop)    qs kill -c "$cfg" >/dev/null 2>&1 || true ;;   # never pkill -f: too broad
     restart) "$0" stop; sleep 0.3; "$0" start ;;
     status)  qs list --all 2>/dev/null ;;
     *)       echo "usage: $0 start|stop|restart|status" >&2; exit 2 ;;
