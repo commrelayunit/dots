@@ -1,5 +1,7 @@
 # AI chat panel (optional)
 
+> Tracked as [velitchko/dots#2](https://github.com/velitchko/dots/issues/2).
+
 **Type:** feature · **Priority:** maybe later
 
 An optional assistant panel like end-4's left sidebar: ask a question from the launcher (e.g. `?? how do I…`) or a dedicated key, with streamed answers in the island.

@@ -1,5 +1,7 @@
 # Settings panel in the island
 
+> Tracked as [velitchko/dots#1](https://github.com/velitchko/dots/issues/1).
+
 **Type:** feature · **Priority:** later
 
 A Settings page inside the island (like Panacea / Impasto / Brain_Shell) so everyday preferences don't need editing files:
