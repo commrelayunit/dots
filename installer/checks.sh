@@ -15,7 +15,7 @@ step_check() {
     _c "fuzzel available (launcher)"             "command -v fuzzel"
     _c "bash available (recovery shell)"         "command -v bash && grep -qx /usr/bin/bash /etc/shells"
     _c "fish listed in /etc/shells"              "grep -qx /usr/bin/fish /etc/shells"
-    _c "JetBrainsMono Nerd Font installed"       "fc-list | grep -qi 'JetBrainsMono Nerd Font'"
+    _c "JetBrainsMono Nerd Font installed"       "fc-match -f '%{family}' 'JetBrainsMono Nerd Font' | grep -q 'JetBrainsMono Nerd Font'"
     _c "no foot/rofi in the minimal profile"     "! grep -qxE '(foot|rofi|rofi-wayland)' <(read_manifest '$REPO/pkglist.txt')"
     _c "no flatpak/snap in manifests"            "! grep -qiE 'flatpak|snapd' '$REPO/pkglist.txt' '$REPO/pkglist-aur.txt'"
 
