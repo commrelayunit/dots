@@ -434,6 +434,14 @@ EOG
     if [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] && command -v hyprctl >/dev/null; then
         hyprctl reload >/dev/null 2>&1 || true                   # borders
     fi
+    # GTK apps that stay resident keep the colours they started with; OmniGlyph is
+    # a picker that lingers in the background, so close it — the next SUPER+. is fresh.
+    if pgrep -x omniglyph >/dev/null 2>&1; then
+        for p in $(pgrep -x omniglyph); do kill "$p" 2>/dev/null || true; done
+        for _ in $(seq 20); do pgrep -x omniglyph >/dev/null || break; sleep 0.1; done   # wait up to 2 s
+        for p in $(pgrep -x omniglyph 2>/dev/null); do kill -9 "$p" 2>/dev/null || true; done
+    fi
+
     # Quickshell island: reload its colours (no-op if it is not running).
     qs -c kessel ipc call island reloadTheme >/dev/null 2>&1 || true
     echo "theme: $mode · accent $A · $(basename "$wall")"

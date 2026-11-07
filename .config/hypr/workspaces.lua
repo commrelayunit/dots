@@ -27,6 +27,7 @@ hl.window_rule({
     name  = "omniglyph-float",
     match = { class = "(?i).*omniglyph.*" },
     float = true, center = true, pin = true,
+    opacity = "1.0 override 1.0 override",   -- fully opaque, even when unfocused
 })
 
 -- Blur behind the launcher and the Quickshell island.
