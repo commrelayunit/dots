@@ -444,7 +444,7 @@ EOG
     # ── OnlyOffice ──
     # 1. A custom "Kessel" UI theme (Settings → Theme → Kessel). It starts from
     #    OnlyOffice's own Night/White tokens (read from its CSS) and only swaps the
-    #    backgrounds for ours and the highlights for the wallpaper accent, so text,
+    #    backgrounds for our base (pitch black / eggshell) and the highlights for the wallpaper accent, so text,
     #    icons and the document canvas keep OnlyOffice's tested contrast.
     # 2. If a built-in theme is selected instead, pick one matching light/dark
     #    (keeping the user's choice when it already matches, e.g. Dark Contrast).
@@ -469,8 +469,10 @@ EOG
                 colors: ($base
                   + each("toolbar-header-"; $bg)
                   + each("highlight-toolbar-tab-underline-"; $p) + each("highlight-header-tab-underline-"; $p)
-                  + { "background-toolbar": $s1, "background-toolbar-additional": $s1,
-                      "background-normal": $s1, "background-pane": $s1, "background-pane-additional": $s2,
+                  + { "background-toolbar": $bg, "background-toolbar-additional": $bg,
+                      "background-normal": $bg, "background-pane": $bg, "background-pane-additional": $s1,
+                      "canvas-background": $bg, "canvas-ruler-background": $bg,
+                      "border-toolbar": $s2, "border-divider": $s2,
                       "background-primary-dialog-button": $p, "background-accent-button": $p,
                       "border-control-focus": $p, "border-preview-select": $p,
                       "text-link": $p, "text-link-hover": $p, "text-link-active": $p }) }' \
