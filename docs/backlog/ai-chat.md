@@ -1,6 +1,6 @@
 # AI chat panel (optional)
 
-> Tracked as [velitchko/dots#2](https://github.com/velitchko/dots/issues/2).
+> Tracked as issue #2 in this repo's tracker.
 
 **Type:** feature · **Priority:** maybe later
 

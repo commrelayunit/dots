@@ -1,6 +1,6 @@
 # Settings panel in the island
 
-> Tracked as [velitchko/dots#1](https://github.com/velitchko/dots/issues/1).
+> Tracked as issue #1 in this repo's tracker.
 
 **Type:** feature · **Priority:** later
 

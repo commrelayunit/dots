@@ -1,6 +1,8 @@
 # dots
 
-Arch Linux + **Hyprland** (Lua config) + **Quickshell** desktop, built around a morphing **dynamic island**, with colours that follow your wallpaper (matugen) on a pitch-black or eggshell base. Made on and for **Kessel** (a Proxmox VM) and laptops; any Arch install can use it. GPL-3.0-or-later.
+Arch Linux + **Hyprland** (Lua config) + **Quickshell** desktop, built around a morphing **dynamic island**, with colours that follow your wallpaper (matugen) on a pitch-black or eggshell base. GPL-3.0-or-later.
+
+> **Personal dotfiles. Use at your own risk.** This is the setup I run day to day, shared as-is. It is tuned to my habits and hardware, changes without notice, and comes with no support or guarantees. Read the scripts before running them, start with `--dry-run`, and keep a backup.
 
 - **Terminal:** kitty running fish + Starship (end-4-style prompt).
 - **Launchers:** the island launcher (`SUPER+R`: apps, calculator, URLs, offline translation) and fuzzel (`SUPER+SHIFT+Space`), which always works, even without Quickshell.
@@ -29,8 +31,8 @@ dots/
 ├── sddm-theme/kessel/             # login screen matching the lock screen
 ├── scripts/                       # = ~/Scripts: install · update · uninstall · backup · sddm-theme · gen-shortcuts
 ├── services/                      # future systemd units (never deployed automatically)
-├── docs/                          # SHORTCUTS.md (generated) · THEME.md · MIGRATION_PLAN.md (history)
-├── AGENTS.md · CONTRIBUTING.md · .github/   # contributor docs, issue/PR templates
+├── docs/                          # SHORTCUTS.md (generated) · THEME.md · DESIGN.md · backlog/
+├── AGENTS.md · CONTRIBUTING.md · INSPIRATIONS.md · .github/   # contributor docs, credits, issue/PR templates
 └── LICENSE                        # GPL-3.0-or-later
 ```
 
@@ -59,7 +61,7 @@ Two round buttons float beside it: **⚙ left** opens quick settings, and **🔔
 | `CTRL+ALT+Delete` | Session: lock · standby · log out · restart · shut down (destructive ones need a second press) |
 | `SUPER+ALT+T` | Timer + stopwatch |
 
-Hardware-dependent sections (battery, power profiles, brightness, Wi‑Fi, Bluetooth) appear only when the hardware and its service exist, so the same config runs on Kessel (VM) and on a laptop. **Notifications:** while the island runs, it is the notification server. dunst stays installed and D-Bus activates automatically whenever the island is stopped or has crashed.
+Hardware-dependent sections (battery, power profiles, brightness, Wi‑Fi, Bluetooth) appear only when the hardware and its service exist, so the same config runs on a desktop, a laptop or a VM. **Notifications:** while the island runs, it is the notification server. dunst stays installed and D-Bus activates automatically whenever the island is stopped or has crashed.
 
 ## Theme: light / dark from the wallpaper
 
@@ -77,9 +79,9 @@ Hardware-dependent sections (battery, power profiles, brightness, Wi‑Fi, Bluet
 - **Cursor**: Bibata-Modern-Classic, as in end-4 (AUR `bibata-cursor-theme-bin`, installed with `--with-aur`).
 - **Theme reach**: matugen colours flow into the island, Hyprland borders, kitty (16 colours), fish, Starship, fuzzel, Qt (qt6ct, Dolphin), KDE colour scheme, GTK 3/4 + libadwaita (`gtk.css`, e.g. OmniGlyph), btop, yazi, the lock screen and SDDM (on install).
 
-## Performance note (VMs)
+## Performance note (no GPU)
 
-Without a GPU render node (Kessel has none), `general.lua` turns off blur and shadows automatically, because Hyprland draws in software there. The island also keeps its surface a small strip while resting. Together these took Hyprland from ~110% to ~9% CPU on Kessel. Real hardware keeps blur and shadows.
+Without a GPU render node (typical for VMs), `general.lua` turns off blur and shadows automatically, because Hyprland draws in software there. The island also keeps its surface a small strip while resting. Together these cut Hyprland's CPU use from ~110% to ~9% in software rendering. Machines with a GPU keep blur and shadows.
 
 ## Displays
 
@@ -151,7 +153,7 @@ Each entry in `profiles/minimal.links` becomes a **symlink** from `~` into this 
 ## Update
 
 ```sh
-cd ~/dots && git pull                        # (the repo folder; Kessel uses ~/dot-files)
+cd ~/dots && git pull                        # wherever you cloned the repo
 ./install.sh --profile minimal --apply-config  # picks up new links/packages; idempotent
 hyprctl reload                               # Hyprland also auto-reloads on save
 scripts/gen-shortcuts.sh                     # after editing keybinds.lua
@@ -210,10 +212,10 @@ ss -ltnp | grep 5900        # must show 127.0.0.1:5900 only
 qs -c kessel ipc call island status
 ```
 
-Remote desktop: WayVNC listens **only** on `127.0.0.1:5900`. Reach it through an SSH tunnel:
+Remote desktop (optional): WayVNC listens **only** on `127.0.0.1:5900`. Reach it through an SSH tunnel:
 
 ```sh
-ssh -L 5900:127.0.0.1:5900 velitchko@kessel   # then point a VNC client at localhost:5900
+ssh -L 5900:127.0.0.1:5900 <user>@<host>   # then point a VNC client at localhost:5900
 ```
 
 ## Recovery
@@ -223,7 +225,7 @@ ssh -L 5900:127.0.0.1:5900 velitchko@kessel   # then point a VNC client at local
 | Quickshell broken or missing | Nothing else depends on it: every island bind falls back (fuzzel, cliphist) and dunst takes over notifications. `CTRL + SUPER + R` restarts it; `~/.config/hypr/scripts/island.sh stop` stops it (works over SSH too); set `ENABLE_ISLAND = false` in `exec.lua` to disable |
 | Hyprland module error | A red banner names the file. Other modules and the **rescue binds** (`SUPER+Return`, `SUPER+SHIFT+Return`, `SUPER+R`) still work. Fix the file; Hyprland reloads on save (or `CTRL+SHIFT+SUPER+R`) |
 | Keybinds gone entirely | SSH in and run `KESSEL_STRICT=1 Hyprland --verify-config -c ~/.config/hypr/hyprland.lua` to see the error |
-| Fish broken | `SUPER + SHIFT + Return` gives plain bash. Over SSH: `ssh -t kessel bash --norc`. Revert the login shell with `chsh -s /usr/bin/bash` |
+| Fish broken | `SUPER + SHIFT + Return` gives plain bash. Over SSH: `ssh -t <host> bash --norc`. Revert the login shell with `chsh -s /usr/bin/bash` |
 | Locked out of the lock screen | SSH in: `pkill -USR1 hyprlock` (unlocks) |
 
 ## Rollback
@@ -231,27 +233,16 @@ ssh -L 5900:127.0.0.1:5900 velitchko@kessel   # then point a VNC client at local
 ```sh
 ./install.sh --rollback --dry-run      # preview the latest rollback
 ./install.sh --rollback                # remove links, restore backed-up files + gsettings
-./install.sh --rollback 20261107-124529  # a specific deployment (e.g. the very first Hyprland swap)
+./install.sh --rollback 20260101-120000  # a specific deployment (timestamp from the list below)
 ls ~/.local/state/dot-files/backups/   # all backups
 hyprctl reload
 ```
 
-The original autogenerated `hyprland.lua` (before this repo existed) is in `~/.local/state/dot-files/backups/20261107-124529/.config/hypr/`.
+Your original configs (from before the first `--apply-config`) are in the oldest backup folder.
 
 ## Inspirations
 
-This setup stands on the shoulders of these projects. Thank you to their authors! They were used as **design inspiration**: no code or assets were copied (and the AGPL project was only ever looked at, never imported). Please check them out.
-
-| Project | What inspired us |
-| --- | --- |
-| [end-4/dots-hyprland](https://github.com/end-4/dots-hyprland) | The keybinding layout, the Fish + Starship "pill" prompt and `● ▶` symbol, the lock-screen design (including the Material shapes for password characters, adapted from the owner's own end-4 lock surface), the `SUPER+G` workspace idea, launcher calculator/translator, screen corners, Bibata cursor |
-| [EnsixD/Panacea](https://github.com/EnsixD/Panacea) | "One pill for everything": a single morphing island that opens into quick settings, launcher, clipboard, notifications, media and session pages |
-| [Devvvmn/ActivSpot](https://github.com/Devvvmn/ActivSpot) (based on [ilyamiro/nixos-configuration](https://github.com/ilyamiro/nixos-configuration)) | Context-aware island content: music with a visualizer, collapsed live activities, OSD and notification pop-ins |
-| [andreumassanet/impasto](https://github.com/andreumassanet/impasto) | Layered island state (panel > notification > OSD > glance > rest), privacy indicators, wallpaper-driven colours everywhere, the installer's structure |
-| [Brainitech/Brain_Shell](https://github.com/Brainitech/Brain_Shell) | Dashboard ideas: kanban board, metrics, quick sliders, timers (AGPL-3.0, so used as a visual reference only) |
-| [shantanubaddar/hyprwave](https://github.com/shantanubaddar/hyprwave) | Music control bar that turns into a visualizer: the island's Music perspective |
-
-**Built with**: [Hyprland](https://hypr.land) · [Quickshell](https://quickshell.org) · [matugen](https://github.com/InioX/matugen) · [cava](https://github.com/karlstav/cava) · [Bergamot / translateLocally](https://github.com/XapaJIaMnu/translateLocally) ([browser.mt](https://browser.mt)) · [OmniGlyph](https://github.com/pshycodr/omniglyph) · [Bibata cursor](https://github.com/ful1e5/Bibata_Cursor) · [JetBrains Mono](https://www.jetbrains.com/lp/mono/) + [Nerd Fonts](https://www.nerdfonts.com) · weather from [wttr.in](https://wttr.in) and [Open-Meteo](https://open-meteo.com).
+Built on ideas from end-4/dots-hyprland, Panacea, ActivSpot, impasto, Brain_Shell, hyprwave and more. The full list, with links and what each one inspired, is in [`INSPIRATIONS.md`](INSPIRATIONS.md).
 
 ## Contributing
 
@@ -259,4 +250,4 @@ Bug reports and pull requests: see [`CONTRIBUTING.md`](CONTRIBUTING.md). Agents 
 
 ## Licensing
 
-GPL-3.0-or-later (see `LICENSE`). The reference projects (Panacea, Brain_Shell, ActivSpot, Impasto, end-4/dots-hyprland) were used as **inspiration only**, and no code or assets were copied from them. OmniGlyph (GPL-3.0-only) is an external AUR dependency and is not vendored.
+GPL-3.0-or-later (see `LICENSE`). The projects in [`INSPIRATIONS.md`](INSPIRATIONS.md) were used as **inspiration only**, and no code or assets were copied from them. OmniGlyph (GPL-3.0-only) is an external AUR dependency and is not vendored.

@@ -4,7 +4,7 @@ Guidance for AI coding agents (and humans new to the repo). Read it before chang
 
 ## What this repo is
 
-Personal Arch Linux + **Hyprland (Lua config, 0.57+)** + **Quickshell** desktop for the machine "Kessel" (a VM) and laptops. Everything in `~` is a **symlink into this repo**, created by `install.sh`. Editing `~/.config/...` edits the repo. License: GPL-3.0-or-later.
+Personal Arch Linux + **Hyprland (Lua config, 0.57+)** + **Quickshell** desktop (personal dotfiles; "kessel" is just the project's internal name). Everything in `~` is a **symlink into this repo**, created by `install.sh`. Editing `~/.config/...` edits the repo. License: GPL-3.0-or-later.
 
 ## Map
 
@@ -22,17 +22,18 @@ Personal Arch Linux + **Hyprland (Lua config, 0.57+)** + **Quickshell** desktop 
 | `sddm-theme/kessel/` | Qt6 SDDM theme (installed by `scripts/sddm-theme.sh`, needs sudo) |
 | `scripts/` | `~/Scripts`: install/update/uninstall/backup, `gen-shortcuts.sh`, `sddm-theme.sh` |
 | `services/` | **Future** systemd units. Nothing here is deployed or enabled |
-| `docs/` | `MIGRATION_PLAN.md` (history + decisions), `SHORTCUTS.md` (generated), `THEME.md` |
+| `docs/` | `DESIGN.md` (decisions + why), `SHORTCUTS.md` (generated), `THEME.md`, `backlog/` |
+| `INSPIRATIONS.md` | Credited projects (inspiration only, no code copied) |
 
 ## Ground rules
 
 1. **Never `git push`.** Commit locally in small, verified steps; end commit messages with your attribution trailer if you're an agent.
-2. **Never break access.** Don't touch SSH, firewall, networking, WayVNC's `127.0.0.1:5900` binding, or the login shell (only `install.sh --set-shell` changes it, on request).
+2. **Never break access.** Don't touch SSH, firewall, networking, the loopback-only WayVNC binding (`127.0.0.1:5900`), or the login shell (only `install.sh --set-shell` changes it, on request).
 3. **No services.** The installer never enables system/user services. Anything in `services/` is a future, explicit opt-in.
 4. **Back up before replacing.** Use the installer's link mechanism (it moves old files to `~/.local/state/dot-files/backups/<ts>/` and records a rollback manifest). Don't `cp`/`rm` over live config by hand.
 5. **No secrets** in the repo, logs or output.
 6. **Official repos first.** AUR only in `pkglist-aur.txt`. No Flatpak/Snap. If a package has an undeclared runtime dependency, add it to `pkglist.txt` with a comment (example: `gtk4-layer-shell` for OmniGlyph).
-7. **Licensing:** reference projects (end-4, Panacea, ActivSpot, Impasto, Brain_Shell) are inspiration only. Don't copy code; Brain_Shell is AGPL and must never be imported.
+7. **Licensing:** the projects in `INSPIRATIONS.md` are inspiration only. Don't copy code; Brain_Shell is AGPL and must never be imported.
 8. **Don't edit generated files.** They live in `~/.local/state/kessel/theme/`, `~/.config/{btop,yazi,qt6ct}`, `~/.config/gtk-{3,4}.0/gtk.css`, `kdeglobals`. Change `theme.sh` instead.
 
 ## How to validate (always, before committing)
@@ -96,4 +97,4 @@ KESSEL_LOCK_PREVIEW=1 qs -n -c kessel-lock -d     # lock screen WITHOUT locking;
 
 ## Where to look when something breaks
 
-`hyprctl configerrors` · `qs log -c kessel` · `~/.cache/quickshell/crashes/` · `journalctl --user -b` · `./install.sh --check` · `docs/MIGRATION_PLAN.md` (why things are the way they are).
+`hyprctl configerrors` · `qs log -c kessel` · `~/.cache/quickshell/crashes/` · `journalctl --user -b` · `./install.sh --check` · `docs/DESIGN.md` (why things are the way they are).
