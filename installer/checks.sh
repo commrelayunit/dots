@@ -33,6 +33,6 @@ step_check() {
     else
         info "not inside Hyprland — live checks skipped"
     fi
-    _w "omniglyph installed (optional AUR)" "command -v omniglyph"
+    _w "omniglyph installed (AUR)" "command -v omniglyph"
     return $failed
 }
