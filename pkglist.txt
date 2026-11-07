@@ -90,6 +90,7 @@ unzip
 imagemagick
 ghostscript
 zathura
+tesseract-data-eng      # mupdf → tesseract needs one language pack; naming it avoids a 128-choice prompt
 zathura-pdf-mupdf
 shellcheck
 shfmt
