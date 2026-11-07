@@ -21,7 +21,8 @@ Singleton {
     readonly property bool swRunning: swStart > 0
     readonly property int swMs: swAccum + (swRunning ? tick.now - swStart : 0)
 
-    function startCountdown(minutes) { cdTotal = minutes * 60; cdPausedLeft = 0; cdEnd = Date.now() + cdTotal * 1000 }
+    function startCountdown(minutes) { startSeconds(minutes * 60) }
+    function startSeconds(sec) { cdTotal = sec; cdPausedLeft = 0; cdEnd = Date.now() + cdTotal * 1000 }
     function pauseCountdown() { if (cdRunning) { cdPausedLeft = cdLeft; cdEnd = 0 } else if (cdPausedLeft > 0) { cdEnd = Date.now() + cdPausedLeft * 1000; cdPausedLeft = 0 } }
     function cancelCountdown() { cdEnd = 0; cdPausedLeft = 0; cdTotal = 0 }
     function swToggle() { if (swRunning) { swAccum += Date.now() - swStart; swStart = 0 } else swStart = Date.now() }
@@ -30,7 +31,7 @@ Singleton {
     onCdLeftChanged: {
         if (cdRunning && cdLeft === 0) {
             cdEnd = 0
-            Quickshell.execDetached(["notify-send", "-u", "critical", "-a", "Timer", "Time's up", Time.hms(cdTotal) + " timer finished"])
+            Alarm.ring(Time.hms(cdTotal) + " timer")
         }
     }
     Timer { id: tick; property real now: Date.now(); interval: 100; repeat: true; running: root.swRunning; onTriggered: now = Date.now() }

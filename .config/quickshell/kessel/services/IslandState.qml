@@ -33,7 +33,8 @@ Singleton {
 
     readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer", "wallpaper", "board"]
 
-    readonly property string layer: panel !== "" ? "panel"
+    readonly property string layer: Alarm.ringing ? "alarm"
+        : panel !== "" ? "panel"
         : Notifs.popup !== null ? "notification"
         : osdActive ? "osd"
         : summary ? "summary"
@@ -86,6 +87,8 @@ Singleton {
         // Rotate perspectives without a scroll wheel: step = 1 / -1
         function perspective(step: int): string { Perspectives.rotate(step); return Perspectives.current }
         function pill(): string { return String(Math.round(root.pillWidth * 10) / 10) }
+        function timer(seconds: int): string { Timers.startSeconds(seconds); return "ok" }
+        function dismissAlarm(): string { Alarm.dismiss(); return "ok" }
         function glance(on: bool): string { root.summary = on; return "ok" }
         function stayAwake(on: bool): string { Session.inhibitIdle = on; return "ok" }
         function reloadTheme(): string { Theme.reload(); return "ok" }

@@ -291,7 +291,12 @@ PanelBase {
                             Drag.active: cma.drag.active
                             Drag.hotSpot.x: width / 2
                             Drag.hotSpot.y: height / 2
-                            z: Drag.active ? 10 : 0
+                            // while dragging, float above every column (the lists clip their children)
+                            states: State {
+                                when: cma.drag.active
+                                ParentChange { target: card; parent: dragLayer }
+                                PropertyChanges { target: card; z: 100; scale: 1.03; opacity: 0.95 }
+                            }
 
                             Text {
                                 id: cardText
@@ -331,10 +336,7 @@ PanelBase {
                                 drag.target: card
                                 drag.axis: Drag.XAndYAxis
                                 onPressed: { board.dragFrom = colRect.colId; board.dragIndex = card.index }
-                                onReleased: {
-                                    if (drag.active) card.Drag.drop()
-                                    card.x = 0; card.y = card.y   // ListView re-lays out after the model changes
-                                }
+                                onReleased: { if (drag.active) card.Drag.drop() }
                                 onClicked: { card.editing = true; editInput.forceActiveFocus(); editInput.selectAll() }
                             }
                             // hover actions: ◀ ▶ ×
@@ -373,6 +375,9 @@ PanelBase {
                 }
             }
         }
+        // dragged cards are reparented here so they render above all columns
+        Item { id: dragLayer; anchors.fill: parent; z: 100 }
     }
+
     property var addFieldRef: null
 }

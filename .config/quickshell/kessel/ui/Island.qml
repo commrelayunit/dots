@@ -25,7 +25,7 @@ PanelWindow {
     // whole surface every frame — expensive without a GPU). Grow at once when
     // something tall opens; shrink only after the closing spring has settled.
     readonly property real tallHeight: Math.min(screen ? screen.height - 40 : 700, 700)
-    readonly property bool needsTall: layer === "panel" || layer === "notification" || layer === "summary"
+    readonly property bool needsTall: layer === "panel" || layer === "notification" || layer === "summary" || layer === "alarm"
     property bool tall: false
     onNeedsTallChanged: { if (needsTall) { shrinkTimer.stop(); tall = true } else shrinkTimer.restart() }
     Timer { id: shrinkTimer; interval: 900; onTriggered: win.tall = win.needsTall }
@@ -62,7 +62,8 @@ PanelWindow {
     onPanelOpenChanged: { armTimer.armed = false; if (panelOpen) armTimer.restart() }
 
     // The view that currently defines the pill's size.
-    readonly property Item current: panelOpen ? panelLoader
+    readonly property Item current: layer === "alarm" ? alarmView
+        : panelOpen ? panelLoader
         : layer === "notification" ? notifView
         : layer === "osd" ? osdView
         : layer === "summary" ? summaryView
@@ -135,8 +136,32 @@ PanelWindow {
         height: Math.max(Theme.islandHeight, win.current.implicitHeight)
         radius: win.layer === "rest" || win.layer === "osd" ? height / 2 : Theme.radiusPanel
         color: Theme.island
-        border.width: 1
-        border.color: Theme.a(Theme.text, hover.hovered || win.panelOpen ? 0.12 : 0.06)
+        border.width: win.layer === "alarm" ? 2 : 1
+        border.color: win.layer === "alarm" ? Theme.a(Theme.red, alarmPulse.v) : Theme.a(Theme.text, hover.hovered || win.panelOpen ? 0.12 : 0.06)
+        Item {
+            id: alarmPulse
+            visible: false
+            property real v: 1
+            SequentialAnimation on v {
+                running: win.layer === "alarm"
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.35; duration: 450; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 1; duration: 450; easing.type: Easing.InOutSine }
+            }
+        }
+        // buzz: a short horizontal shake every ~1.2 s while the alarm rings
+        transform: Translate { id: buzz; x: 0 }
+        SequentialAnimation {
+            running: win.layer === "alarm"
+            loops: Animation.Infinite
+            onStopped: buzz.x = 0
+            NumberAnimation { target: buzz; property: "x"; to: -7; duration: 45 }
+            NumberAnimation { target: buzz; property: "x"; to: 7; duration: 70 }
+            NumberAnimation { target: buzz; property: "x"; to: -5; duration: 60 }
+            NumberAnimation { target: buzz; property: "x"; to: 5; duration: 60 }
+            NumberAnimation { target: buzz; property: "x"; to: 0; duration: 45 }
+            PauseAnimation { duration: 950 }
+        }
         clip: true
         onWidthChanged: IslandState.pillWidth = width
 
@@ -152,6 +177,7 @@ PanelWindow {
         RestView    { id: restView;    shown: win.current === restView }
         SummaryView { id: summaryView; shown: win.current === summaryView; minWidth: restView.implicitWidth }
         OsdView     { id: osdView;     shown: win.current === osdView }
+        AlarmView { id: alarmView; shown: win.current === alarmView }
         NotificationView { id: notifView; shown: win.current === notifView; minWidth: restView.implicitWidth }
 
         Loader {
