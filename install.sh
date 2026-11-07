@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Kessel dot-files installer — idempotent, explicit, reversible.
+# Kessel dots installer — idempotent, explicit, reversible.
 #
 #   ./install.sh --dry-run --profile minimal --with-aur --apply-config   # preview everything
 #   ./install.sh --profile minimal                                       # official packages only

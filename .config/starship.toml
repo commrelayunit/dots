@@ -53,6 +53,7 @@ format = "[](fg:primary_container)[󰉋 → $path]($style)[$read_only](fg:err
 "Projects" = "󰝰 "
 "Notes" = "󰠮 "
 "dot-files" = "󰒓 dot-files"
+"dots" = "󰒓 dots"
 
 [git_branch]
 symbol = "󰘬"

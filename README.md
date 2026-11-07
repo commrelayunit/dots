@@ -1,4 +1,4 @@
-# dot-files
+# dots
 
 Arch Linux + **Hyprland** (Lua config) + **Quickshell** desktop, built around a morphing **dynamic island**, with colours that follow your wallpaper (matugen) on a pitch-black or eggshell base. Made on and for **Kessel** (a Proxmox VM) and laptops; any Arch install can use it. GPL-3.0-or-later.
 
@@ -10,7 +10,7 @@ Arch Linux + **Hyprland** (Lua config) + **Quickshell** desktop, built around a 
 New here? Start with **Install** below. Want to change something? Read [`AGENTS.md`](AGENTS.md) (repo map and pitfalls) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ```
-dot-files/
+dots/
 ├── install.sh · installer/        # idempotent installer (packages, config links, theme, checks, rollback)
 ├── profiles/minimal.links         # repo path → ~ path for every linked config
 ├── pkglist.txt                    # official packages
@@ -91,7 +91,7 @@ A new Arch install with Hyprland and a display manager (SDDM) is all that's assu
 
 ```sh
 sudo pacman -S --needed git
-git clone <repo> ~/dot-files && cd ~/dot-files
+git clone <repo> ~/dots && cd ~/dots          # any folder works; links point at wherever you cloned it
 
 ./install.sh --dry-run --with-aur --with-translate --apply-config   # 1. preview everything (changes nothing)
 ./install.sh --with-aur --apply-config                             # 2. packages (pacman + yay, bootstraps yay) + config links + theme
@@ -151,7 +151,7 @@ Each entry in `profiles/minimal.links` becomes a **symlink** from `~` into this 
 ## Update
 
 ```sh
-cd ~/dot-files && git pull                   # or edit in place
+cd ~/dots && git pull                        # (the repo folder; Kessel uses ~/dot-files)
 ./install.sh --profile minimal --apply-config  # picks up new links/packages; idempotent
 hyprctl reload                               # Hyprland also auto-reloads on save
 scripts/gen-shortcuts.sh                     # after editing keybinds.lua
@@ -160,7 +160,7 @@ scripts/gen-shortcuts.sh                     # after editing keybinds.lua
 Before deploying any Hyprland change, validate it offline:
 
 ```sh
-KESSEL_STRICT=1 Hyprland --verify-config -c ~/dot-files/.config/hypr/hyprland.lua
+KESSEL_STRICT=1 Hyprland --verify-config -c ~/.config/hypr/hyprland.lua
 ```
 
 ## Keybindings
