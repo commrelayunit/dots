@@ -24,7 +24,8 @@
 | `SUPER + Tab` | Overview: workspaces + window previews |
 | `SUPER + A` | Quick settings (Wi-Fi, BT, audio, brightness, power) |
 | `SUPER + N` | Notifications + calendar + weather |
-| `SUPER + G` | Notes |
+| `SUPER + G` | Workspace: Markdown notes (~/Notes) |
+| `SUPER + SHIFT + G` | Workspace: kanban board |
 | `SUPER + ALT + T` | Timer / stopwatch |
 | `CTRL + ALT + Delete` | Session menu (lock, standby, logout, restart, shutdown) |
 | `CTRL + SUPER + T` | Wallpaper & theme picker |

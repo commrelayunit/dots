@@ -31,7 +31,7 @@ Singleton {
     property string osdLabel: ""
     property real osdValue: 0
 
-    readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer", "wallpaper"]
+    readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer", "wallpaper", "board"]
 
     readonly property string layer: panel !== "" ? "panel"
         : Notifs.popup !== null ? "notification"

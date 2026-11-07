@@ -83,6 +83,7 @@ Singleton {
     readonly property string thermo:     g(0xF050F)
     readonly property string drop:       g(0xF058E)
     readonly property string wind:       g(0xF059D)
+    readonly property string place:      g(0xF034E)
 
     // weather
     readonly property string sunny:      g(0xF0599)

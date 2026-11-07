@@ -57,7 +57,8 @@ add { group = "Island", keys = "SUPER + V",         exec = island("open clipboar
 add { group = "Island", keys = "SUPER + Tab",       exec = island("open overview"), desc = "Overview: workspaces + window previews" }
 add { group = "Island", keys = "SUPER + A",         exec = island("open control"), desc = "Quick settings (Wi-Fi, BT, audio, brightness, power)" }
 add { group = "Island", keys = "SUPER + N",         exec = island("open notifications"), desc = "Notifications + calendar + weather" }
-add { group = "Island", keys = "SUPER + G",         exec = island("open notes"), desc = "Notes" }
+add { group = "Island", keys = "SUPER + G",         exec = island("open notes"), desc = "Workspace: Markdown notes (~/Notes)" }
+add { group = "Island", keys = "SUPER + SHIFT + G", exec = island("open board"), desc = "Workspace: kanban board" }
 add { group = "Island", keys = "SUPER + M",         exec = island("open control"), desc = "Media controls (quick settings)", hidden = true }
 add { group = "Island", keys = "SUPER + ALT + T",   exec = island("open timer"), desc = "Timer / stopwatch" }
 add { group = "Island", keys = "CTRL + ALT + Delete", exec = island("open power"), desc = "Session menu (lock, standby, logout, restart, shutdown)" }

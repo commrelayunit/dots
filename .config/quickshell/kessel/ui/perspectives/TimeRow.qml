@@ -27,6 +27,8 @@ Item {
             Label { text: Weather.temp; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
             Label { text: Weather.desc; color: Theme.subtext; size: Theme.fontSmall + 0.5; anchors.verticalCenter: parent.verticalCenter }
         }
+        // where the weather is for (detected from your IP unless Config.weatherLocation is set)
+        Chip { visible: Weather.ok && Weather.area !== ""; icon: Icons.place; text: Weather.area; anchors.verticalCenter: parent.verticalCenter }
         // next three days (skip today, it's the "now" above)
         Row {
             visible: Weather.ok && Weather.forecast.length > 1

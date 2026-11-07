@@ -172,6 +172,7 @@ PanelWindow {
                 case "control":   return "panels/ControlCenter.qml"
                 case "notifications": return "panels/NotificationsPanel.qml"
                 case "notes":     return "panels/NotesPanel.qml"
+                case "board":     return "panels/NotesPanel.qml"
                 case "overview":  return "panels/Overview.qml"
                 case "power":     return "panels/PowerPanel.qml"
                 case "timer":     return "panels/TimerPanel.qml"

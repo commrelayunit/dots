@@ -27,8 +27,8 @@ Singleton {
     readonly property color yellow:  c.yellow ?? "#eed49f"
     readonly property color purple:  c.purple ?? "#c6a0f6"
 
-    // The island is the mode's base colour, nearly opaque.
-    readonly property color island:  a(base, dark ? 0.97 : 0.96)
+    // The island is the mode's base colour (pitch black / eggshell), opaque.
+    readonly property color island:  base     // fully opaque: even 3% lets bright text behind ghost through
     readonly property color card:    a(text, dark ? 0.06 : 0.06)
     readonly property color cardHi:  a(text, dark ? 0.11 : 0.10)
 
