@@ -115,7 +115,9 @@ PanelBase {
                     wrapMode: d.modelData.kind === "tr" ? Text.Wrap : Text.NoWrap
                     maximumLineCount: d.modelData.kind === "tr" ? 3 : 1
                     elide: Text.ElideRight
-                    text: d.modelData.kind === "tr" ? (Translator.state === "ready" ? (d.modelData.value || "Type a sentence…") : "Offline translation isn't set up yet")
+                    text: d.modelData.kind === "tr" ? (Translator.state === "ready" ? (d.modelData.value || "Type a sentence…")
+                                                      : Translator.state === "no-avx2" ? "This CPU can't run the translator (no AVX2)"
+                                                      : "Offline translation isn't set up yet")
                         : d.modelData.kind === "calc" ? "= " + d.modelData.value
                         : d.modelData.kind === "url" ? d.modelData.value
                         : d.modelData.app.name
@@ -124,7 +126,9 @@ PanelBase {
                 }
                 Label {
                     width: parent.width
-                    text: d.modelData.kind === "tr" ? (Translator.state === "ready" ? d.modelData.label + " · offline · Enter to copy" : "Run: ~/.config/hypr/scripts/translate.sh setup")
+                    text: d.modelData.kind === "tr" ? (Translator.state === "ready" ? d.modelData.label + " · offline · Enter to copy"
+                                                      : Translator.state === "no-avx2" ? "On a VM: set its CPU type to 'host'"
+                                                      : "Run: ~/.config/hypr/scripts/translate.sh setup")
                         : d.modelData.kind === "calc" ? "Enter to copy" + (Calc.qalcAvailable ? " · qalc" : "")
                         : d.modelData.kind === "url" ? "Enter to open in your browser"
                         : (d.modelData.app.comment || d.modelData.app.genericName || "")

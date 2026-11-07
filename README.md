@@ -115,6 +115,8 @@ After that, `~/Scripts/update.sh` keeps everything current.
 
 ### Offline translation (launcher)
 
+Needs a CPU with **AVX2**. Any recent laptop or desktop has it; on a VM, set the CPU type to `host`.
+
 Type in the launcher (`SUPER+R`): `>de good morning` (EN→DE), `>bg …` (EN→BG), `>en …` (→EN, Cyrillic is detected as Bulgarian), or an explicit pair like `>de-bg Hallo`. Enter copies the result. It runs **entirely locally** using Bergamot, the same engine and models as translateLocally and Firefox's offline translation. A private Python 3.10 managed by `uv` holds it, so nothing needs compiling.
 
 ```sh

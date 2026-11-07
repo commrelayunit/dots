@@ -10,7 +10,7 @@
 #   translate.sh installed        downloaded models
 #   translate.sh remove <code>    delete a downloaded model
 #   translate.sh run <from> <to>  translate stdin → stdout (pivots through English)
-#   translate.sh status           "ready" / "no-runtime" / "no-models" (for the island)
+#   translate.sh status           "ready" / "no-avx2" / "no-runtime" / "no-models" (for the island)
 #
 # Pairs are ISO-639-1 codes (en, de, bg, fr…). browsermt models are preferred
 # (higher quality), "base" over "tiny"; OPUS-MT (3-letter codes) fills the gaps.
@@ -23,6 +23,7 @@ CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/kessel/translate"
 BMT_URL="https://translatelocally.com/models.json"
 OPUS_URL="https://object.pouta.csc.fi/OPUS-MT-models/app/models.json"
 DEFAULT_PAIRS=(en-de de-en en-bg bg-en)
+STAMP="$ROOT/.works"          # written once the engine has actually run on this CPU
 mkdir -p "$CACHE"
 
 die() { echo "translate: $*" >&2; exit 1; }
@@ -120,13 +121,21 @@ case "${1:-}" in
     setup)
         shift
         command -v uv >/dev/null || die "uv is not installed (sudo pacman -S uv)"
+        # The prebuilt Bergamot engine needs AVX2. Generic VM CPU models (e.g. Proxmox's
+        # default "kvm64"/"QEMU Virtual CPU") don't expose it: set the VM CPU type to "host".
+        if ! grep -qw avx2 /proc/cpuinfo; then
+            die "this CPU has no AVX2, which the translation engine needs.
+  On a VM: set the CPU type to 'host' (Proxmox: VM → Hardware → Processors → Type), then cold-boot it.
+  Real laptops/desktops from the last decade have AVX2."
+        fi
         mkdir -p "$ROOT"
         if [[ ! -x $BIN ]]; then
             echo "• private Python 3.10 + bergamot → $VENV"
             uv venv --quiet --python 3.10 "$VENV"
             VIRTUAL_ENV="$VENV" uv pip install --quiet bergamot
         fi
-        "$BIN" --help >/dev/null 2>&1 || die "bergamot did not install correctly"
+        "$BIN" --help >/dev/null 2>&1 || { rm -f "$STAMP"; die "bergamot did not start (see above)"; }
+        touch "$STAMP"
         echo "✓ runtime ready"
         (( $# )) && add "$@" || add "${DEFAULT_PAIRS[@]}"
         ;;
@@ -146,7 +155,8 @@ case "${1:-}" in
         done ;;
     run)       shift; (( $# == 2 )) || die "usage: translate.sh run <from> <to>  (text on stdin)"; run_translate "$1" "$2" ;;
     status)
-        if [[ ! -x $BIN ]]; then echo no-runtime
+        if ! grep -qw avx2 /proc/cpuinfo; then echo no-avx2
+        elif [[ ! -x $BIN || ! -e $STAMP ]]; then echo no-runtime
         elif [[ -z "$(installed_codes)" ]]; then echo no-models
         else echo ready; fi ;;
     *) sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
