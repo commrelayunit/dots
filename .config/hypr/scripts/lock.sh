@@ -5,10 +5,11 @@
 # lock within 3 s, hyprlock is used instead. Never leaves the session unlocked
 # by accident, never stacks two lockers.
 #
-# Recovery from SSH if a locker ever wedges (session stays locked, red screen):
-#   qs kill -c kessel-lock
-#   hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()'          # (tested) — or start hyprlock:
-#   hyprctl dispatch 'hl.dsp.exec_cmd("hyprlock")'
+# Recovery from SSH if a locker ever wedges (tested):
+#   for p in $(pgrep -x quickshell); do tr '\0' ' ' </proc/$p/cmdline | grep -q kessel-lock && kill -9 $p; done
+#   hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()'
+# (kill -9 matters: a crashing locker is restarted by Quickshell and would lock again;
+#  Hyprland refuses to clear the lock while a live locker holds it.)
 set -u
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then

@@ -217,8 +217,8 @@ MouseArea {
                 verticalAlignment: TextInput.AlignVCenter
                 echoMode: TextInput.Password
                 inputMethodHints: Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
-                enabled: !root.context.unlockInProgress
-                color: "transparent"                 // dots are drawn below
+                enabled: !root.context.unlockInProgress && !root.context.exiting
+                color: "transparent"                 // shapes are drawn below
                 selectionColor: "transparent"
                 selectedTextColor: "transparent"
                 cursorVisible: false
@@ -245,19 +245,13 @@ MouseArea {
                 font.family: Style.mono
                 font.pixelSize: 15
             }
-            // password dots
+            // password characters as Material shapes (end-4 style)
             Row {
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 6
+                spacing: 4
                 Repeater {
-                    model: Math.min(root.context.currentText.length, 24)
-                    Rectangle {
-                        width: 10; height: 10; radius: 5
-                        color: Style.accent
-                        scale: 0
-                        Component.onCompleted: scale = 1
-                        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
-                    }
+                    model: Math.min(root.context.currentText.length, 18)
+                    ShapeChar { required property int index; shapeIndex: index }
                 }
             }
             SequentialAnimation {

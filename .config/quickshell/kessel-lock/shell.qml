@@ -18,32 +18,40 @@ ShellRoot {
             if (action === LockContext.Action.Poweroff) { Quickshell.execDetached(["systemctl", "poweroff"]); return }
             if (action === LockContext.Action.Reboot)   { Quickshell.execDetached(["systemctl", "reboot"]); return }
             if (ctx.keepAwake) Quickshell.execDetached(["qs", "-c", "kessel", "ipc", "call", "island", "stayAwake", "true"])
-            if (ctx.preview) { Qt.quit(); return }
-            lock.locked = false
+            ctx.exiting = true          // drop focus first (see LockContext.exiting)
+            if (!shell.preview) lockLoader.item.locked = false
         }
+        onExitingChanged: if (exiting) quitTimer.start()
     }
 
-    // ── the real lock ────────────────────────────────────────────────────────
-    WlSessionLock {
-        id: lock
-        locked: !ctx.preview
-        onLockedChanged: if (!locked) quitTimer.start()   // let the unlock reach the compositor first
-        WlSessionLockSurface {
-            color: "black"
-            LockSurface { anchors.fill: parent; context: ctx }
+    // Preview is decided once, from the environment — never through a binding
+    // that could briefly read wrong and engage a real lock.
+    readonly property bool preview: Quickshell.env("KESSEL_LOCK_PREVIEW") === "1"
+
+    // ── the real lock (not even created in preview) ──────────────────────────
+    LazyLoader {
+        id: lockLoader
+        active: !shell.preview
+        WlSessionLock {
+            locked: true
+            WlSessionLockSurface {
+                color: "black"
+                LockSurface { anchors.fill: parent; context: ctx }
+            }
         }
     }
-    Timer { id: quitTimer; interval: 150; onTriggered: Qt.quit() }
+    // exit after focus has been dropped and the unlock has reached the compositor
+    Timer { id: quitTimer; interval: 250; onTriggered: Qt.quit() }
 
     // lock.sh asks whether the compositor confirmed the lock
     IpcHandler {
         target: "lockstate"
-        function secure(): string { return lock.secure ? "yes" : "no" }
+        function secure(): string { return lockLoader.item && lockLoader.item.secure ? "yes" : "no" }
     }
 
     // ── preview (no session lock) ────────────────────────────────────────────
     Variants {
-        model: ctx.preview ? Quickshell.screens : []
+        model: shell.preview ? Quickshell.screens : []
         PanelWindow {
             required property var modelData
             screen: modelData
@@ -56,7 +64,7 @@ ShellRoot {
             LockSurface {
                 anchors.fill: parent
                 context: ctx
-                Keys.onEscapePressed: Qt.quit()
+                Keys.onEscapePressed: ctx.exiting = true
             }
         }
     }

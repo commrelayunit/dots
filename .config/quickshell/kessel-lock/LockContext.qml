@@ -18,6 +18,10 @@ Scope {
     property bool failed: false
     property int targetAction: LockContext.Action.Unlock
     property bool keepAwake: false          // CTRL+Enter: unlock and keep the session awake
+    // Set just before exiting: text fields give up focus first, because Qt 6.12
+    // crashes tearing down a focused text input — and a crashed locker gets
+    // restarted by Quickshell, which would lock the session again.
+    property bool exiting: false
 
     signal unlocked(int action)
     signal shouldReFocus()
@@ -67,5 +71,7 @@ Scope {
             return JSON.stringify({ preview: root.preview, failed: root.failed, busy: root.unlockInProgress, typed: root.currentText.length })
         }
         function tryPassword(pw: string): string { root.currentText = pw; root.tryUnlock(false); return "started" }
+        function type(text: string): string { root.currentText = text; return "ok" }
+        function quit(): string { root.exiting = true; return "ok" }   // preview only (handler disabled otherwise)
     }
 }
