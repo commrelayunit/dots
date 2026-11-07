@@ -57,12 +57,37 @@ accents() {
     if [[ $mode == dark ]]; then echo "#8aadf4 #a6da95 #c6a0f6"; else echo "#3d6ad6 #4f8a3a #7e57c2"; fi
 }
 
+# Material roles for the mode, as "name=#hex" lines (empty if matugen is unavailable).
+roles() {
+    local wall=$1 mode=$2 json
+    command -v matugen >/dev/null 2>&1 && [[ -r $wall ]] || return 0
+    json="$CACHE/$(sha1sum "$wall" | cut -c1-16).json"
+    [[ -s $json ]] || return 0
+    jq -r --arg m "$mode" '
+        . as $doc
+        | def pick(r): ($doc.colors[r][$m].color // $doc.colors[r][$m] // empty);
+        ["primary","on_primary","primary_container","on_primary_container",
+         "secondary","on_secondary","secondary_container","on_secondary_container",
+         "tertiary","on_tertiary","tertiary_container","on_tertiary_container",
+         "error","on_error","error_container","on_error_container",
+         "outline","outline_variant","surface_variant","on_surface_variant"][]
+        | . as $r | pick($r) | select(type == "string") | "\($r)=\(.)"' "$json" 2>/dev/null
+}
+
+# mix A B t → A blended toward B by t (0..1); used to "harmonize" fixed hues with the accent
+mix() {
+    local a=${1#\#} b=${2#\#} t=$3
+    python3 -c "import sys;a,b,t=sys.argv[1:];t=float(t);print('#'+''.join('%02x'%round(int(a[i:i+2],16)*(1-t)+int(b[i:i+2],16)*t) for i in (0,2,4)))" "$a" "$b" "$t"
+}
+
 apply() {
     local mode wall
     mode="$(state_get mode)"; mode="${mode:-dark}"
     wall="$(state_get wallpaper)"; [[ -r $wall ]] || wall="$DEFAULT_WALL"
     read -r A A2 A3 <<<"$(accents "$wall" "$mode")"
     A=${A:-#8aadf4}; A2=${A2:-$A}; A3=${A3:-$A}
+    declare -A M=()
+    while IFS='=' read -r k v; do [[ -n $k ]] && M[$k]=$v; done < <(roles "$wall" "$mode")
 
     # Fixed bases. Dark = pitch black, light = eggshell.
     if [[ $mode == dark ]]; then
@@ -79,6 +104,18 @@ apply() {
         C0="#1d1b16"; C7="#d6cdb2"; C8="#6b6556"; C15="#ffffff"
         GTK_SCHEME="prefer-light"; GTK_THEME="Adwaita"
     fi
+
+    # Material roles with sensible fallbacks
+    local P=${M[primary]:-$A} ONP=${M[on_primary]:-$BG}
+    local PC=${M[primary_container]:-$SURFACE2} ONPC=${M[on_primary_container]:-$TEXT}
+    local S2=${M[secondary]:-$A2} SC=${M[secondary_container]:-$SURFACE2} ONSC=${M[on_secondary_container]:-$TEXT}
+    local T=${M[tertiary]:-$A3} TC=${M[tertiary_container]:-$SURFACE2} ONTC=${M[on_tertiary_container]:-$TEXT}
+    local ERR=${M[error]:-$RED} OUT=${M[outline]:-$MUTED} SV=${M[surface_variant]:-$OVERLAY} ONSV=${M[on_surface_variant]:-$SUBTEXT}
+    # terminal hues: blue/magenta/cyan from the scheme, red = error,
+    # green/yellow = fixed hues harmonized 25% toward the primary
+    local H_RED=$ERR H_GRN H_YEL
+    H_GRN="$(mix "$GREEN" "$P" 0.25)"; H_YEL="$(mix "$YELLOW" "$P" 0.25)"
+    RED=$ERR; GREEN=$H_GRN; YELLOW=$H_YEL; PURPLE=$T; CYAN=$S2
 
     jq -n --arg mode "$mode" --arg wallpaper "$wall" \
           --arg bg "$BG" --arg surface "$SURFACE" --arg surface2 "$SURFACE2" --arg overlay "$OVERLAY" \
@@ -101,17 +138,17 @@ inactive_border_color $OVERLAY
 color0  $C0
 color8  $C8
 color1  $RED
-color9  $RED
+color9  $( mix "$RED" "$C15" 0.25 )
 color2  $GREEN
 color10 $GREEN
 color3  $YELLOW
 color11 $YELLOW
-color4  $A
-color12 $A
-color5  $PURPLE
-color13 $A3
-color6  $CYAN
-color14 $A2
+color4  $P
+color12 $( [[ $mode == dark ]] && echo "$ONPC" || echo "$PC" )
+color5  $T
+color13 $( [[ $mode == dark ]] && echo "$ONTC" || echo "$TC" )
+color6  $S2
+color14 $( [[ $mode == dark ]] && echo "$ONSC" || echo "$SC" )
 color7  $C7
 color15 $C15
 EOF
@@ -208,6 +245,142 @@ EOF
         kwriteconfig6 --file "$qd/qt6ct.conf" --group Appearance --key style "$( [[ -d /usr/lib/qt6/plugins/styles ]] && ls /usr/lib/qt6/plugins/styles | grep -qi breeze && echo Breeze || echo Fusion )"
         kwriteconfig6 --file "$qd/qt6ct.conf" --group Fonts --key general '"JetBrainsMono Nerd Font,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"'
         kwriteconfig6 --file "$qd/qt6ct.conf" --group Fonts --key fixed '"JetBrainsMono Nerd Font,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"'
+    fi
+
+    # Starship: repo config + a generated [palettes.kessel] (fish points STARSHIP_CONFIG here)
+    local SREPO="$HOME/.config/starship.toml"
+    if [[ -r $SREPO ]]; then
+        { sed '/^\[palettes\.kessel\]/,$d' "$SREPO"
+          cat <<EOS
+[palettes.kessel]
+primary = "$P"
+on_primary = "$ONP"
+primary_container = "$PC"
+on_primary_container = "$ONPC"
+secondary_container = "$SC"
+on_secondary_container = "$ONSC"
+tertiary_container = "$TC"
+on_tertiary_container = "$ONTC"
+surface_variant = "$SV"
+on_surface_variant = "$ONSV"
+error = "$ERR"
+outline = "$OUT"
+EOS
+        } | write "$STATE/starship.toml"
+    fi
+
+    # fish: universal colour variables → running shells re-colour immediately
+    if command -v fish >/dev/null; then
+        fish -c "set -U fish_color_command ${P#\#}; set -U fish_color_param ${TEXT#\#}; set -U fish_color_quote ${T#\#}
+                 set -U fish_color_error ${ERR#\#}; set -U fish_color_comment ${OUT#\#}; set -U fish_color_autosuggestion ${OUT#\#}
+                 set -U fish_color_operator ${S2#\#}; set -U fish_color_escape ${T#\#}; set -U fish_color_redirection ${S2#\#} --bold
+                 set -U fish_color_end ${S2#\#}; set -U fish_color_valid_path --underline
+                 set -U fish_color_search_match --background=${SV#\#}; set -U fish_color_selection --background=${SV#\#}
+                 set -U fish_pager_color_prefix ${P#\#} --bold --underline; set -U fish_pager_color_description ${ONSV#\#}
+                 set -U fish_pager_color_progress ${ONP#\#} --background=${P#\#}" 2>/dev/null || true
+    fi
+
+    # btop: theme file + select it (btop rewrites its own conf; only our keys are touched)
+    local bd="${XDG_CONFIG_HOME:-$HOME/.config}/btop"; mkdir -p "$bd/themes"
+    write "$bd/themes/kessel.theme" <<EOB
+# generated by theme.sh ($mode) — do not edit
+theme[main_bg]="$BG"
+theme[main_fg]="$TEXT"
+theme[title]="$TEXT"
+theme[hi_fg]="$P"
+theme[selected_bg]="$PC"
+theme[selected_fg]="$ONPC"
+theme[inactive_fg]="$OUT"
+theme[graph_text]="$ONSV"
+theme[meter_bg]="$SV"
+theme[proc_misc]="$S2"
+theme[cpu_box]="$P"
+theme[mem_box]="$T"
+theme[net_box]="$S2"
+theme[proc_box]="$OUT"
+theme[div_line]="$SV"
+theme[temp_start]="$P"
+theme[temp_mid]="$T"
+theme[temp_end]="$ERR"
+theme[cpu_start]="$P"
+theme[cpu_mid]="$T"
+theme[cpu_end]="$ERR"
+theme[free_start]="$GREEN"
+theme[free_mid]="$S2"
+theme[free_end]="$P"
+theme[cached_start]="$S2"
+theme[cached_mid]="$P"
+theme[cached_end]="$T"
+theme[available_start]="$T"
+theme[available_mid]="$P"
+theme[available_end]="$S2"
+theme[used_start]="$P"
+theme[used_mid]="$T"
+theme[used_end]="$ERR"
+theme[download_start]="$S2"
+theme[download_mid]="$P"
+theme[download_end]="$T"
+theme[upload_start]="$T"
+theme[upload_mid]="$P"
+theme[upload_end]="$ERR"
+theme[process_start]="$P"
+theme[process_mid]="$T"
+theme[process_end]="$ERR"
+EOB
+    local bc="$bd/btop.conf"
+    if [[ -f $bc ]]; then
+        sed -i 's|^color_theme = .*|color_theme = "kessel"|; s|^theme_background = .*|theme_background = True|' "$bc"
+        grep -q '^color_theme' "$bc" || echo 'color_theme = "kessel"' >> "$bc"
+    else
+        printf 'color_theme = "kessel"\ntheme_background = True\n' > "$bc"
+    fi
+
+    # yazi: generated theme (left alone if you replaced it with your own)
+    local yd="${XDG_CONFIG_HOME:-$HOME/.config}/yazi"; mkdir -p "$yd"
+    if [[ ! -e $yd/theme.toml ]] || head -1 "$yd/theme.toml" | grep -q 'generated by theme.sh'; then
+        write "$yd/theme.toml" <<EOY
+# generated by theme.sh ($mode) — delete this line to keep your own edits
+[mgr]
+cwd = { fg = "$P" }
+hovered = { fg = "$ONPC", bg = "$PC" }
+preview_hovered = { underline = true }
+find_keyword = { fg = "$T", bold = true }
+find_position = { fg = "$S2" }
+marker_selected = { fg = "$P", bg = "$P" }
+marker_copied = { fg = "$GREEN", bg = "$GREEN" }
+marker_cut = { fg = "$ERR", bg = "$ERR" }
+tab_active = { fg = "$ONP", bg = "$P" }
+tab_inactive = { fg = "$ONSV", bg = "$SV" }
+border_style = { fg = "$SV" }
+
+[mode]
+normal_main = { fg = "$ONP", bg = "$P", bold = true }
+normal_alt = { fg = "$P", bg = "$SV" }
+select_main = { fg = "$ONTC", bg = "$TC", bold = true }
+select_alt = { fg = "$T", bg = "$SV" }
+unset_main = { fg = "$ONSC", bg = "$SC", bold = true }
+unset_alt = { fg = "$S2", bg = "$SV" }
+
+[status]
+perm_type = { fg = "$P" }
+perm_read = { fg = "$YELLOW" }
+perm_write = { fg = "$ERR" }
+perm_exec = { fg = "$GREEN" }
+perm_sep = { fg = "$OUT" }
+progress_label = { fg = "$TEXT", bold = true }
+progress_normal = { fg = "$P", bg = "$SV" }
+progress_error = { fg = "$ERR", bg = "$SV" }
+
+[filetype]
+rules = [
+  { mime = "image/*", fg = "$T" },
+  { mime = "{audio,video}/*", fg = "$YELLOW" },
+  { mime = "application/{zip,gzip,x-tar,x-bzip*,x-7z-compressed,x-xz,x-rar,zstd}", fg = "$ERR" },
+  { mime = "application/{pdf,doc,rtf}", fg = "$S2" },
+  { url = "*", is = "exec", fg = "$GREEN" },
+  { url = "*/", fg = "$P" },
+]
+EOY
     fi
 
     # ── reload consumers (each optional) ──

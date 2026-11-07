@@ -1,45 +1,47 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Starship — end-4/dots-hyprland *style* prompt, written from scratch:
-# rounded "pills" on line 1 (duration · user•host · directory · git), a bare
-# glyph on line 2, transient prompt in fish. Colours use the terminal palette
-# (white/black/bright-*), so the prompt follows the wallpaper theme that the
-# theme switcher writes into kitty.
+# rounded "pills" on line 1 (duration · user•host · directory · git) and the
+# end-4 symbol on line 2:  ● ▶  (success, primary)  ✕ ▶  (error / cancel).
+# Colours come from the "kessel" palette: scripts/theme.sh writes a copy of this
+# file with matugen's Material colours into ~/.local/state/kessel/theme/starship.toml
+# (fish points STARSHIP_CONFIG there); the table at the bottom is only a fallback.
 "$schema" = "https://starship.rs/config-schema.json"
 add_newline = false
 command_timeout = 800
+palette = "kessel"
 
 format = """
 $cmd_duration$username$hostname $directory$git_branch$git_status$python$nodejs$rust$jobs
   $character"""
 
 [character]
-success_symbol = "[󰅂](bold bright-black)"
-error_symbol = "[󰅂](bold red)"
-vimcmd_symbol = "[󰅁](bold green)"
+success_symbol = "[ ](bold primary)"
+error_symbol = "[ ](bold error)"
+vimcmd_symbol = "[ 󰅁](bold primary)"
 
 [cmd_duration]
 min_time = 0
 show_milliseconds = false
-format = "[](fg:bright-black)[󰪢 $duration](bold fg:bright-white bg:bright-black)[](fg:bright-black) "
+format = "[](fg:surface_variant)[󰪢 $duration](bold fg:on_surface_variant bg:surface_variant)[](fg:surface_variant) "
 
 [username]
 show_always = true
-style_user = "bold fg:black bg:white"
-style_root = "bold fg:black bg:red"
-format = "[](fg:white)[$user]($style)"
+style_user = "bold fg:on_primary bg:primary"
+style_root = "bold fg:on_primary bg:error"
+format = "[](fg:primary)[$user]($style)"
 
 [hostname]
 ssh_only = false
 ssh_symbol = " 󰌘"
-format = "[•$hostname$ssh_symbol](bold fg:black bg:white)[](fg:white)"
+format = "[•$hostname$ssh_symbol](bold fg:on_primary bg:primary)[](fg:primary)"
 
 [directory]
 home_symbol = " "
 read_only = " 󰌾"
 truncation_length = 2
 truncation_symbol = "…/"
-style = "fg:black bg:bright-white"
-format = "[](fg:bright-white)[󰉋 → $path]($style)[$read_only](fg:red bg:bright-white)[](fg:bright-white)"
+style = "fg:on_primary_container bg:primary_container"
+format = "[](fg:primary_container)[󰉋 → $path]($style)[$read_only](fg:error bg:primary_container)[](fg:primary_container)"
 
 [directory.substitutions]
 "Desktop" = "󰇄 "
@@ -49,29 +51,45 @@ format = "[](fg:bright-white)[󰉋 → $path]($style)[$read_only](fg:red bg:b
 "Pictures" = "󰋩 "
 "Videos" = "󰕧 "
 "Projects" = "󰝰 "
+"Notes" = "󰠮 "
 "dot-files" = "󰒓 dot-files"
 
 [git_branch]
 symbol = "󰘬"
 truncation_length = 16
 truncation_symbol = "…"
-format = " [](fg:green)[$symbol $branch](bold fg:black bg:green)[](fg:green)"
+format = " [](fg:tertiary_container)[$symbol $branch](bold fg:on_tertiary_container bg:tertiary_container)[](fg:tertiary_container)"
 
 [git_status]
-style = "bold yellow"
+style = "bold fg:primary"
 format = "( [$all_status$ahead_behind]($style))"
 
 [python]
 symbol = " "
-format = " [$symbol$version( \\($virtualenv\\))](yellow)"
+format = " [$symbol$version( \\($virtualenv\\))](fg:primary)"
 [nodejs]
 symbol = " "
-format = " [$symbol$version](green)"
+format = " [$symbol$version](fg:primary)"
 [rust]
 symbol = " "
-format = " [$symbol$version](red)"
+format = " [$symbol$version](fg:primary)"
 [jobs]
 symbol = "󰻰 "
-format = " [$symbol$number](purple)"
+format = " [$symbol$number](fg:primary)"
 [package]
 disabled = true
+
+# fallback palette (replaced by theme.sh in the generated copy) — keep this table last
+[palettes.kessel]
+primary = "#8aadf4"
+on_primary = "#000000"
+primary_container = "#1f2a44"
+on_primary_container = "#d6e2ff"
+secondary_container = "#2a2e3a"
+on_secondary_container = "#e8e8e8"
+tertiary_container = "#3b2f52"
+on_tertiary_container = "#ecdcff"
+surface_variant = "#262626"
+on_surface_variant = "#c8c8c8"
+error = "#e06c75"
+outline = "#5a5a5a"

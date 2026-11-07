@@ -62,6 +62,7 @@ obsidian
 # Qt theming (palette from scripts/theme.sh)
 qt6ct
 neovim
+btop
 eza
 htop
 # Tooling used by scripts / installer

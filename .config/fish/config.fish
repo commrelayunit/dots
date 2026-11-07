@@ -10,6 +10,9 @@ if status is-interactive
     # Starship with a transient prompt (old prompts collapse to the glyph).
     # The plain Linux console can't draw the Nerd Font pills, so skip it there.
     if test "$TERM" != linux; and command -q starship
+        # matugen-coloured copy written by ~/.config/hypr/scripts/theme.sh (falls back to ~/.config/starship.toml)
+        set -l themed ~/.local/state/kessel/theme/starship.toml
+        test -r $themed; and set -gx STARSHIP_CONFIG $themed
         starship init fish | source
         enable_transience
     end

@@ -1,17 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Syntax colours use terminal palette names, so they follow the wallpaper theme.
+# Syntax colours are set as *universal* variables by ~/.config/hypr/scripts/theme.sh
+# from the matugen palette (running shells update instantly). These are only
+# fallbacks for a machine where theme.sh hasn't run yet.
 status is-interactive; or return
-set -g fish_color_command blue
-set -g fish_color_param cyan
-set -g fish_color_quote yellow
-set -g fish_color_error brred
-set -g fish_color_comment brblack
-set -g fish_color_autosuggestion brblack
-set -g fish_color_operator brcyan
-set -g fish_color_escape brcyan
-set -g fish_color_redirection cyan --bold
-set -g fish_color_end green
-set -g fish_color_valid_path --underline
-set -g fish_pager_color_prefix cyan --bold --underline
-set -g fish_pager_color_description yellow -i
-set -g fish_pager_color_progress brwhite --background=cyan
+set -q fish_color_command; or set -U fish_color_command blue
+set -q fish_color_quote; or set -U fish_color_quote yellow
+set -q fish_color_error; or set -U fish_color_error brred
+set -q fish_color_comment; or set -U fish_color_comment brblack
+set -q fish_color_autosuggestion; or set -U fish_color_autosuggestion brblack
