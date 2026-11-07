@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# OPTIONAL LaTeX toolchain for Neovim's vimtex (compile with latexmk, view in zathura).
+# Installed only with: ./install.sh --with-tex   (~1 GB)
+texlive-basic
+texlive-latex
+texlive-latexrecommended
+texlive-latexextra
+texlive-fontsrecommended
+texlive-binextra
+texlive-bibtexextra
+biber

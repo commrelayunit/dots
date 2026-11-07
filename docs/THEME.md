@@ -32,6 +32,7 @@ Run it from the island (quick settings → **Dark mode** switch, wallpaper strip
 | GTK 3 / GTK 4 / libadwaita (OmniGlyph…) | `~/.config/gtk-{3,4}.0/gtk.css` + gsettings colour-scheme | next launch (OmniGlyph is restarted) |
 | btop | `~/.config/btop/themes/kessel.theme` | next launch |
 | yazi | `~/.config/yazi/theme.toml` | next launch |
+| Neovim | `…/theme/nvim.json` (base16 palette, applied by `lua/kessel/theme.lua` with mini.base16) | live (file watcher) |
 | Firefox | follows GTK (keep Firefox's theme on *System theme — auto*); needs `adw-gtk-theme` so GTK 3 uses `gtk.css` | restart Firefox |
 | OnlyOffice | `~/.config/onlyoffice/DesktopEditors.conf`: a built-in theme matching light/dark (your own choice is kept if it matches); title bar set to *system*. Custom theme files only recolour its tab strip, so none is shipped | restart OnlyOffice |
 

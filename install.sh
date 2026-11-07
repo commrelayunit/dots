@@ -7,6 +7,7 @@
 #   ./install.sh --profile minimal --apply-config                        # + deploy config links
 #   ./install.sh --with-aur                                              # + optional AUR (yay)
 #   ./install.sh --with-laptop                                           # + bluez, power-profiles-daemon
+#   ./install.sh --with-tex                                              # + LaTeX for Neovim (~1 GB)
 #   ./install.sh --with-translate                                        # + offline translation (downloads models)
 #   ./install.sh --check                                                 # read-only verification
 #   ./install.sh --rollback [timestamp]                                  # undo a config deployment
@@ -23,7 +24,7 @@ source "$REPO/installer/config.sh"
 source "$REPO/installer/checks.sh"
 
 PROFILE=minimal
-WITH_AUR=0 WITH_LAPTOP=0 WITH_TRANSLATE=0 APPLY_CONFIG=0 SET_SHELL=0 CHECK_ONLY=0 ROLLBACK=0 ROLLBACK_TS="" SKIP_PACKAGES=0
+WITH_AUR=0 WITH_TEX=0 WITH_LAPTOP=0 WITH_TRANSLATE=0 APPLY_CONFIG=0 SET_SHELL=0 CHECK_ONLY=0 ROLLBACK=0 ROLLBACK_TS="" SKIP_PACKAGES=0
 
 usage() { sed -n '3,16p' "$0" | sed 's/^# \{0,1\}//'; }
 
@@ -34,6 +35,7 @@ while (( $# )); do
         --profile=*)     PROFILE="${1#*=}" ;;
         --with-aur)      WITH_AUR=1 ;;
         --with-laptop)   WITH_LAPTOP=1 ;;
+        --with-tex)      WITH_TEX=1 ;;
         --with-translate) WITH_TRANSLATE=1 ;;
         --apply-config)  APPLY_CONFIG=1 ;;
         --skip-packages) SKIP_PACKAGES=1 ;;
@@ -58,6 +60,7 @@ if (( CHECK_ONLY )); then step_check; exit $?; fi
 (( SKIP_PACKAGES )) || step_packages
 (( WITH_AUR )) && { step_aur || warn "AUR step incomplete"; }
 (( WITH_LAPTOP )) && step_laptop
+(( WITH_TEX )) && step_tex
 if (( APPLY_CONFIG )); then
     step_config
 else

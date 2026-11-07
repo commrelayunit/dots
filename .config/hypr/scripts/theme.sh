@@ -297,6 +297,17 @@ EOS
                  set -U fish_pager_color_progress ${ONP#\#} --background=${P#\#}" 2>/dev/null || true
     fi
 
+    # Neovim: base16 palette for lua/kessel/theme.lua (re-applied live when this changes)
+    jq -n --arg mode "$mode" \
+        --arg b00 "$BG" --arg b01 "$SURFACE" --arg b02 "$SURFACE2" --arg b03 "$MUTED" \
+        --arg b04 "$SUBTEXT" --arg b05 "$TEXT" --arg b06 "$TEXT" --arg b07 "$TEXT" \
+        --arg b08 "$RED" --arg b09 "$T" --arg b0a "$YELLOW" --arg b0b "$GREEN" \
+        --arg b0c "$CYAN" --arg b0d "$P" --arg b0e "$PURPLE" --arg b0f "$OUT" \
+        '{mode: $mode, palette: {base00: $b00, base01: $b01, base02: $b02, base03: $b03,
+          base04: $b04, base05: $b05, base06: $b06, base07: $b07, base08: $b08, base09: $b09,
+          base0A: $b0a, base0B: $b0b, base0C: $b0c, base0D: $b0d, base0E: $b0e, base0F: $b0f}}' \
+        | write "$STATE/nvim.json"
+
     # btop: theme file + select it (btop rewrites its own conf; only our keys are touched)
     local bd="${XDG_CONFIG_HOME:-$HOME/.config}/btop"; mkdir -p "$bd/themes"
     write "$bd/themes/kessel.theme" <<EOB

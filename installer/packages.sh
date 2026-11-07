@@ -62,6 +62,17 @@ step_translate() {
     run "$t" setup en-de de-en en-bg bg-en
 }
 
+step_tex() {
+    local manifest="$REPO/pkglist-tex.txt"
+    step "LaTeX toolchain (--with-tex)"
+    local missing
+    mapfile -t missing < <(missing_pkgs "$manifest")
+    if (( ${#missing[@]} == 0 )); then ok "all installed"; else
+        info "missing: ${missing[*]}"
+        run sudo pacman -S --needed "${missing[@]}"
+    fi
+}
+
 step_laptop() {
     local manifest="$REPO/pkglist-laptop.txt"
     step "Laptop extras (--with-laptop)"

@@ -19,6 +19,7 @@ Personal Arch Linux + **Hyprland (Lua config, 0.57+)** + **Quickshell** desktop 
 | `.config/hypr/scripts/` | Shell helpers used by binds/island: `island.sh` (start/stop/restart), `island-or.sh` (island IPC with fallback), `theme.sh` (**all theming**), `lock.sh`, `translate.sh`, screenshot/clipboard/… |
 | `.config/quickshell/kessel/` | The island. `shell.qml` → `ui/Island.qml`. `services/` = singletons without UI (state, D-Bus, PipeWire, processes). `ui/` = views, `ui/panels/` = expanded panels, `ui/perspectives/` = resting views. `components/` = reusable widgets. `Theme.qml`, `Icons.qml`, `Config.qml` |
 | `.config/quickshell/kessel-lock/` | Separate Quickshell config for the lock screen (runs only while locked) |
+| `.config/nvim/` | LazyVim. `lazyvim.json` = enabled extras; `lua/plugins/*.lua` = our additions; `lua/kessel/theme.lua` = colours from theme.sh. `lazy-lock.json` pins plugin versions (commit it after `:Lazy update`) |
 | `sddm-theme/kessel/` | Qt6 SDDM theme (installed by `scripts/sddm-theme.sh`, needs sudo) |
 | `scripts/` | `~/Scripts`: install/update/uninstall/backup, `gen-shortcuts.sh`, `sddm-theme.sh` |
 | `services/` | **Future** systemd units. Nothing here is deployed or enabled |

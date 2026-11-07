@@ -78,6 +78,22 @@ mpv-mpris
 # Qt theming (palette from scripts/theme.sh)
 qt6ct
 neovim
+# Neovim (LazyVim) helpers: search, git UI, language servers via Mason (node/npm),
+# image + PDF preview (ImageMagick + Ghostscript), LaTeX viewer, shell lint/format
+lazygit
+fd
+fzf
+nodejs
+npm
+tree-sitter-cli
+unzip
+imagemagick
+ghostscript
+zathura
+zathura-pdf-mupdf
+shellcheck
+shfmt
+git-delta
 btop
 eza
 htop
