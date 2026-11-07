@@ -1,5 +1,7 @@
 # Kessel migration plan
 
+> **Historical record.** This is the original audit and plan from the first day (2026-11-07) and the decisions that changed afterwards (§8). The current state is described in `README.md`, `AGENTS.md` and `docs/THEME.md`.
+
 **Date:** 2026-11-07 · **Target:** Kessel (Arch VM) · **Repo:** `~/dot-files` (fresh, local-only git)
 
 ## 1. Audit findings (2026-11-07)

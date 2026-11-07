@@ -1,36 +1,37 @@
-# dot-files: Kessel
+# dot-files
 
-A minimal, modular Arch Linux + Hyprland (Lua) + Quickshell desktop for **Kessel**, a persistent Arch VM. This README covers installing, updating, verifying and rolling back. GPL-3.0-or-later.
+Arch Linux + **Hyprland** (Lua config) + **Quickshell** desktop, built around a morphing **dynamic island**, with colours that follow your wallpaper (matugen) on a pitch-black or eggshell base. Made on and for **Kessel** (a Proxmox VM) and laptops; any Arch install can use it. GPL-3.0-or-later.
 
-Fixed choices: **Kitty** is the only terminal. **Fuzzel** is the Quickshell-independent launcher (SUPER+R, and the fallback for SUPER+Space). Keybindings follow the **end-4/dots-hyprland** layout.
+- **Terminal:** kitty running fish + Starship (end-4-style prompt).
+- **Launchers:** the island launcher (`SUPER+R`: apps, calculator, URLs, offline translation) and fuzzel (`SUPER+SHIFT+Space`), which always works, even without Quickshell.
+- **Keys:** end-4/dots-hyprland muscle memory. Press `SUPER+/` for the full list.
+- **Safety first:** everything is a symlink into this repo, every install is reversible, and nothing depends on Quickshell to keep working.
+
+New here? Start with **Install** below. Want to change something? Read [`AGENTS.md`](AGENTS.md) (repo map and pitfalls) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ```
 dot-files/
-├── install.sh                 # idempotent installer (see below)
-├── installer/                 # installer steps: common, packages, config, checks
-├── profiles/minimal.links     # which repo paths get symlinked into ~
-├── pkglist.txt                # official packages (minimal profile)
-├── pkglist-aur.txt            # OPTIONAL AUR packages (only with --with-aur, via yay)
+├── install.sh · installer/        # idempotent installer (packages, config links, theme, checks, rollback)
+├── profiles/minimal.links         # repo path → ~ path for every linked config
+├── pkglist.txt                    # official packages
+├── pkglist-aur.txt                # optional AUR (--with-aur, via yay): OmniGlyph, Bibata cursor
+├── pkglist-laptop.txt             # optional laptop extras (--with-laptop)
 ├── .config/
-│   ├── hypr/                  # Hyprland Lua config (entry: hyprland.lua)
-│   │   ├── hyprland.lua       #   tiny loader
-│   │   ├── monitors.lua       #   displays
-│   │   ├── env.lua            #   environment
-│   │   ├── general.lua        #   UI / aesthetic
-│   │   ├── input.lua          #   keyboard / pointer
-│   │   ├── workspaces.lua     #   workspace, window, layer rules
-│   │   ├── exec.lua           #   autostart (+ feature toggles)
-│   │   ├── keybinds.lua       #   THE keybinding registry
-│   │   ├── custom.lua         #   personal tweaks, loaded last
-│   │   ├── lib/               #   safety (rescue binds) + binder (registry → binds + views)
-│   │   ├── scripts/           #   screenshot, clipboard, shortcuts, omniglyph, island
+│   ├── hypr/                      # Hyprland (Lua): hyprland.lua loads monitors · env · general ·
+│   │   │                          #   input · workspaces · exec · keybinds (THE registry) · custom
+│   │   ├── lib/                   #   safety (rescue binds) · binder · floatmode
+│   │   ├── scripts/               #   island · theme · lock · translate · screenshot · clipboard · …
 │   │   └── hypridle.conf hyprlock.conf hyprpaper.conf
-│   ├── quickshell/kessel/     # the island (ui/ + services/)
-│   ├── kitty/ fuzzel/ dunst/ fish/ starship.toml
-│   ├── fontconfig/ gtk-3.0/ gtk-4.0/ omniglyph/
-├── scripts/gen-shortcuts.sh   # regenerate docs/SHORTCUTS.md from keybinds.lua
-├── services/                  # FUTURE systemd units — never deployed by install.sh
-└── docs/                      # MIGRATION_PLAN.md, SHORTCUTS.md, THEME.md
+│   ├── quickshell/kessel/         # the island: services/ (logic) · ui/ (views, panels, perspectives) · components/
+│   ├── quickshell/kessel-lock/    # lock screen (separate process; hyprlock fallback)
+│   ├── kitty/ fish/ starship.toml fuzzel/ dunst/
+│   └── fontconfig/ gtk-3.0/ gtk-4.0/ omniglyph/
+├── sddm-theme/kessel/             # login screen matching the lock screen
+├── scripts/                       # = ~/Scripts: install · update · uninstall · backup · sddm-theme · gen-shortcuts
+├── services/                      # future systemd units (never deployed automatically)
+├── docs/                          # SHORTCUTS.md (generated) · THEME.md · MIGRATION_PLAN.md (history)
+├── AGENTS.md · CONTRIBUTING.md · .github/   # contributor docs, issue/PR templates
+└── LICENSE                        # GPL-3.0-or-later
 ```
 
 ## The island
