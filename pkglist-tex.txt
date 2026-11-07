@@ -1,11 +1,32 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# OPTIONAL LaTeX toolchain for Neovim's vimtex (compile with latexmk, view in zathura).
-# Installed only with: ./install.sh --with-tex   (~1 GB)
+# OPTIONAL LaTeX: the complete TeX Live set (= Arch's `texlive` group, listed so
+# the installer can see partial installs) + German/Cyrillic language support
+# + biber. Every font and icon package is included (fontawesome5, academicons,
+# fontsextra…), plus pdflatex, xelatex, lualatex, tikz, siunitx, beamer, …
+# Installed only with: ./install.sh --with-tex   (~2.8 GB)
 texlive-basic
-texlive-latex
-texlive-latexrecommended
-texlive-latexextra
-texlive-fontsrecommended
-texlive-binextra
 texlive-bibtexextra
+texlive-binextra
+texlive-context
+texlive-fontsextra
+texlive-fontsrecommended
+texlive-fontutils
+texlive-formatsextra
+texlive-games
+texlive-humanities
+texlive-latex
+texlive-latexextra
+texlive-latexrecommended
+texlive-luatex
+texlive-mathscience
+texlive-metapost
+texlive-music
+texlive-pictures
+texlive-plaingeneric
+texlive-pstricks
+texlive-publishers
+texlive-xetex
+texlive-langgerman
+texlive-langcyrillic
+texlive-langenglish
 biber

@@ -7,4 +7,3 @@ o.wrap = false
 o.spelllang = { "en" }       -- :set spell (on by default for markdown / tex / git commits)
 o.mousemoveevent = true      -- hover effects in the tab bar / tree
 vim.g.autoformat = true      -- format on save (toggle: <leader>uf)
-vim.g.vimtex_view_method = "zathura"

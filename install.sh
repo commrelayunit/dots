@@ -7,7 +7,7 @@
 #   ./install.sh --profile minimal --apply-config                        # + deploy config links
 #   ./install.sh --with-aur                                              # + optional AUR (yay)
 #   ./install.sh --with-laptop                                           # + bluez, power-profiles-daemon
-#   ./install.sh --with-tex                                              # + LaTeX for Neovim (~1 GB)
+#   ./install.sh --with-tex                                              # + full TeX Live for Neovim (~2.8 GB)
 #   ./install.sh --with-translate                                        # + offline translation (downloads models)
 #   ./install.sh --check                                                 # read-only verification
 #   ./install.sh --rollback [timestamp]                                  # undo a config deployment
