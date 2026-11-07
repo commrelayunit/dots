@@ -6,6 +6,9 @@ import Quickshell
 
 Singleton {
     property bool inhibitIdle: false
+    // Global tiling/floating layout mode (owned by Hyprland: lib/floatmode.lua)
+    property bool floatMode: false
+    function toggleFloatMode() { Quickshell.execDetached(["hyprctl", "dispatch", "KesselToggleFloat"]) }
 
     function lock()     { Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock"]) }
     function suspend()  { Quickshell.execDetached(["sh", "-c", "loginctl lock-session; sleep 0.5; systemctl suspend"]) }

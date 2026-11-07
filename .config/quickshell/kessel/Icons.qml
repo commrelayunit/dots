@@ -78,6 +78,8 @@ Singleton {
     readonly property string download:   g(0xF01DA)
     readonly property string upload:     g(0xF0552)
     readonly property string overview:   g(0xF0570)
+    readonly property string tiling:     g(0xF0574)
+    readonly property string floating:   g(0xF10AC)
     readonly property string thermo:     g(0xF050F)
     readonly property string drop:       g(0xF058E)
     readonly property string wind:       g(0xF059D)

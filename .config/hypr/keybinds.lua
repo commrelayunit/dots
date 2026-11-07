@@ -81,9 +81,17 @@ add { group = "Utilities", keys = "SUPER + SHIFT + D", exec = island("dnd"),    
 -- Windows ----------------------------------------------------------------------
 add { group = "Windows", keys = "SUPER + Q",               dsp = function() return hl.dsp.window.close() end, desc = "Close window" }
 add { group = "Windows", keys = "SUPER + SHIFT + ALT + Q", dsp = function() return hl.dsp.window.kill() end, desc = "Force-kill window" }
-add { group = "Windows", keys = "SUPER + F",         dsp = function() return hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }) end, desc = "Fullscreen" }
-add { group = "Windows", keys = "SUPER + D",         dsp = function() return hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }) end, desc = "Maximize" }
-add { group = "Windows", keys = "SUPER + ALT + Space", dsp = function() return hl.dsp.window.float({ action = "toggle" }) end, desc = "Float / tile" }
+add { group = "Windows", keys = "SUPER + F",         dsp = function() return hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }) end, desc = "Fullscreen (again to exit)" }
+-- Detach: float just this window, centred; pressing again tiles it back.
+local function detach()
+    hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
+    local w = hl.get_active_window()
+    if w and w.floating then hl.dispatch(hl.dsp.window.center()) end
+end
+add { group = "Windows", keys = "SUPER + D",         dsp = function() return detach end, desc = "Detach window: float ↔ tile (again to re-tile)" }
+add { group = "Windows", keys = "SUPER + ALT + Space", dsp = function() return detach end, desc = "Detach window", hidden = true }
+add { group = "Windows", keys = "SUPER + ALT + D",   dsp = function() return hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }) end, desc = "Maximize (again to restore)" }
+add { group = "Windows", keys = "SUPER + SHIFT + F", dsp = function() return require("lib.floatmode").toggle end, desc = "Layout mode: all windows tiling ↔ floating" }
 add { group = "Windows", keys = "SUPER + P",         dsp = function() return hl.dsp.window.pin() end, desc = "Pin (show on all workspaces)" }
 add { group = "Windows", keys = "SUPER + semicolon", dsp = function() return hl.dsp.layout("splitratio -0.1") end, opts = { repeating = true }, desc = "Narrower (split ratio −)" }
 add { group = "Windows", keys = "SUPER + apostrophe", dsp = function() return hl.dsp.layout("splitratio +0.1") end, opts = { repeating = true }, desc = "Wider (split ratio +)" }

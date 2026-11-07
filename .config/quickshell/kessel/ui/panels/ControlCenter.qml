@@ -309,6 +309,7 @@ PanelBase {
             Tile { width: 119; icon: Notifs.dnd ? Icons.bellOff : Icons.bell; label: "Silence"; active: Notifs.dnd; tint: Theme.red; onClicked: Notifs.dnd = !Notifs.dnd }
             Tile { width: 119; icon: Icons.coffee; label: "Stay awake"; active: Session.inhibitIdle; tint: Theme.yellow; onClicked: Session.inhibitIdle = !Session.inhibitIdle }
             Tile { width: 119; icon: Theme.dark ? Icons.night : Icons.sunny; label: Theme.dark ? "Dark" : "Light"; active: true; onClicked: Themes.toggleMode() }
+            Tile { width: 119; icon: Session.floatMode ? Icons.floating : Icons.tiling; label: Session.floatMode ? "Floating" : "Tiling"; active: Session.floatMode; tint: Theme.accent3; onClicked: Session.toggleFloatMode() }
             Tile { width: 119; icon: Icons.notes; label: "Notes"; onClicked: IslandState.openPanel("notes") }
             Tile { width: 119; icon: Icons.picker; label: "Color picker"; onClicked: Utils.colorPicker() }
             Tile { width: 119; icon: Icons.screenshot; label: "Screenshot"; onClicked: Utils.screenshotRegion() }

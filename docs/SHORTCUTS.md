@@ -50,9 +50,10 @@
 | --- | --- |
 | `SUPER + Q` | Close window |
 | `SUPER + SHIFT + ALT + Q` | Force-kill window |
-| `SUPER + F` | Fullscreen |
-| `SUPER + D` | Maximize |
-| `SUPER + ALT + Space` | Float / tile |
+| `SUPER + F` | Fullscreen (again to exit) |
+| `SUPER + D` | Detach window: float ↔ tile (again to re-tile) |
+| `SUPER + ALT + D` | Maximize (again to restore) |
+| `SUPER + SHIFT + F` | Layout mode: all windows tiling ↔ floating |
 | `SUPER + P` | Pin (show on all workspaces) |
 | `SUPER + semicolon` | Narrower (split ratio −) |
 | `SUPER + apostrophe` | Wider (split ratio +) |

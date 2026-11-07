@@ -75,6 +75,11 @@ Singleton {
         function dnd(): string { Notifs.dnd = !Notifs.dnd; return Notifs.dnd ? "dnd on" : "dnd off" }
         function record(): string { Recorder.toggle(false); return "ok" }
         function recordRegion(): string { Recorder.toggle(true); return "ok" }
+        function layoutMode(mode: string): string {
+            Session.floatMode = mode === "floating"
+            root.showOsd(Session.floatMode ? Icons.floating : Icons.tiling, Session.floatMode ? "Floating" : "Tiling", 1)
+            return "ok"
+        }
         function reloadTheme(): string { Theme.reload(); return "ok" }
         function toggleTheme(): string { Themes.toggleMode(); return "ok" }
         function status(): string {
