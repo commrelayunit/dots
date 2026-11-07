@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Hover glance: the music controller if something plays, else today at a glance.
+import QtQuick
+import ".."
+import "../services"
+import "../components"
+
+View {
+    implicitWidth: 440
+    implicitHeight: col.implicitHeight + 24
+
+    Column {
+        id: col
+        anchors.top: parent.top
+        anchors.topMargin: 12
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: 416
+        spacing: 10
+
+        Row {
+            width: parent.width
+            spacing: 10
+            Label { text: Time.time; size: Theme.fontBig; font.bold: true }
+            Column {
+                anchors.verticalCenter: parent.verticalCenter
+                Label { text: Time.dateLong; color: Theme.subtext; size: Theme.fontSmall }
+                Label {
+                    visible: Weather.ok
+                    text: `${Weather.icon} ${Weather.temp} ${Weather.desc}${Weather.area ? " · " + Weather.area : ""}`
+                    color: Theme.yellow
+                    size: Theme.fontSmall
+                }
+            }
+        }
+        MediaCard { visible: Media.active; compact: true; width: parent.width }
+        Row {
+            spacing: 18
+            Chip { icon: Icons.cpu; text: "CPU " + Math.round(Stats.cpu * 100) + "%" }
+            Chip { icon: Icons.memory; text: `RAM ${Stats.memUsedGiB.toFixed(1)}/${Stats.memTotalGiB.toFixed(1)} GiB` }
+            Chip { icon: Icons.download; text: Stats.human(Stats.rxRate) }
+            Chip { icon: Icons.upload; text: Stats.human(Stats.txRate) }
+        }
+    }
+}

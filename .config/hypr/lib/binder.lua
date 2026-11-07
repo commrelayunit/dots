@@ -5,7 +5,7 @@ local safety = require("lib.safety")
 
 local M = {}
 
-local GROUP_ORDER = { "Apps", "Windows", "Workspaces", "Screenshots", "Session", "Media" }
+local GROUP_ORDER = { "Apps", "Island", "Utilities", "Windows", "Workspaces", "Session", "Media" }
 
 local function normalize(keys)
     return (keys:gsub("%s+", " "):upper())

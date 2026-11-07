@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Screen recording with wf-recorder (full screen or a slurp region).
+pragma Singleton
+import QtQuick
+import Quickshell
+import Quickshell.Io
+import ".."
+
+Singleton {
+    id: root
+    property bool available: false
+    readonly property bool recording: rec.running
+    property real startedAt: 0
+    readonly property int elapsed: recording ? Math.floor((Time.now.getTime() - startedAt) / 1000) : 0
+    property string file: ""
+
+    Process {
+        running: true
+        command: ["sh", "-c", "command -v wf-recorder >/dev/null && command -v slurp >/dev/null"]
+        onExited: code => root.available = code === 0
+    }
+
+    function toggle(region) {
+        if (recording) stop()
+        else start(region)
+    }
+    function start(region) {
+        if (!available) {
+            Quickshell.execDetached(["notify-send", "-a", "Recorder", "wf-recorder is not installed", "sudo pacman -S wf-recorder"])
+            return
+        }
+        file = Config.recordDir + "/" + Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss") + ".mp4"
+        if (region) {
+            pick.running = true
+        } else {
+            launch([])
+        }
+    }
+    function launch(extra) {
+        rec.command = ["sh", "-c", 'mkdir -p "$(dirname "$1")" && exec wf-recorder -f "$1" "${@:2}"', "sh", file].concat(extra)
+        startedAt = Date.now()
+        rec.running = true
+    }
+    function stop() { if (recording) rec.signal(2) }   // SIGINT lets wf-recorder finalise the file
+
+    Process {
+        id: pick
+        command: ["slurp", "-d"]
+        stdout: StdioCollector { onStreamFinished: { const g = text.trim(); if (g !== "") root.launch(["-g", g]) } }
+    }
+    Process {
+        id: rec
+        onExited: Quickshell.execDetached(["notify-send", "-a", "Recorder", "Recording saved", root.file.replace(Quickshell.env("HOME"), "~")])
+    }
+}

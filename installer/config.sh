@@ -79,6 +79,7 @@ GSETTINGS_WANT=(
     "org.gnome.desktop.interface font-name 'JetBrainsMono Nerd Font 11'"
     "org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font 12'"
     "org.gnome.desktop.interface color-scheme 'prefer-dark'"
+    "org.gnome.desktop.interface icon-theme 'Papirus-Dark'"
 )
 
 step_gsettings() { # returns 0 if something changed

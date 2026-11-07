@@ -1,0 +1,139 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Overview (SUPER+Tab): every workspace with live window previews.
+// Click a window to focus it, click a workspace to go there, drag a window
+// onto another workspace to move it. ←/→/↑/↓ + Enter work too.
+import QtQuick
+import Quickshell
+import Quickshell.Hyprland
+import Quickshell.Wayland
+import "../.."
+import "../../services"
+import "../../components"
+
+PanelBase {
+    id: root
+    title: "Overview"
+    icon: Icons.overview
+
+    readonly property var mon: Hyprland.focusedMonitor
+    readonly property real monW: mon ? mon.width / mon.scale : 1920
+    readonly property real monH: mon ? mon.height / mon.scale : 1080
+    readonly property int cols: 5
+    readonly property int count: Math.max(Hypr.maxId, 5)
+    readonly property real cardW: 168
+    readonly property real cardH: cardW * monH / monW
+    readonly property real k: cardW / monW            // logical px → preview px
+
+    contentWidth: cols * cardW + (cols - 1) * 10
+    contentHeight: Math.ceil(count / cols) * (cardH + 26) + (Math.ceil(count / cols) - 1) * 10
+
+    property int sel: Hypr.focusedId - 1
+    property var dragging: null
+
+    Component.onCompleted: { Hyprland.refreshToplevels(); Hyprland.refreshMonitors() }
+
+    focus: true
+    Keys.onLeftPressed:  sel = (sel + count - 1) % count
+    Keys.onRightPressed: sel = (sel + 1) % count
+    Keys.onUpPressed:    sel = (sel - cols + count) % count
+    Keys.onDownPressed:  sel = (sel + cols) % count
+    Keys.onReturnPressed: { Hypr.focus(sel + 1); IslandState.closePanel() }
+
+    Grid {
+        columns: root.cols
+        spacing: 10
+        Repeater {
+            model: root.count
+            Column {
+                id: ws
+                required property int index
+                readonly property int wsId: index + 1
+                readonly property var wins: Hypr.windowsOn(wsId)
+                spacing: 4
+
+                Rectangle {
+                    id: card
+                    width: root.cardW
+                    height: root.cardH
+                    radius: 10
+                    clip: true
+                    color: drop.containsDrag ? Theme.a(Theme.accent, 0.18) : Theme.card
+                    border.width: root.sel === ws.index || Hypr.focusedId === ws.wsId ? 2 : 1
+                    border.color: root.sel === ws.index ? Theme.accent
+                        : Hypr.focusedId === ws.wsId ? Theme.a(Theme.accent, 0.5) : Theme.a(Theme.text, 0.06)
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: root.sel = ws.index
+                        onClicked: { Hypr.focus(ws.wsId); IslandState.closePanel() }
+                    }
+                    DropArea {
+                        id: drop
+                        anchors.fill: parent
+                        onDropped: if (root.dragging) { Hypr.moveWindowTo(root.dragging, ws.wsId); root.dragging = null }
+                    }
+
+                    Repeater {
+                        model: ws.wins
+                        Rectangle {
+                            id: win
+                            required property var modelData
+                            readonly property var ipc: modelData.lastIpcObject
+                            readonly property real mx: mon ? mon.x : 0
+                            readonly property real my: mon ? mon.y : 0
+                            x: ((ipc?.at?.[0] ?? 0) - mx) * root.k
+                            y: ((ipc?.at?.[1] ?? 0) - my) * root.k
+                            width: Math.max(12, (ipc?.size?.[0] ?? 100) * root.k)
+                            height: Math.max(10, (ipc?.size?.[1] ?? 80) * root.k)
+                            radius: 4
+                            color: Theme.overlay
+                            border.width: wma.containsMouse ? 1 : 0
+                            border.color: Theme.accent
+                            clip: true
+                            Drag.active: wma.drag.active
+                            Drag.hotSpot.x: width / 2
+                            Drag.hotSpot.y: height / 2
+
+                            ScreencopyView {
+                                anchors.fill: parent
+                                captureSource: win.modelData.wayland
+                                live: true
+                                paintCursor: false
+                            }
+                            Image {
+                                anchors.centerIn: parent
+                                width: Math.min(24, parent.width * 0.5)
+                                height: width
+                                sourceSize: Qt.size(48, 48)
+                                source: Quickshell.iconPath((win.ipc?.class ?? "").toLowerCase(), true)
+                                opacity: 0.85
+                            }
+                            MouseArea {
+                                id: wma
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                drag.target: win
+                                onPressed: root.dragging = win.modelData
+                                onReleased: {
+                                    const moved = win.Drag.target !== null
+                                    win.Drag.drop()
+                                    if (!moved) { Hypr.focusWindow(win.modelData); IslandState.closePanel() }
+                                    else IslandState.closePanel()
+                                }
+                            }
+                        }
+                    }
+                }
+                Row {
+                    spacing: 6
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    Label { text: ws.wsId; font.bold: Hypr.focusedId === ws.wsId; color: Hypr.focusedId === ws.wsId ? Theme.accent : Theme.subtext; size: Theme.fontSmall }
+                    Label { text: ws.wins.length > 0 ? "· " + ws.wins.length : ""; color: Theme.muted; size: Theme.fontSmall }
+                }
+            }
+        }
+    }
+}

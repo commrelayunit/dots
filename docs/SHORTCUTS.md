@@ -8,23 +8,55 @@
 | --- | --- |
 | `SUPER + Return` | Terminal (kitty) |
 | `SUPER + SHIFT + Return` | Recovery shell (kitty + plain bash) |
-| `SUPER + R` | App launcher (fuzzel) |
-| `SUPER + V` | Clipboard history (cliphist → fuzzel) |
-| `SUPER + period` | Emoji / symbol picker (OmniGlyph, optional AUR) |
-| `SUPER + slash` | Show this shortcuts list |
+| `SUPER + C` | Code editor (Neovim) |
+| `SUPER + W` | Web browser |
+| `CTRL + SUPER + V` | Volume mixer (pavucontrol) |
+| `CTRL + SHIFT + Escape` | Task manager (htop) |
+| `SUPER + R` | App launcher (fuzzel, always available) |
+
+## Island
+
+| Keys | Action |
+| --- | --- |
+| `SUPER + Space` | Launcher (fallback: fuzzel) |
+| `SUPER + V` | Clipboard history (fallback: fuzzel) |
+| `SUPER + Tab` | Overview: workspaces + window previews |
+| `SUPER + A` | Quick settings (Wi-Fi, BT, audio, brightness, power) |
+| `SUPER + N` | Notifications + calendar + weather |
+| `SUPER + G` | Notes |
+| `SUPER + ALT + T` | Timer / stopwatch |
+| `CTRL + ALT + Delete` | Session menu (lock, standby, logout, restart, shutdown) |
+| `SUPER + J` | Show / hide the island |
+| `CTRL + SUPER + R` | Restart the island |
+| `SUPER + slash` | Shortcuts (this list) |
+
+## Utilities
+
+| Keys | Action |
+| --- | --- |
+| `SUPER + SHIFT + S` | Screenshot region → clipboard + file |
+| `Print` | Screenshot screen → clipboard + file |
+| `SUPER + SHIFT + C` | Color picker → clipboard |
+| `SUPER + SHIFT + R` | Record region (again to stop) |
+| `CTRL + ALT + R` | Record screen (again to stop) |
+| `SUPER + period` | Emoji / symbol picker (OmniGlyph) |
+| `SUPER + SHIFT + D` | Do not disturb on/off |
 
 ## Windows
 
 | Keys | Action |
 | --- | --- |
 | `SUPER + Q` | Close window |
-| `SUPER + C` | Close window (legacy) |
-| `SUPER + F` | Toggle fullscreen |
-| `SUPER + SHIFT + F` | Toggle floating |
-| `SUPER + P` | Toggle pseudotile |
-| `SUPER + J` | Toggle split (dwindle) |
-| `SUPER + ←↑→↓` | Move focus |
-| `SUPER + SHIFT + ←↑→↓` | Move window |
+| `SUPER + SHIFT + ALT + Q` | Force-kill window |
+| `SUPER + F` | Fullscreen |
+| `SUPER + D` | Maximize |
+| `SUPER + ALT + Space` | Float / tile |
+| `SUPER + P` | Pin (show on all workspaces) |
+| `SUPER + semicolon` | Narrower (split ratio −) |
+| `SUPER + apostrophe` | Wider (split ratio +) |
+| `SUPER + ALT + J` | Toggle split direction |
+| `SUPER + ←↑→↓` | Focus window in direction |
+| `SUPER + SHIFT + ←↑→↓` | Move window in direction |
 | `SUPER + mouse:272` | Drag window (LMB) |
 | `SUPER + mouse:273` | Resize window (RMB) |
 
@@ -32,40 +64,36 @@
 
 | Keys | Action |
 | --- | --- |
-| `SUPER + 1…0` | Go to workspace 1–10 |
-| `SUPER + SHIFT + 1…0` | Move window to workspace 1–10 |
-| `SUPER + S` | Toggle scratchpad |
-| `SUPER + ALT + S` | Move window to scratchpad |
+| `SUPER (+ CTRL) + 1…0` | Go to workspace 1–10 |
+| `SUPER + ALT + 1…0` | Send window to workspace 1–10 |
+| `SUPER + SHIFT + 1…0` | Move window to workspace 1–10 and follow |
+| `CTRL + SUPER + left` | Previous workspace |
+| `CTRL + SUPER + right` | Next workspace |
+| `SUPER + SHIFT + Page_Up` | Move window to previous workspace |
+| `SUPER + SHIFT + Page_Down` | Move window to next workspace |
 | `SUPER + mouse_down` | Next workspace (scroll) |
 | `SUPER + mouse_up` | Previous workspace (scroll) |
-
-## Screenshots
-
-| Keys | Action |
-| --- | --- |
-| `SUPER + SHIFT + S` | Region → clipboard + ~/Pictures/Screenshots |
-| `Print` | Region → clipboard + file |
-| `SHIFT + Print` | Full screen → clipboard + file |
+| `SUPER + S` | Toggle scratchpad |
+| `SUPER + ALT + S` | Send window to scratchpad |
 
 ## Session
 
 | Keys | Action |
 | --- | --- |
-| `SUPER + L` | Lock screen (hyprlock) |
-| `SUPER + CTRL + R` | Reload Hyprland config |
-| `SUPER + CTRL + Q` | Restart Quickshell island |
-| `SUPER + ALT + I` | Show / hide the island |
-| `SUPER + ALT + D` | Island: toggle long date |
-| `SUPER + SHIFT + M` | Exit Hyprland |
+| `SUPER + L` | Lock |
+| `SUPER + SHIFT + L` | Standby (suspend) |
+| `CTRL + SHIFT + SUPER + R` | Reload Hyprland config |
 
 ## Media
 
 | Keys | Action |
 | --- | --- |
+| `SUPER + SHIFT + P` | Play / pause |
+| `SUPER + SHIFT + N` | Next track |
+| `SUPER + SHIFT + B` | Previous track |
+| `SUPER + SHIFT + M` | Mute output |
+| `SUPER + ALT + M` | Mute microphone |
 | `XF86AudioRaiseVolume` | Volume up |
 | `XF86AudioLowerVolume` | Volume down |
-| `XF86AudioMute` | Mute output |
-| `XF86AudioMicMute` | Mute microphone |
-| `XF86AudioPlay` | Play / pause |
-| `XF86AudioNext` | Next track |
-| `XF86AudioPrev` | Previous track |
+| `XF86MonBrightnessUp` | Brightness up |
+| `XF86MonBrightnessDown` | Brightness down |

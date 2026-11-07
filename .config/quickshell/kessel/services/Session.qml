@@ -1,0 +1,15 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Session actions + idle inhibit. The session is started by uwsm.
+pragma Singleton
+import QtQuick
+import Quickshell
+
+Singleton {
+    property bool inhibitIdle: false
+
+    function lock()     { Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock"]) }
+    function suspend()  { Quickshell.execDetached(["sh", "-c", "loginctl lock-session; sleep 0.5; systemctl suspend"]) }
+    function logout()   { Quickshell.execDetached(["uwsm", "stop"]) }
+    function reboot()   { Quickshell.execDetached(["systemctl", "reboot"]) }
+    function poweroff() { Quickshell.execDetached(["systemctl", "poweroff"]) }
+}

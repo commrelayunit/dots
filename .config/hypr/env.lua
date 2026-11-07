@@ -16,3 +16,6 @@ hl.env("CLUTTER_BACKEND", "wayland")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 
 hl.env("TERMINAL", "kitty")
+
+-- Icon theme for Quickshell (island app icons) and Qt apps.
+hl.env("QS_ICON_THEME", "Papirus-Dark")

@@ -39,6 +39,15 @@ polkit-gnome
 qt5-wayland
 qt6-wayland
 xdg-user-dirs
+# Island utilities: screen recording, colour picker, backlight, app icons
+wf-recorder
+hyprpicker
+brightnessctl
+papirus-icon-theme
+# Apps bound in keybinds.lua (SUPER+C editor, CTRL+SHIFT+Esc task manager)
+neovim
+htop
 # Tooling used by scripts / installer
 jq
 git
+curl

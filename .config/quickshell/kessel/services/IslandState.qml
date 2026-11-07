@@ -1,28 +1,84 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Island state + IPC. Hyprland binds / scripts call e.g.:
-//   qs -c kessel ipc call island toggle
-//   qs -c kessel ipc call island toggleExpanded
-//   qs -c kessel ipc call island status
+// Island arbitration + IPC. The island shows the highest layer that wants it:
+//
+//   panel         opened by the user (launcher, clipboard, control, power, timer)
+//   notification  something arrived              until it expires / is closed
+//   osd           volume changed                 briefly
+//   summary       pointer resting on the island  until it leaves
+//   rest          clock, workspaces and live activities
+//
+// IPC (used by Hyprland binds via scripts/island-or.sh):
+//   qs -c kessel ipc call island open <launcher|clipboard|control|power|timer>
+//   qs -c kessel ipc call island close | toggle | show | hide | dnd | record | status
 pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import ".."
 
 Singleton {
     id: root
-    property bool ready: false
+
     property bool shown: true
-    property bool expanded: false
+    property string panel: ""
+    property bool hovered: false
+    property bool summary: false
+
+    property bool osdActive: false
+    property string osdIcon: ""
+    property string osdLabel: ""
+    property real osdValue: 0
+
+    readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer"]
+
+    readonly property string layer: panel !== "" ? "panel"
+        : Notifs.popup !== null ? "notification"
+        : osdActive ? "osd"
+        : summary ? "summary"
+        : "rest"
+
+    function openPanel(name) {
+        if (panels.indexOf(name) < 0) return false
+        shown = true
+        panel = (panel === name) ? "" : name
+        return true
+    }
+    function closePanel() { panel = "" }
+
+    function showOsd(icon, label, value) {
+        osdIcon = icon; osdLabel = label; osdValue = value
+        osdActive = true
+        osdTimer.restart()
+    }
+
+    Timer { id: osdTimer; interval: Config.osdMs; onTriggered: root.osdActive = false }
+    Timer { id: hoverTimer; interval: Config.hoverDelayMs; onTriggered: root.summary = root.hovered }
+    onHoveredChanged: {
+        if (hovered) hoverTimer.restart()
+        else { hoverTimer.stop(); summary = false }
+    }
 
     IpcHandler {
         target: "island"
 
-        function toggle(): void { root.shown = !root.shown }
-        function show(): void { root.shown = true }
-        function hide(): void { root.shown = false }
-        function toggleExpanded(): void { root.expanded = !root.expanded }
+        function open(name: string): string {
+            if (!root.shown) return "hidden"
+            return root.openPanel(name) ? "ok" : "unknown panel"
+        }
+        function close(): string { root.closePanel(); return "ok" }
+        function toggle(): string { root.shown = !root.shown; if (!root.shown) root.closePanel(); return root.shown ? "shown" : "hidden" }
+        function show(): string { root.shown = true; return "ok" }
+        function hide(): string { root.shown = false; root.closePanel(); return "ok" }
+        function dnd(): string { Notifs.dnd = !Notifs.dnd; return Notifs.dnd ? "dnd on" : "dnd off" }
+        function record(): string { Recorder.toggle(false); return "ok" }
+        function recordRegion(): string { Recorder.toggle(true); return "ok" }
         function status(): string {
-            return JSON.stringify({ shown: root.shown, expanded: root.expanded })
+            return JSON.stringify({
+                shown: root.shown, layer: root.layer, panel: root.panel,
+                dnd: Notifs.dnd, notifications: Notifs.count,
+                media: Media.active ? Media.title : null,
+                recording: Recorder.recording, weather: Weather.ok ? Weather.temp : null
+            })
         }
     }
 }

@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# OPTIONAL laptop extras. Installed only with: ./install.sh --with-laptop
+# These ship system services. The installer never enables them; after
+# installing, enable what you want yourself:
+#   sudo systemctl enable --now bluetooth.service
+#   sudo systemctl enable --now power-profiles-daemon.service
+bluez
+bluez-utils
+power-profiles-daemon
