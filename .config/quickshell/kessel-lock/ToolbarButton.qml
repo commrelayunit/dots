@@ -7,7 +7,7 @@ Rectangle {
     property string icon: ""
     property bool toggled: false
     property color tint: Style.accent
-    property color iconColor: toggled ? "#000000" : Style.subtext
+    property color iconColor: toggled ? Style.onAccent : Style.subtext
     signal clicked()
     Layout.preferredWidth: 38
     Layout.preferredHeight: 38

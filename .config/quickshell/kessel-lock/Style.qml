@@ -9,13 +9,22 @@ import Quickshell.Io
 Singleton {
     id: root
     property var c: ({})
+    // Theme-aware: dark = pitch black, light = eggshell (colors.json from theme.sh).
+    readonly property bool dark: (c.mode ?? "dark") !== "light"
+    readonly property color base: c.bg ?? (dark ? "#000000" : "#f0ead6")
+    readonly property color text: c.text ?? (dark ? "#e8e8e8" : "#1d1b16")
     readonly property color accent: c.accent ?? "#8aadf4"
-    readonly property color red: "#e06c75"
-    readonly property color text: "white"
-    readonly property color subtext: Qt.rgba(1, 1, 1, 0.65)
-    readonly property color faint: Qt.rgba(1, 1, 1, 0.45)
-    readonly property color toolbar: Qt.rgba(0.06, 0.06, 0.06, 0.78)
-    readonly property color toolbarHi: Qt.rgba(1, 1, 1, 0.10)
+    readonly property color red: c.red ?? "#e06c75"
+    readonly property color subtext: a(text, 0.68)
+    readonly property color faint: a(text, 0.45)
+    readonly property color overlay: a(base, dark ? 0.62 : 0.58)   // over the blurred wallpaper
+    readonly property color card: a(base, dark ? 0.45 : 0.55)
+    readonly property color cardBorder: a(text, 0.07)
+    readonly property color toolbar: a(base, dark ? 0.82 : 0.86)
+    readonly property color toolbarHi: a(text, 0.10)
+    readonly property color pill: a(text, 0.08)
+    readonly property color onAccent: dark ? "#000000" : "#ffffff"
+    function a(col, alpha) { return Qt.rgba(col.r, col.g, col.b, alpha) }
     readonly property string wallpaper: c.wallpaper ?? "/usr/share/hypr/wall2.png"
     readonly property string mono: "JetBrainsMono Nerd Font Mono"
     readonly property string font: "JetBrainsMono Nerd Font"

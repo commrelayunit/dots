@@ -30,8 +30,13 @@ accent()    { jq -r '.accent // "#8aadf4"' "${XDG_STATE_HOME:-$HOME/.local/state
 
 case $cmd in
     test)
-        w="$(wallpaper)"; [[ -r $w ]] && cp "$w" "$src/background.png"
-        exec sddm-greeter-qt6 --test-mode --theme "$src" ;;
+        # preview a throwaway copy carrying the current wallpaper + theme colours
+        t="$(mktemp -d)"; cp -r "$src/." "$t/"
+        w="$(wallpaper)"; [[ -r $w ]] && { rm -f "$t"/background.*; cp "$w" "$t/background.${w##*.}"; sed -i "s|^background=.*|background=background.${w##*.}|" "$t/theme.conf"; }
+        tc="${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme/colors.json"
+        for k in accent mode text red; do v="$(jq -r --arg k "$k" '.[$k] // empty' "$tc" 2>/dev/null || true)"; [[ -n $v ]] && sed -i "s|^$k=.*|$k=$v|" "$t/theme.conf"; done
+        v="$(jq -r '.bg // empty' "$tc" 2>/dev/null || true)"; [[ -n $v ]] && sed -i "s|^base=.*|base=$v|" "$t/theme.conf"
+        sddm-greeter-qt6 --test-mode --theme "$t"; rm -rf "$t" ;;
     install)
         step "Install SDDM theme → $dest"
         tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
@@ -43,7 +48,14 @@ case $cmd in
             sed -i "s|^background=.*|background=background.$ext|" "$tmp/theme.conf"
             ok "wallpaper: $w"
         fi
-        sed -i "s|^accent=.*|accent=$(accent)|" "$tmp/theme.conf"
+        # colours/mode from the desktop theme (dark = pitch black, light = eggshell)
+        tc="${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme/colors.json"
+        for k in accent mode text red; do
+            v="$(jq -r --arg k "$k" '.[$k] // empty' "$tc" 2>/dev/null || true)"
+            [[ -n $v ]] && sed -i "s|^$k=.*|$k=$v|" "$tmp/theme.conf"
+        done
+        v="$(jq -r '.bg // empty' "$tc" 2>/dev/null || true)"; [[ -n $v ]] && sed -i "s|^base=.*|base=$v|" "$tmp/theme.conf"
+        info "mode: $(grep '^mode=' "$tmp/theme.conf" | cut -d= -f2)  (re-run install after switching light/dark)"
         run sudo install -d -m 755 "$dest"
         run sudo cp -r "$tmp/." "$dest/"
         run sudo chmod -R a+rX "$dest"

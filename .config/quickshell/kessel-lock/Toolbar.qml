@@ -11,7 +11,7 @@ Rectangle {
     radius: height / 2
     color: Style.toolbar
     border.width: 1
-    border.color: Qt.rgba(1, 1, 1, 0.08)
+    border.color: Style.cardBorder
     RowLayout {
         id: row
         anchors.fill: parent

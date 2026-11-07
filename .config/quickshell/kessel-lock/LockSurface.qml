@@ -50,7 +50,7 @@ MouseArea {
     }
 
     // ── background: blurred wallpaper + dark overlay ─────────────────────────
-    Rectangle { anchors.fill: parent; color: "black" }
+    Rectangle { anchors.fill: parent; color: Style.base }
     Image {
         id: wall
         anchors.fill: parent
@@ -68,7 +68,7 @@ MouseArea {
         saturation: -0.1
         visible: wall.status === Image.Ready
     }
-    Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, 0.62) }
+    Rectangle { anchors.fill: parent; color: Style.overlay }
 
     // ── centre card ──────────────────────────────────────────────────────────
     SystemClock { id: clock; precision: SystemClock.Seconds }
@@ -81,16 +81,16 @@ MouseArea {
         width: centerInfo.implicitWidth + 80
         height: centerInfo.implicitHeight + 56
         radius: 28
-        color: Qt.rgba(0, 0, 0, 0.38)
+        color: Style.card
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.06)
+        border.color: Style.cardBorder
         opacity: root.toolbarOpacity
         scale: root.toolbarScale
         layer.enabled: true
         layer.effect: MultiEffect {
             shadowEnabled: true
             shadowBlur: 1.0
-            shadowOpacity: 0.55
+            shadowOpacity: Style.dark ? 0.55 : 0.18
             shadowColor: "black"
             shadowVerticalOffset: 8
         }
@@ -151,7 +151,7 @@ MouseArea {
                     text: Style.iAccount
                     font.family: Style.font
                     font.pixelSize: parent.s
-                    color: Qt.rgba(1, 1, 1, 0.7)
+                    color: Style.subtext
                 }
             }
 
@@ -185,7 +185,7 @@ MouseArea {
         width: lockedRow.implicitWidth + 24
         height: lockedRow.implicitHeight + 10
         radius: height / 2
-        color: Qt.rgba(1, 1, 1, 0.08)
+        color: Style.pill
         opacity: root.toolbarOpacity
         Row {
             id: lockedRow

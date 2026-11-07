@@ -12,11 +12,18 @@ Item {
     width: Screen.width
     height: Screen.height
 
+    // Theme (written into theme.conf by ~/Scripts/sddm-theme.sh from the desktop theme):
+    // dark = pitch black, light = eggshell — same as the lock screen.
+    readonly property bool dark: (config.stringValue("mode") || "dark") !== "light"
+    readonly property color base: config.stringValue("base") || (dark ? "#000000" : "#f0ead6")
+    readonly property color fg: config.stringValue("text") || (dark ? "#e8e8e8" : "#1d1b16")
     readonly property color accent: config.stringValue("accent") || "#8aadf4"
-    readonly property color red: "#e06c75"
-    readonly property color subtext: Qt.rgba(1, 1, 1, 0.65)
-    readonly property color faint: Qt.rgba(1, 1, 1, 0.45)
-    readonly property color toolbarColor: Qt.rgba(0.06, 0.06, 0.06, 0.78)
+    readonly property color red: config.stringValue("red") || "#e06c75"
+    readonly property color subtext: a(fg, 0.68)
+    readonly property color faint: a(fg, 0.45)
+    readonly property color toolbarColor: a(base, dark ? 0.82 : 0.86)
+    readonly property color onAccent: dark ? "#000000" : "#ffffff"
+    function a(c, alpha) { return Qt.rgba(c.r, c.g, c.b, alpha) }
     readonly property string mono: "JetBrainsMono Nerd Font Mono"
     readonly property string nf: "JetBrainsMono Nerd Font"
     function g(cp) { return String.fromCodePoint(cp) }
@@ -54,7 +61,7 @@ Item {
     }
 
     // ── background ───────────────────────────────────────────────────────────
-    Rectangle { anchors.fill: parent; color: "black" }
+    Rectangle { anchors.fill: parent; color: root.base }
     Image {
         id: wall
         anchors.fill: parent
@@ -72,7 +79,7 @@ Item {
         saturation: -0.1
         visible: wall.status === Image.Ready
     }
-    Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, 0.62) }
+    Rectangle { anchors.fill: parent; color: root.a(root.base, root.dark ? 0.62 : 0.58) }
 
     MouseArea { anchors.fill: parent; onPressed: password.forceActiveFocus() }
 
@@ -91,13 +98,13 @@ Item {
         width: info.implicitWidth + 80
         height: info.implicitHeight + 56
         radius: 28
-        color: Qt.rgba(0, 0, 0, 0.38)
+        color: root.a(root.base, root.dark ? 0.45 : 0.55)
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.06)
+        border.color: root.a(root.fg, 0.07)
         opacity: root.enter
         scale: 0.92 + 0.08 * root.enter
         layer.enabled: true
-        layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowOpacity: 0.55; shadowColor: "black"; shadowVerticalOffset: 8 }
+        layer.effect: MultiEffect { shadowEnabled: true; shadowBlur: 1.0; shadowOpacity: root.dark ? 0.55 : 0.18; shadowColor: "black"; shadowVerticalOffset: 8 }
 
         ColumnLayout {
             id: info
@@ -109,7 +116,7 @@ Item {
                 font.pixelSize: Math.min(84, root.height * 0.11)
                 font.family: root.mono
                 font.weight: Font.Bold
-                color: "white"
+                color: root.fg
             }
             Text {
                 Layout.alignment: Qt.AlignHCenter
@@ -160,7 +167,7 @@ Item {
                         text: root.g(0xF0009)
                         font.family: root.nf
                         font.pixelSize: parent.s
-                        color: Qt.rgba(1, 1, 1, 0.7)
+                        color: root.subtext
                     }
                 }
                 Text {
@@ -173,7 +180,7 @@ Item {
             }
             Item { Layout.preferredHeight: 20 }
             Text { Layout.alignment: Qt.AlignHCenter; text: "$ whoami"; font.pixelSize: 15; font.family: root.mono; color: root.faint; bottomPadding: 6 }
-            Text { Layout.alignment: Qt.AlignHCenter; text: root.userName; font.pixelSize: 36; font.family: root.mono; font.weight: Font.Medium; color: "white" }
+            Text { Layout.alignment: Qt.AlignHCenter; text: root.userName; font.pixelSize: 36; font.family: root.mono; font.weight: Font.Medium; color: root.fg }
         }
     }
 
@@ -185,7 +192,7 @@ Item {
         width: pillRow.implicitWidth + 24
         height: pillRow.implicitHeight + 10
         radius: height / 2
-        color: Qt.rgba(1, 1, 1, 0.08)
+        color: root.a(root.fg, 0.08)
         opacity: root.enter
         Row {
             id: pillRow
@@ -204,7 +211,7 @@ Item {
         radius: height / 2
         color: root.toolbarColor
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.08)
+        border.color: root.a(root.fg, 0.08)
         opacity: root.enter
         scale: 0.92 + 0.08 * root.enter
         RowLayout { id: row; anchors.fill: parent; anchors.leftMargin: 8; anchors.rightMargin: 8; spacing: 4 }
@@ -217,9 +224,9 @@ Item {
         signal clicked()
         Layout.preferredWidth: 38; Layout.preferredHeight: 38; Layout.alignment: Qt.AlignVCenter
         radius: 19
-        color: toggled ? tint : (bma.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+        color: toggled ? tint : (bma.containsMouse ? root.a(root.fg, 0.10) : "transparent")
         opacity: enabled ? 1 : 0.5
-        Text { anchors.centerIn: parent; text: b.icon; font.family: root.nf; font.pixelSize: 20; color: b.toggled ? "black" : root.subtext }
+        Text { anchors.centerIn: parent; text: b.icon; font.family: root.nf; font.pixelSize: 20; color: b.toggled ? root.onAccent : root.subtext }
         MouseArea { id: bma; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: b.clicked() }
     }
 
@@ -278,8 +285,9 @@ Item {
         Btn { icon: root.g(0xF0054); toggled: true; enabled: !root.busy; onClicked: root.login() }
     }
 
-    // left: session + keyboard layout
+    // left: keyboard layout (hidden when SDDM reports none)
     Toolbar {
+        visible: keyboard.layouts.length > 0
         anchors.right: mainBar.left
         anchors.rightMargin: 10
         anchors.verticalCenter: mainBar.verticalCenter
@@ -287,22 +295,8 @@ Item {
             Layout.leftMargin: 8
             Layout.rightMargin: 8
             spacing: 8
-            Text { text: root.g(0xF0379); font.family: root.nf; font.pixelSize: 20; color: root.subtext; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: root.g(0xF030C); font.family: root.nf; font.pixelSize: 20; color: root.subtext; anchors.verticalCenter: parent.verticalCenter }
             Text {
-                text: root.sessionName(root.sessionIndex)
-                font.family: root.mono; font.pixelSize: 15; color: "white"
-                anchors.verticalCenter: parent.verticalCenter
-                MouseArea {
-                    anchors.fill: parent; anchors.margins: -8
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: sessionModel.rowCount() > 1
-                    onClicked: root.sessionIndex = (root.sessionIndex + 1) % sessionModel.rowCount()
-                }
-            }
-            Text { text: "·"; color: root.faint; font.pixelSize: 15; anchors.verticalCenter: parent.verticalCenter; visible: kb.visible }
-            Text {
-                id: kb
-                visible: keyboard.layouts.length > 0
                 text: keyboard.layouts.length > 0 ? keyboard.layouts[keyboard.currentLayout].shortName : ""
                 font.family: root.mono; font.pixelSize: 15; color: root.subtext
                 anchors.verticalCenter: parent.verticalCenter
@@ -310,6 +304,92 @@ Item {
                     anchors.fill: parent; anchors.margins: -8
                     enabled: keyboard.layouts.length > 1
                     onClicked: keyboard.currentLayout = (keyboard.currentLayout + 1) % keyboard.layouts.length
+                }
+            }
+        }
+    }
+
+    // ── session switcher: a small icon top-left; click to expand ─────────────
+    Rectangle {
+        id: sessionSwitcher
+        property bool open: false
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.margins: 16
+        width: open ? Math.max(260, sessionList.implicitWidth + 24) : 40
+        height: open ? 40 + sessionList.implicitHeight + 12 : 40
+        radius: open ? 20 : 20
+        color: root.toolbarColor
+        border.width: 1
+        border.color: root.a(root.fg, 0.08)
+        clip: true
+        opacity: root.enter
+        Behavior on width  { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+        Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+
+        // header: icon (+ current session name when open)
+        Item {
+            width: parent.width
+            height: 40
+            Text {
+                x: 10
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.g(0xF0379)
+                font.family: root.nf; font.pixelSize: 18
+                color: sessionSwitcher.open ? root.accent : root.subtext
+            }
+            Text {
+                x: 40
+                anchors.verticalCenter: parent.verticalCenter
+                visible: sessionSwitcher.open
+                text: "Session"
+                font.family: root.mono; font.pixelSize: 13
+                color: root.faint
+            }
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+                onClicked: sessionSwitcher.open = !sessionSwitcher.open
+            }
+        }
+        Column {
+            id: sessionList
+            x: 6; y: 42
+            visible: sessionSwitcher.open
+            spacing: 2
+            Repeater {
+                model: sessionModel
+                Rectangle {
+                    required property int index
+                    required property string name
+                    readonly property bool current: index === root.sessionIndex
+                    width: Math.max(248, label.implicitWidth + 44)
+                    height: 32
+                    radius: 10
+                    color: current ? root.a(root.accent, 0.18) : (sma.containsMouse ? root.a(root.fg, 0.08) : "transparent")
+                    Text {
+                        id: label
+                        x: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: parent.name
+                        font.family: root.mono; font.pixelSize: 14
+                        color: parent.current ? root.accent : root.fg
+                    }
+                    Text {
+                        anchors.right: parent.right; anchors.rightMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: parent.current
+                        text: root.g(0xF012C)
+                        font.family: root.nf; font.pixelSize: 14; color: root.accent
+                    }
+                    MouseArea {
+                        id: sma
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: { root.sessionIndex = parent.index; sessionSwitcher.open = false; password.forceActiveFocus() }
+                    }
                 }
             }
         }
