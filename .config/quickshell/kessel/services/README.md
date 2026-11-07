@@ -1,12 +1,18 @@
 # Island services
 
-Each service is a QML singleton with no UI. The UI under `ui/` only reads them.
+Singletons without UI: state, D-Bus, PipeWire, processes. Views in `../ui/` only read them.
 
-| Service | State | Notes |
-| --- | --- | --- |
-| `Time.qml` | **implemented** | One `SystemClock` (minute precision) |
-| `IslandState.qml` | **implemented** | Visibility/expansion + `IpcHandler` target `island` |
-| `Media` (MPRIS) | planned | `Quickshell.Services.Mpris`. Enabled only after it has been verified reliable in the session |
-| `Notifications` | planned (not used) | dunst is the single notification path; the island must not register a second server |
-| `Audio` | planned | `Quickshell.Services.Pipewire` default sink volume/mute |
-| `Launcher` | planned | Would only *call* fuzzel; fuzzel stays independent |
+| Service | Role |
+| --- | --- |
+| `IslandState` | Layer arbitration (alarm > panel > notification > osd > summary > rest) + **all IPC** (`qs -c kessel ipc show`) |
+| `Perspectives` | Resting perspectives (overview · time · music · metrics · minimal), auto music mode |
+| `Time`, `Weather`, `User` | Clock; wttr.in + Open-Meteo (7 days, sunrise/sunset); user/host/avatar/uptime |
+| `Media`, `Cava` | MPRIS player (wraps looping positions); cava visualizer (runs only when shown) |
+| `Audio`, `Privacy` | PipeWire sinks/sources/per-app streams (classified by `PwNodeType`); mic/camera/screen-share in use |
+| `Notifs` | Notification server (dunst takes over via D-Bus when the island is down) |
+| `Net`, `Bt`, `Power`, `Brightness`, `NightLight` | NetworkManager, BlueZ, UPower + power profiles, backlight, hyprsunset; hidden when absent |
+| `Apps`, `Calc`, `Translator`, `Clipboard` | Launcher sources: desktop entries, qalc/built-in maths, offline translation, cliphist |
+| `Notes`, `Board` | `~/Notes/*.md` editor, kanban board in `~/Notes/Board.md` |
+| `Timers`, `Alarm`, `Recorder`, `Session`, `Utils`, `Themes`, `Hypr`, `Stats` | Timer/stopwatch, alarm, wf-recorder, power actions + idle inhibit, one-shot tools, wallpaper/theme, Hyprland workspaces/windows, CPU/RAM/net |
+
+Adding one: create `Name.qml` with `pragma Singleton` and `Singleton { … }`, then **restart** the island (new files aren't hot-reloaded). Avoid names of QtQuick types (e.g. `Translate`).
