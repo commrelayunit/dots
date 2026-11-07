@@ -16,5 +16,6 @@
 .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini
 .config/gtk-4.0/settings.ini .config/gtk-4.0/settings.ini
 .config/quickshell/kessel    .config/quickshell/kessel
+.config/quickshell/kessel-lock .config/quickshell/kessel-lock
 .config/omniglyph/config.toml .config/omniglyph/config.toml
 scripts                      Scripts

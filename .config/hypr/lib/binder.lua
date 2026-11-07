@@ -74,6 +74,10 @@ local function write(path, content)
 end
 
 function M.apply(registry)
+    if type(registry) ~= "table" or type(registry.binds) ~= "table" then
+        -- e.g. Hyprland auto-reloaded while keybinds.lua was half-written; the next save fixes it
+        error("keybinds.lua did not return { binds = … } (file mid-save?) — rescue binds active", 0)
+    end
     local seen, errors = {}, {}
     for _, e in ipairs(registry.binds) do
         if not e.doc then

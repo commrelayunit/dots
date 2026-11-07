@@ -3,7 +3,11 @@
 -- Note: the session is started by uwsm, which already exports the XDG_* session
 -- variables to systemd; these are for processes Hyprland spawns.
 
+-- Cursor: Bibata-Modern-Classic (as in end-4; AUR bibata-cursor-theme-bin, optional).
+-- Missing theme → toolkits fall back to the default cursor.
+hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
 hl.env("XCURSOR_SIZE", "24")
+hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Classic")
 hl.env("HYPRCURSOR_SIZE", "24")
 
 -- Toolkits: prefer native Wayland, fall back to X11.

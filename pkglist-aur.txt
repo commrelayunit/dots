@@ -1,3 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # OPTIONAL AUR packages. Installed only with: ./install.sh --with-aur (via yay).
 omniglyph
+# end-4's cursor (Bibata-Modern-Classic)
+bibata-cursor-theme-bin

@@ -80,6 +80,7 @@ Singleton {
             root.showOsd(Session.floatMode ? Icons.floating : Icons.tiling, Session.floatMode ? "Floating" : "Tiling", 1)
             return "ok"
         }
+        function stayAwake(on: bool): string { Session.inhibitIdle = on; return "ok" }
         function reloadTheme(): string { Theme.reload(); return "ok" }
         function toggleTheme(): string { Themes.toggleMode(); return "ok" }
         function status(): string {

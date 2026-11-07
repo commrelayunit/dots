@@ -33,7 +33,7 @@ local apps = {
     editor   = S .. "editor.sh",
     mixer    = "pavucontrol",
     taskmgr  = "kitty --class htop -e htop",
-    lock     = "pidof hyprlock || hyprlock",
+    lock     = S .. "lock.sh",
 }
 
 local b = {}
@@ -138,7 +138,7 @@ add { group = "Workspaces", keys = "SUPER + ALT + S",  dsp = function() return h
 
 -- Session ----------------------------------------------------------------------
 add { group = "Session", keys = "SUPER + L",          exec = apps.lock, desc = "Lock" }
-add { group = "Session", keys = "SUPER + SHIFT + L",  exec = "loginctl lock-session; systemctl suspend", opts = { locked = true }, desc = "Standby (suspend)" }
+add { group = "Session", keys = "SUPER + SHIFT + L",  exec = S .. "lock.sh; sleep 1; systemctl suspend", opts = { locked = true }, desc = "Standby (suspend)" }
 add { group = "Session", keys = "CTRL + SHIFT + SUPER + R", dsp = function() return hl.dsp.reload_config() end, desc = "Reload Hyprland config" }
 
 -- Media / hardware keys (work while locked) ------------------------------------

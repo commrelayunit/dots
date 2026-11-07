@@ -56,6 +56,7 @@ hl.config({
         force_default_wallpaper = 0,     -- hyprpaper draws the wallpaper
         disable_hyprland_logo   = true,
         disable_splash_rendering = true,
+        allow_session_lock_restore = true, -- a new locker (hyprlock) may take over a crashed one
     },
 
     layers = {

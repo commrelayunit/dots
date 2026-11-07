@@ -1,0 +1,362 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Kessel lock surface. Standalone (no end-4 modules); layout follows the user's
+// own adaptation of end-4/dots-hyprland's lock screen and clock widget:
+// blurred wallpaper + dark overlay, frosted centre card (time, date, avatar,
+// "$ whoami", username), a "Locked" pill, and a bottom toolbar
+// (keyboard layout · password · battery / sleep / power / reboot).
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Effects
+import Quickshell
+import Quickshell.Io
+import Quickshell.Hyprland
+import Quickshell.Services.UPower
+import Quickshell.Widgets
+
+MouseArea {
+    id: root
+    required property LockContext context
+    readonly property bool requirePasswordToPower: true
+    readonly property string user: Quickshell.env("USER") || "user"
+
+    function forceFieldFocus() { passwordBox.forceActiveFocus() }
+    Connections {
+        target: root.context
+        function onShouldReFocus() { root.forceFieldFocus() }
+        function onFailedChanged() { if (root.context.failed) shake.restart() }
+    }
+    hoverEnabled: true
+    acceptedButtons: Qt.LeftButton
+    onPressed: forceFieldFocus()
+    onPositionChanged: forceFieldFocus()
+
+    // entrance animation
+    property real toolbarScale: 0.92
+    property real toolbarOpacity: 0
+    Behavior on toolbarScale { NumberAnimation { duration: 420; easing.type: Easing.OutBack; easing.overshoot: 1.2 } }
+    Behavior on toolbarOpacity { NumberAnimation { duration: 260 } }
+    Component.onCompleted: { forceFieldFocus(); toolbarScale = 1; toolbarOpacity = 1 }
+
+    property bool ctrlHeld: false
+    Keys.onPressed: event => {
+        root.context.resetClearTimer()
+        if (event.key === Qt.Key_Control) root.ctrlHeld = true
+        if (event.key === Qt.Key_Escape) { root.context.currentText = ""; root.context.resetTargetAction() }
+        forceFieldFocus()
+    }
+    Keys.onReleased: event => {
+        if (event.key === Qt.Key_Control) root.ctrlHeld = false
+        forceFieldFocus()
+    }
+
+    // ── background: blurred wallpaper + dark overlay ─────────────────────────
+    Rectangle { anchors.fill: parent; color: "black" }
+    Image {
+        id: wall
+        anchors.fill: parent
+        source: "file://" + Style.wallpaper
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        visible: false
+    }
+    MultiEffect {
+        anchors.fill: parent
+        source: wall
+        blurEnabled: true
+        blurMax: 64
+        blur: 1.0
+        saturation: -0.1
+        visible: wall.status === Image.Ready
+    }
+    Rectangle { anchors.fill: parent; color: Qt.rgba(0, 0, 0, 0.62) }
+
+    // ── centre card ──────────────────────────────────────────────────────────
+    SystemClock { id: clock; precision: SystemClock.Seconds }
+
+    Rectangle {
+        id: centerCard
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: -40
+        width: centerInfo.implicitWidth + 80
+        height: centerInfo.implicitHeight + 56
+        radius: 28
+        color: Qt.rgba(0, 0, 0, 0.38)
+        border.width: 1
+        border.color: Qt.rgba(1, 1, 1, 0.06)
+        opacity: root.toolbarOpacity
+        scale: root.toolbarScale
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowBlur: 1.0
+            shadowOpacity: 0.55
+            shadowColor: "black"
+            shadowVerticalOffset: 8
+        }
+
+        ColumnLayout {
+            id: centerInfo
+            anchors.centerIn: parent
+            spacing: 0
+
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: Qt.formatDateTime(clock.date, "HH:mm")
+                font.pixelSize: Math.min(84, root.height * 0.11)
+                font.family: Style.mono
+                font.weight: Font.Bold
+                color: Style.text
+            }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: Qt.formatDateTime(clock.date, "dddd, d MMMM")
+                font.pixelSize: 20
+                font.family: Style.mono
+                color: Style.subtext
+                topPadding: 6
+            }
+
+            Item { Layout.preferredHeight: Math.min(48, root.height * 0.04) }
+
+            // avatar: same lookup order as the SDDM theme
+            Item {
+                Layout.alignment: Qt.AlignHCenter
+                readonly property real s: Math.min(160, root.height * 0.17)
+                Layout.preferredWidth: s
+                Layout.preferredHeight: s
+                ClippingRectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: "transparent"
+                    Image {
+                        id: avatar
+                        anchors.fill: parent
+                        readonly property var sources: [
+                            "file:///usr/share/sddm/faces/" + root.user + ".face.icon",
+                            "file:///var/lib/AccountsService/icons/" + root.user,
+                            "file://" + Quickshell.env("HOME") + "/.face"
+                        ]
+                        property int idx: 0
+                        source: sources[idx]
+                        sourceSize: Qt.size(320, 320)
+                        fillMode: Image.PreserveAspectCrop
+                        visible: status === Image.Ready
+                        onStatusChanged: if (status === Image.Error && idx < sources.length - 1) idx++
+                    }
+                }
+                Text {
+                    anchors.centerIn: parent
+                    visible: avatar.status !== Image.Ready
+                    text: Style.iAccount
+                    font.family: Style.font
+                    font.pixelSize: parent.s
+                    color: Qt.rgba(1, 1, 1, 0.7)
+                }
+            }
+
+            Item { Layout.preferredHeight: 20 }
+
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: "$ whoami"
+                font.pixelSize: 15
+                font.family: Style.mono
+                color: Style.faint
+                bottomPadding: 6
+            }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: root.user
+                font.pixelSize: 36
+                font.family: Style.mono
+                font.weight: Font.Medium
+                color: Style.text
+            }
+        }
+    }
+
+    // "Locked" pill (the clock widget's locked state), kept below the card
+    Rectangle {
+        id: lockedPill
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: centerCard.bottom
+        anchors.topMargin: 16
+        width: lockedRow.implicitWidth + 24
+        height: lockedRow.implicitHeight + 10
+        radius: height / 2
+        color: Qt.rgba(1, 1, 1, 0.08)
+        opacity: root.toolbarOpacity
+        Row {
+            id: lockedRow
+            anchors.centerIn: parent
+            spacing: 6
+            Text { text: Style.iLock; font.family: Style.font; font.pixelSize: 18; color: Style.subtext; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: "Locked"; font.family: Style.mono; font.pixelSize: 16; color: Style.subtext; anchors.verticalCenter: parent.verticalCenter }
+        }
+    }
+
+    // ── main toolbar: password ───────────────────────────────────────────────
+    Toolbar {
+        id: mainIsland
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
+
+        Item {
+            id: field
+            Layout.preferredWidth: 260
+            Layout.preferredHeight: 38
+            Layout.leftMargin: 8
+
+            TextInput {
+                id: passwordBox
+                anchors.fill: parent
+                verticalAlignment: TextInput.AlignVCenter
+                echoMode: TextInput.Password
+                inputMethodHints: Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                enabled: !root.context.unlockInProgress
+                color: "transparent"                 // dots are drawn below
+                selectionColor: "transparent"
+                selectedTextColor: "transparent"
+                cursorVisible: false
+                font.pixelSize: 16
+                focus: true
+                onTextChanged: if (root.context.currentText !== text) root.context.currentText = text
+                onAccepted: root.context.tryUnlock(root.ctrlHeld)
+                Keys.onPressed: root.context.resetClearTimer()
+                Connections {
+                    target: root.context
+                    function onCurrentTextChanged() { if (passwordBox.text !== root.context.currentText) passwordBox.text = root.context.currentText }
+                }
+            }
+            // placeholder / status
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.context.currentText.length === 0
+                text: root.context.unlockInProgress ? "Checking…"
+                    : root.context.failed ? "Incorrect password"
+                    : root.context.targetAction === LockContext.Action.Poweroff ? "Password to shut down"
+                    : root.context.targetAction === LockContext.Action.Reboot ? "Password to restart"
+                    : "Enter password"
+                color: root.context.failed ? Style.red : Style.faint
+                font.family: Style.mono
+                font.pixelSize: 15
+            }
+            // password dots
+            Row {
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 6
+                Repeater {
+                    model: Math.min(root.context.currentText.length, 24)
+                    Rectangle {
+                        width: 10; height: 10; radius: 5
+                        color: Style.accent
+                        scale: 0
+                        Component.onCompleted: scale = 1
+                        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutBack } }
+                    }
+                }
+            }
+            SequentialAnimation {
+                id: shake
+                property real d: 10
+                NumberAnimation { target: field; property: "Layout.leftMargin"; to: 8 + shake.d; duration: 45 }
+                NumberAnimation { target: field; property: "Layout.leftMargin"; to: 8 - shake.d; duration: 70 }
+                NumberAnimation { target: field; property: "Layout.leftMargin"; to: 8 + shake.d / 2; duration: 60 }
+                NumberAnimation { target: field; property: "Layout.leftMargin"; to: 8; duration: 50 }
+            }
+        }
+
+        ToolbarButton {
+            id: confirmButton
+            toggled: true
+            enabled: !root.context.unlockInProgress
+            icon: root.context.targetAction === LockContext.Action.Poweroff ? Style.iPower
+                : root.context.targetAction === LockContext.Action.Reboot ? Style.iReboot
+                : root.ctrlHeld ? Style.iCoffee : Style.iArrow
+            onClicked: root.context.tryUnlock(root.ctrlHeld)
+        }
+    }
+
+    // ── left toolbar: keyboard layout ────────────────────────────────────────
+    Toolbar {
+        id: leftIsland
+        anchors.right: mainIsland.left
+        anchors.rightMargin: 10
+        anchors.verticalCenter: mainIsland.verticalCenter
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
+        Row {
+            Layout.leftMargin: 8
+            Layout.rightMargin: 8
+            spacing: 8
+            Text { text: Style.iKeyboard; font.family: Style.font; font.pixelSize: 20; color: Style.subtext; anchors.verticalCenter: parent.verticalCenter }
+            Text { id: layoutText; text: "us"; font.family: Style.mono; font.pixelSize: 15; color: Style.subtext; anchors.verticalCenter: parent.verticalCenter }
+        }
+    }
+    Process {
+        id: kbProbe
+        running: true
+        command: ["sh", "-c", "hyprctl devices -j | jq -r '[.keyboards[] | select(.main)][0] | .active_keymap // .layout // \"us\"'"]
+        stdout: StdioCollector { onStreamFinished: { const t = text.trim(); if (t) layoutText.text = t.length > 14 ? t.slice(0, 12) + "…" : t } }
+    }
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) { if (event.name === "activelayout") kbProbe.running = true }
+    }
+
+    // ── right toolbar: battery, sleep, power, reboot ─────────────────────────
+    Toolbar {
+        id: rightIsland
+        anchors.left: mainIsland.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: mainIsland.verticalCenter
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
+
+        Row {
+            readonly property var bat: UPower.displayDevice
+            readonly property bool has: (bat?.isLaptopBattery ?? false) && (bat?.isPresent ?? false)
+            visible: has
+            Layout.leftMargin: 10
+            Layout.rightMargin: 6
+            spacing: 4
+            Text {
+                text: !UPower.onBattery ? Style.iBolt : Style.iBattery
+                font.family: Style.font; font.pixelSize: 20
+                color: parent.has && UPower.onBattery && parent.bat.percentage < 0.15 ? Style.red : Style.subtext
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            Text {
+                text: parent.has ? Math.round(parent.bat.percentage * 100) : ""
+                font.family: Style.mono; font.pixelSize: 15
+                color: Style.subtext
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+        ToolbarButton { icon: Style.iSleep; onClicked: Quickshell.execDetached(["systemctl", "suspend"]) }
+        ToolbarButton {
+            icon: Style.iPower
+            toggled: root.context.targetAction === LockContext.Action.Poweroff
+            tint: Style.red
+            onClicked: root.guard(LockContext.Action.Poweroff)
+        }
+        ToolbarButton {
+            icon: Style.iReboot
+            toggled: root.context.targetAction === LockContext.Action.Reboot
+            tint: Style.red
+            onClicked: root.guard(LockContext.Action.Reboot)
+        }
+    }
+
+    // Power actions need the password: the first click arms, the password confirms.
+    function guard(action) {
+        if (!root.requirePasswordToPower) { root.context.unlocked(action); return }
+        if (root.context.targetAction === action) root.context.resetTargetAction()
+        else root.context.targetAction = action
+        root.context.shouldReFocus()
+    }
+}

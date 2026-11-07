@@ -93,6 +93,8 @@ GSETTINGS_WANT=(
     "org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font 12'"
     "org.gnome.desktop.interface color-scheme 'prefer-dark'"   # theme.sh flips this for light mode
     "org.gnome.desktop.interface icon-theme 'Papirus-Dark'"
+    "org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Classic'"
+    "org.gnome.desktop.interface cursor-size 24"
 )
 
 step_gsettings() { # returns 0 if something changed

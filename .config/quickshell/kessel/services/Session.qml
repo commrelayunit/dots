@@ -10,8 +10,8 @@ Singleton {
     property bool floatMode: false
     function toggleFloatMode() { Quickshell.execDetached(["hyprctl", "dispatch", "KesselToggleFloat"]) }
 
-    function lock()     { Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock"]) }
-    function suspend()  { Quickshell.execDetached(["sh", "-c", "loginctl lock-session; sleep 0.5; systemctl suspend"]) }
+    function lock()     { Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/lock.sh"]) }
+    function suspend()  { Quickshell.execDetached(["sh", "-c", "\"$HOME/.config/hypr/scripts/lock.sh\"; sleep 1; systemctl suspend"]) }
     function logout()   { Quickshell.execDetached(["uwsm", "stop"]) }
     function reboot()   { Quickshell.execDetached(["systemctl", "reboot"]) }
     function poweroff() { Quickshell.execDetached(["systemctl", "poweroff"]) }
