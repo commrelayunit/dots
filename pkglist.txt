@@ -52,7 +52,15 @@ hyprsunset
 cava
 # Wallpaper-derived theme accents (scripts/theme.sh)
 matugen
-# Apps bound in keybinds.lua (SUPER+C editor, CTRL+SHIFT+Esc task manager)
+# Apps bound in keybinds.lua (SUPER+C editor, CTRL+SHIFT+Esc task manager, SUPER+E files, SUPER+O notes)
+dolphin
+kio-extras
+ffmpegthumbs
+archlinux-xdg-menu
+breeze
+obsidian
+# Qt theming (palette from scripts/theme.sh)
+qt6ct
 neovim
 eza
 htop

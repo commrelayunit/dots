@@ -139,6 +139,77 @@ return {
 }
 EOF
 
+    # KDE apps (Dolphin): a "Kessel" colour scheme from the same palette.
+    if command -v kwriteconfig6 >/dev/null; then
+        local cs="${XDG_DATA_HOME:-$HOME/.local/share}/color-schemes"; mkdir -p "$cs"
+        rgb() { local h=${1#\#}; printf '%d,%d,%d' 0x${h:0:2} 0x${h:2:2} 0x${h:4:2}; }
+        local SEL_FG; [[ $mode == dark ]] && SEL_FG="$BG" || SEL_FG="#ffffff"
+        {
+            echo "[General]"; echo "ColorScheme=Kessel"; echo "Name=Kessel"; echo
+            for g in Window View Button Tooltip Header Complementary; do
+                local bgn="$BG" alt="$SURFACE"
+                [[ $g == Button ]] && bgn="$SURFACE" && alt="$SURFACE2"
+                [[ $g == View ]] && alt="$SURFACE"
+                echo "[Colors:$g]"
+                echo "BackgroundNormal=$(rgb "$bgn")"; echo "BackgroundAlternate=$(rgb "$alt")"
+                echo "ForegroundNormal=$(rgb "$TEXT")"; echo "ForegroundInactive=$(rgb "$SUBTEXT")"
+                echo "ForegroundActive=$(rgb "$A")"; echo "ForegroundLink=$(rgb "$A")"; echo "ForegroundVisited=$(rgb "$A3")"
+                echo "ForegroundNegative=$(rgb "$RED")"; echo "ForegroundNeutral=$(rgb "$YELLOW")"; echo "ForegroundPositive=$(rgb "$GREEN")"
+                echo "DecorationFocus=$(rgb "$A")"; echo "DecorationHover=$(rgb "$A")"; echo
+            done
+            echo "[Colors:Selection]"
+            echo "BackgroundNormal=$(rgb "$A")"; echo "BackgroundAlternate=$(rgb "$A")"
+            echo "ForegroundNormal=$(rgb "$SEL_FG")"; echo "ForegroundInactive=$(rgb "$SEL_FG")"; echo "ForegroundActive=$(rgb "$SEL_FG")"
+            echo "ForegroundLink=$(rgb "$SEL_FG")"; echo "ForegroundVisited=$(rgb "$SEL_FG")"
+            echo "ForegroundNegative=$(rgb "$RED")"; echo "ForegroundNeutral=$(rgb "$YELLOW")"; echo "ForegroundPositive=$(rgb "$GREEN")"
+            echo "DecorationFocus=$(rgb "$A")"; echo "DecorationHover=$(rgb "$A")"; echo
+            # standard effect groups (as in KDE's stock schemes); without them some
+            # widgets derive unreadable text colours
+            echo "[ColorEffects:Disabled]"; echo "Color=56,56,56"; echo "ColorAmount=0"; echo "ColorEffect=0"
+            echo "ContrastAmount=0.65"; echo "ContrastEffect=1"; echo "IntensityAmount=0.1"; echo "IntensityEffect=2"; echo
+            echo "[ColorEffects:Inactive]"; echo "ChangeSelectionColor=true"; echo "Color=112,111,110"; echo "ColorAmount=0.025"
+            echo "ColorEffect=2"; echo "ContrastAmount=0.1"; echo "ContrastEffect=2"; echo "Enable=false"; echo "IntensityAmount=0"; echo "IntensityEffect=0"; echo
+            echo "[WM]"; echo "activeBackground=$(rgb "$BG")"; echo "activeForeground=$(rgb "$TEXT")"
+            echo "inactiveBackground=$(rgb "$BG")"; echo "inactiveForeground=$(rgb "$SUBTEXT")"
+        } | write "$cs/Kessel.colors"
+        local icons; [[ $mode == dark ]] && icons="Papirus-Dark" || icons="Papirus-Light"
+        kwriteconfig6 --file kdeglobals --group General --key ColorScheme Kessel
+        kwriteconfig6 --file kdeglobals --group General --key TerminalApplication kitty
+        kwriteconfig6 --file kdeglobals --group General --key TerminalService kitty.desktop
+        kwriteconfig6 --file kdeglobals --group Icons --key Theme "$icons"
+        kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle Breeze
+        # apply the scheme's colours to the [Colors:*] groups KDE apps read from kdeglobals
+        while IFS= read -r line; do
+            case $line in
+                \[Colors:*\]) grp="${line#[}"; grp="${grp%]}" ;;
+                *=*) [[ -n ${grp:-} ]] && kwriteconfig6 --file kdeglobals --group "$grp" --key "${line%%=*}" "${line#*=}" ;;
+                "") ;;
+                *) grp="" ;;
+            esac
+        done < "$cs/Kessel.colors"
+    fi
+
+    # Qt apps (Dolphin, …): qt6ct palette, applied at app start. KDE apps outside
+    # Plasma otherwise apply their colour scheme too late for item views
+    # (black text on black). Only our keys are set; other qt6ct settings survive.
+    local qd="${XDG_CONFIG_HOME:-$HOME/.config}/qt6ct"; mkdir -p "$qd/colors"
+    # role order: WindowText Button Light Midlight Dark Mid Text BrightText ButtonText Base
+    #             Window Shadow Highlight HighlightedText Link LinkVisited AlternateBase
+    #             NoRole ToolTipBase ToolTipText PlaceholderText Accent
+    local HL_TXT; [[ $mode == dark ]] && HL_TXT="$BG" || HL_TXT="#ffffff"
+    local act="$TEXT, $SURFACE, $OVERLAY, $SURFACE2, $BG, $SURFACE2, $TEXT, #ffffff, $TEXT, $BG, $BG, #000000, $A, $HL_TXT, $A, $A3, $SURFACE, $BG, $SURFACE, $TEXT, $MUTED, $A"
+    local dis="$MUTED, $SURFACE, $OVERLAY, $SURFACE2, $BG, $SURFACE2, $MUTED, #ffffff, $MUTED, $BG, $BG, #000000, $OVERLAY, $MUTED, $MUTED, $MUTED, $SURFACE, $BG, $SURFACE, $MUTED, $MUTED, $OVERLAY"
+    printf '[ColorScheme]\nactive_colors=%s\ninactive_colors=%s\ndisabled_colors=%s\n' "$act" "$act" "$dis" | write "$qd/colors/Kessel.conf"
+    if command -v kwriteconfig6 >/dev/null; then
+        local icons6; [[ $mode == dark ]] && icons6="Papirus-Dark" || icons6="Papirus-Light"
+        kwriteconfig6 --file "$qd/qt6ct.conf" --group Appearance --key custom_palette true
+        kwriteconfig6 --file "$qd/qt6ct.conf" --group Appearance --key color_scheme_path "$qd/colors/Kessel.conf"
+        kwriteconfig6 --file "$qd/qt6ct.conf" --group Appearance --key icon_theme "$icons6"
+        kwriteconfig6 --file "$qd/qt6ct.conf" --group Appearance --key style "$( [[ -d /usr/lib/qt6/plugins/styles ]] && ls /usr/lib/qt6/plugins/styles | grep -qi breeze && echo Breeze || echo Fusion )"
+        kwriteconfig6 --file "$qd/qt6ct.conf" --group Fonts --key general '"JetBrainsMono Nerd Font,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"'
+        kwriteconfig6 --file "$qd/qt6ct.conf" --group Fonts --key fixed '"JetBrainsMono Nerd Font,12,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"'
+    fi
+
     # ── reload consumers (each optional) ──
     pkill -USR1 -x kitty 2>/dev/null || true                     # kitty re-reads its config
     if command -v gsettings >/dev/null; then

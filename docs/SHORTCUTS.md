@@ -10,7 +10,8 @@
 | `SUPER + SHIFT + Return` | Recovery shell (kitty + plain bash) |
 | `SUPER + C` | Code editor (Neovim) |
 | `SUPER + W` | Web browser |
-| `CTRL + SUPER + V` | Volume mixer (pavucontrol) |
+| `SUPER + E` | File manager (Dolphin) |
+| `SUPER + O` | Obsidian (notes) |
 | `CTRL + SHIFT + Escape` | Task manager (htop) |
 | `SUPER + SHIFT + Space` | App launcher: fuzzel (always available) |
 
@@ -23,14 +24,16 @@
 | `SUPER + V` | Clipboard history (fallback: fuzzel) |
 | `SUPER + Tab` | Overview: workspaces + window previews |
 | `SUPER + A` | Quick settings (Wi-Fi, BT, audio, brightness, power) |
-| `SUPER + N` | Notifications + calendar + weather |
+| `SUPER + ALT + N` | Notifications + calendar + weather |
 | `SUPER + G` | Workspace: Markdown notes (~/Notes) |
 | `SUPER + SHIFT + G` | Workspace: kanban board |
+| `SUPER + M` | Media player |
+| `SUPER + SHIFT + V` | Volume mixer: devices + per-app (fallback: pavucontrol) |
 | `SUPER + ALT + T` | Timer / stopwatch |
 | `CTRL + ALT + Delete` | Session menu (lock, standby, logout, restart, shutdown) |
 | `CTRL + SUPER + T` | Wallpaper & theme picker |
 | `CTRL + SUPER + SHIFT + D` | Toggle light / dark theme |
-| `CTRL + SUPER + R` | Restart the island |
+| `CTRL + SUPER + R` | Refresh: reload Hyprland + restart the island |
 | `SUPER + slash` | Shortcuts (this list) |
 
 ## Utilities
@@ -57,7 +60,7 @@
 | `SUPER + D` | Detach window: float ↔ tile (again to re-tile) |
 | `SUPER + ALT + D` | Maximize (again to restore) |
 | `SUPER + SHIFT + F` | Layout mode: all windows tiling ↔ floating |
-| `SUPER + P` | Pin (show on all workspaces) |
+| `SUPER + ALT + P` | Pin (show on all workspaces) |
 | `SUPER + semicolon` | Narrower (split ratio −) |
 | `SUPER + apostrophe` | Wider (split ratio +) |
 | `SUPER + ALT + J` | Toggle split direction |
@@ -94,11 +97,11 @@
 
 | Keys | Action |
 | --- | --- |
-| `SUPER + SHIFT + P` | Play / pause |
-| `SUPER + SHIFT + N` | Next track |
-| `SUPER + SHIFT + B` | Previous track |
-| `SUPER + SHIFT + M` | Mute output |
-| `SUPER + ALT + M` | Mute microphone |
+| `SUPER + P` | Play / pause |
+| `SUPER + N` | Next track |
+| `SUPER + SHIFT + N` | Previous track |
+| `CTRL + SUPER + V` | Mute / unmute output |
+| `SUPER + ALT + M` | Mute / unmute microphone |
 | `XF86AudioRaiseVolume` | Volume up |
 | `XF86AudioLowerVolume` | Volume down |
 | `XF86MonBrightnessUp` | Brightness up |

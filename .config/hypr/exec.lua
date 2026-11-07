@@ -19,6 +19,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpaper")
     -- wallpaper + light/dark theme from the last session (needs hyprpaper up first)
     hl.exec_cmd("sleep 1; " .. HOME .. "/.config/hypr/scripts/theme.sh restore")
+    hl.exec_cmd("hyprctl setcursor Bibata-Modern-Classic 24")      -- cursor (no-op if not installed)
+    hl.exec_cmd("kbuildsycoca6 --noincremental >/dev/null 2>&1")   -- Dolphin's "Open with" database
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     -- Notifications: dunst is D-Bus activated on first notification; nothing to start.

@@ -33,6 +33,8 @@ local apps = {
     editor   = S .. "editor.sh",
     mixer    = "pavucontrol",
     taskmgr  = "kitty --class htop -e htop",
+    files    = "dolphin",
+    obsidian = S .. "obsidian.sh",
     lock     = S .. "lock.sh",
 }
 
@@ -46,7 +48,8 @@ add { group = "Apps", keys = "CTRL + ALT + T",         exec = apps.terminal, des
 add { group = "Apps", keys = "SUPER + SHIFT + Return", exec = apps.recovery, desc = "Recovery shell (kitty + plain bash)" }
 add { group = "Apps", keys = "SUPER + C",              exec = apps.editor,   desc = "Code editor (Neovim)" }
 add { group = "Apps", keys = "SUPER + W",              exec = apps.browser,  desc = "Web browser" }
-add { group = "Apps", keys = "CTRL + SUPER + V",       exec = apps.mixer,    desc = "Volume mixer (pavucontrol)" }
+add { group = "Apps", keys = "SUPER + E",              exec = apps.files,    desc = "File manager (Dolphin)" }
+add { group = "Apps", keys = "SUPER + O",              exec = apps.obsidian, desc = "Obsidian (notes)" }
 add { group = "Apps", keys = "CTRL + SHIFT + Escape",  exec = apps.taskmgr,  desc = "Task manager (htop)" }
 add { group = "Apps", keys = "SUPER + SHIFT + Space",  exec = apps.launcher, desc = "App launcher: fuzzel (always available)" }
 
@@ -56,17 +59,18 @@ add { group = "Island", keys = "SUPER + Space",     exec = "qs -c kessel ipc cal
 add { group = "Island", keys = "SUPER + V",         exec = island("open clipboard", S .. "clipboard.sh"), desc = "Clipboard history (fallback: fuzzel)" }
 add { group = "Island", keys = "SUPER + Tab",       exec = island("open overview"), desc = "Overview: workspaces + window previews" }
 add { group = "Island", keys = "SUPER + A",         exec = island("open control"), desc = "Quick settings (Wi-Fi, BT, audio, brightness, power)" }
-add { group = "Island", keys = "SUPER + N",         exec = island("open notifications"), desc = "Notifications + calendar + weather" }
+add { group = "Island", keys = "SUPER + ALT + N",   exec = island("open notifications"), desc = "Notifications + calendar + weather" }
 add { group = "Island", keys = "SUPER + G",         exec = island("open notes"), desc = "Workspace: Markdown notes (~/Notes)" }
 add { group = "Island", keys = "SUPER + SHIFT + G", exec = island("open board"), desc = "Workspace: kanban board" }
-add { group = "Island", keys = "SUPER + M",         exec = island("open control"), desc = "Media controls (quick settings)", hidden = true }
+add { group = "Island", keys = "SUPER + M",         exec = island("open media"), desc = "Media player" }
+add { group = "Island", keys = "SUPER + SHIFT + V", exec = island("open mixer", "pavucontrol"), desc = "Volume mixer: devices + per-app (fallback: pavucontrol)" }
 add { group = "Island", keys = "SUPER + ALT + T",   exec = island("open timer"), desc = "Timer / stopwatch" }
 add { group = "Island", keys = "CTRL + ALT + Delete", exec = island("open power"), desc = "Session menu (lock, standby, logout, restart, shutdown)" }
 add { group = "Island", keys = "SUPER + Escape",    exec = island("open power"), desc = "Session menu", hidden = true }
 add { group = "Island", keys = "CTRL + SUPER + T",  exec = island("open wallpaper"), desc = "Wallpaper & theme picker" }
 add { group = "Island", keys = "CTRL + SUPER + SHIFT + D", exec = S .. "theme.sh mode toggle", desc = "Toggle light / dark theme" }
 add { group = "Island", keys = "SUPER + J",         exec = "qs -c kessel ipc call island toggle", desc = "Show / hide the island", hidden = true }
-add { group = "Island", keys = "CTRL + SUPER + R",  exec = S .. "island.sh restart", desc = "Restart the island" }
+add { group = "Island", keys = "CTRL + SUPER + R",  exec = "hyprctl reload; " .. S .. "island.sh restart", desc = "Refresh: reload Hyprland + restart the island" }
 add { group = "Island", keys = "SUPER + slash",     exec = S .. "shortcuts.sh", desc = "Shortcuts (this list)" }
 
 -- Utilities --------------------------------------------------------------------
@@ -94,7 +98,7 @@ add { group = "Windows", keys = "SUPER + D",         dsp = function() return det
 add { group = "Windows", keys = "SUPER + ALT + Space", dsp = function() return detach end, desc = "Detach window", hidden = true }
 add { group = "Windows", keys = "SUPER + ALT + D",   dsp = function() return hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }) end, desc = "Maximize (again to restore)" }
 add { group = "Windows", keys = "SUPER + SHIFT + F", dsp = function() return require("lib.floatmode").toggle end, desc = "Layout mode: all windows tiling ↔ floating" }
-add { group = "Windows", keys = "SUPER + P",         dsp = function() return hl.dsp.window.pin() end, desc = "Pin (show on all workspaces)" }
+add { group = "Windows", keys = "SUPER + ALT + P",   dsp = function() return hl.dsp.window.pin() end, desc = "Pin (show on all workspaces)" }
 add { group = "Windows", keys = "SUPER + semicolon", dsp = function() return hl.dsp.layout("splitratio -0.1") end, opts = { repeating = true }, desc = "Narrower (split ratio −)" }
 add { group = "Windows", keys = "SUPER + apostrophe", dsp = function() return hl.dsp.layout("splitratio +0.1") end, opts = { repeating = true }, desc = "Wider (split ratio +)" }
 add { group = "Windows", keys = "SUPER + ALT + J",   dsp = function() return hl.dsp.layout("togglesplit") end, desc = "Toggle split direction" }
@@ -157,11 +161,11 @@ add { group = "Session", keys = "CTRL + SHIFT + SUPER + R", dsp = function() ret
 
 -- Media / hardware keys (work while locked) ------------------------------------
 local L, LR = { locked = true }, { locked = true, repeating = true }
-add { group = "Media", keys = "SUPER + SHIFT + P", exec = "playerctl play-pause", opts = L, desc = "Play / pause" }
-add { group = "Media", keys = "SUPER + SHIFT + N", exec = "playerctl next",       opts = L, desc = "Next track" }
-add { group = "Media", keys = "SUPER + SHIFT + B", exec = "playerctl previous",   opts = L, desc = "Previous track" }
-add { group = "Media", keys = "SUPER + SHIFT + M", exec = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",   opts = L, desc = "Mute output" }
-add { group = "Media", keys = "SUPER + ALT + M",   exec = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle", opts = L, desc = "Mute microphone" }
+add { group = "Media", keys = "SUPER + P",         exec = "playerctl play-pause", opts = L, desc = "Play / pause" }
+add { group = "Media", keys = "SUPER + N",         exec = "playerctl next",       opts = L, desc = "Next track" }
+add { group = "Media", keys = "SUPER + SHIFT + N", exec = "playerctl previous",   opts = L, desc = "Previous track" }
+add { group = "Media", keys = "CTRL + SUPER + V",  exec = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle", opts = L, desc = "Mute / unmute output" }
+add { group = "Media", keys = "SUPER + ALT + M",   exec = "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle", opts = L, desc = "Mute / unmute microphone" }
 add { group = "Media", keys = "XF86AudioRaiseVolume", exec = "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+", opts = LR, desc = "Volume up" }
 add { group = "Media", keys = "XF86AudioLowerVolume", exec = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",      opts = LR, desc = "Volume down" }
 add { group = "Media", keys = "XF86AudioMute",        exec = "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",     opts = L,  desc = "Mute output", hidden = true }
