@@ -57,6 +57,13 @@ Singleton {
     readonly property int pad: 14
 
     readonly property int animMs: 320
+
+    // Physics-based morphing (Qt SpringAnimation). Slightly under-damped like
+    // macOS/iOS: a hint of overshoot, then it settles. Velocity is preserved when
+    // the target changes mid-flight, so interrupted morphs stay smooth.
+    readonly property real springStiffness: 3.6     // higher = snappier
+    readonly property real springDamping: 0.32      // lower = more bounce (0.2…0.5 sensible)
+    readonly property real springMass: 1.0
     readonly property int fadeMs: 160
 
     function a(c, alpha) { return Qt.rgba(c.r, c.g, c.b, alpha) }

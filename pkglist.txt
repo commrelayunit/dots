@@ -44,6 +44,8 @@ wf-recorder
 hyprpicker
 brightnessctl
 papirus-icon-theme
+# Music perspective visualizer
+cava
 # Wallpaper-derived theme accents (scripts/theme.sh)
 matugen
 # Apps bound in keybinds.lua (SUPER+C editor, CTRL+SHIFT+Esc task manager)

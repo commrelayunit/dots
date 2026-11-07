@@ -5,13 +5,13 @@ import "../services"
 import "../components"
 
 View {
-    implicitWidth: 300
+    implicitWidth: IslandState.osdValue >= 0 ? 300 : 200
     implicitHeight: Theme.islandHeight + 4
     Row {
         anchors.centerIn: parent
         spacing: 12
         Glyph { text: IslandState.osdIcon; size: Theme.fontUi + 4; anchors.verticalCenter: parent.verticalCenter }
-        Bar { width: 170; value: IslandState.osdValue; anchors.verticalCenter: parent.verticalCenter }
+        Bar { visible: IslandState.osdValue >= 0; width: 170; value: IslandState.osdValue; anchors.verticalCenter: parent.verticalCenter }
         Label { text: IslandState.osdLabel; width: 64; size: Theme.fontSmall; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
     }
 }

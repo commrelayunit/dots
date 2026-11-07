@@ -1,18 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Resting island: workspaces + music on the left, the time in the middle,
-// weather / system / network / battery and live activities on the right.
+// Resting island. Shows one "perspective" (Overview · Music · System · Minimal);
+// scroll over the island to rotate between them. Music appears while a player
+// exists and is entered automatically when playback starts.
 import QtQuick
 import Quickshell
 import ".."
 import "../services"
 import "../components"
+import "perspectives"
 
 View {
     id: root
-    implicitWidth: row.implicitWidth + 32
+    readonly property Item cur: Perspectives.current === "music" ? music
+        : Perspectives.current === "system" ? system
+        : Perspectives.current === "minimal" ? minimal
+        : overview
+    implicitWidth: cur.implicitWidth + 32
+    implicitHeight: Theme.islandHeight
     onImplicitWidthChanged: IslandState.restWidth = implicitWidth
     Component.onCompleted: IslandState.restWidth = implicitWidth
-    implicitHeight: Theme.islandHeight
 
     // Click anywhere that isn't a control → quick settings.
     MouseArea {
@@ -20,93 +26,46 @@ View {
         cursorShape: Qt.PointingHandCursor
         onClicked: IslandState.openPanel("control")
     }
+    // Scroll → next / previous perspective
+    WheelHandler {
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        property real acc: 0
+        onWheel: e => {
+            acc += e.angleDelta.y
+            if (Math.abs(acc) >= 120) {
+                Perspectives.rotate(acc > 0 ? -1 : 1)
+                acc = 0
+            }
+        }
+    }
 
-    Row {
-        id: row
+    component Slot: Item {
+        property bool on: false
         anchors.centerIn: parent
-        spacing: 14
+        opacity: on ? 1 : 0
+        visible: opacity > 0.01
+        Behavior on opacity { NumberAnimation { duration: Theme.fadeMs } }
+    }
+    Slot { on: root.cur === overview; implicitWidth: overview.implicitWidth; implicitHeight: overview.implicitHeight; width: implicitWidth; height: implicitHeight
+           OverviewRow { id: overview } }
+    Slot { on: root.cur === music; width: music.implicitWidth; height: music.implicitHeight
+           MusicRow { id: music; active: root.cur === music && root.shown } }
+    Slot { on: root.cur === system; width: system.implicitWidth; height: system.implicitHeight
+           SystemRow { id: system } }
+    Slot { on: root.cur === minimal; width: minimal.implicitWidth; height: minimal.implicitHeight
+           MinimalRow { id: minimal } }
 
-        // ── left wing ───────────────────────────────────────────────
-        Row {
-            id: workspaces
-            spacing: 5
-            anchors.verticalCenter: parent.verticalCenter
-            Repeater {
-                model: Hypr.maxId
-                Rectangle {
-                    required property int index
-                    readonly property int wsId: index + 1
-                    readonly property bool focused: Hypr.focusedId === wsId
-                    readonly property bool used: Hypr.occupied(wsId)
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: focused ? 18 : 7
-                    height: 7
-                    radius: 3.5
-                    color: focused ? Theme.accent : used ? Theme.subtext : Theme.overlay
-                    Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                    Behavior on color { ColorAnimation { duration: 200 } }
-                    MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: Hypr.focus(parent.wsId) }
-                }
-            }
-        }
-
-        Item {
-          visible: Media.active
-          implicitWidth: mediaRow.implicitWidth
-          implicitHeight: mediaRow.implicitHeight
-          anchors.verticalCenter: parent.verticalCenter
-          MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Media.toggle() }
-          Row {
-            id: mediaRow
-            spacing: 7
-            Rectangle {
-                width: 20; height: 20; radius: 10
-                color: Theme.overlay
-                clip: true
-                anchors.verticalCenter: parent.verticalCenter
-                Image { anchors.fill: parent; source: Media.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: status === Image.Ready }
-                Glyph { anchors.centerIn: parent; text: Icons.music; size: Theme.fontSmall; visible: Media.art === ""; color: Theme.subtext }
-            }
-            Label {
-                text: Media.title
-                width: Math.min(implicitWidth, 150)
-                size: Theme.fontSmall + 0.5
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            EqBars { playing: Media.playing; anchors.verticalCenter: parent.verticalCenter }
-          }
-        }
-
-        // ── centre ──────────────────────────────────────────────────
-        Item {
-            implicitWidth: clockRow.implicitWidth
-            implicitHeight: clockRow.implicitHeight
-            anchors.verticalCenter: parent.verticalCenter
-            Row {
-                id: clockRow
-                spacing: 8
-                Label { text: Time.time; font.bold: true; size: Theme.fontUi + 1; anchors.verticalCenter: parent.verticalCenter }
-                Label { text: Time.dateShort; color: Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-            }
-            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: IslandState.openPanel("notifications") }
-        }
-
-        // ── right wing ──────────────────────────────────────────────
-        Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: Weather.ok; icon: Weather.icon; text: Weather.temp; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.cpu; text: Stats.pct(Stats.cpu); tint: Stats.cpu > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.memory; text: Stats.pct(Stats.mem); tint: Stats.mem > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-        // network: link icon, then fixed-width ↓ / ↑ so the island never changes size
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Net.icon; tint: Net.online ? Theme.subtext : Theme.red; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.download; text: Stats.compact(Stats.rxRate); anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.upload; text: Stats.compact(Stats.txRate); anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Power.hasBattery; icon: Power.icon; text: Stats.pct(Power.percent)
-               tint: Power.charging ? Theme.green : Power.percent < 0.15 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-
-        // live activities
-        Chip { clickable: true; onClicked: Recorder.stop(); visible: Recorder.recording; icon: Icons.record; text: Time.hms(Recorder.elapsed); tint: Theme.red; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("timer"); visible: Timers.cdActive; icon: Icons.sand; text: Time.hms(Timers.cdLeft); tint: Theme.purple; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Timers.swRunning; icon: Icons.timer; text: Time.hms(Timers.swMs / 1000); tint: Theme.purple; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: Session.toggleFloatMode(); visible: Session.floatMode; icon: Icons.floating; tint: Theme.accent3; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Session.inhibitIdle; icon: Icons.coffee; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
+    // music progress along the bottom edge of the pill
+    Rectangle {
+        visible: root.cur === music && Media.length > 0
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 18
+        anchors.bottomMargin: 2
+        height: 2
+        radius: 1
+        width: (parent.width - 36) * Media.progress
+        color: Theme.accent
+        Behavior on width { NumberAnimation { duration: 900 } }
     }
 }

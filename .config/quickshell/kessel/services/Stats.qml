@@ -14,6 +14,13 @@ Singleton {
     property real memTotalGiB: 0
     property real rxRate: 0       // bytes/s
     property real txRate: 0
+    // short histories (last 40 samples ≈ 80 s) for sparklines
+    readonly property int histLen: 40
+    property var cpuHist: []
+    property var memHist: []
+    property var rxHist: []
+    property var txHist: []
+    function push(arr, v) { const a = arr.slice(-(histLen - 1)); a.push(v); return a }
 
     property var _prevCpu: null
     property var _prevNet: null
@@ -78,5 +85,9 @@ Singleton {
         }
         _prevNet = { rx, tx }
         _prevT = now
+        cpuHist = push(cpuHist, cpu)
+        memHist = push(memHist, mem)
+        rxHist = push(rxHist, rxRate)
+        txHist = push(txHist, txRate)
     }
 }

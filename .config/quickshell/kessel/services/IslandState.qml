@@ -24,6 +24,7 @@ Singleton {
     property bool hovered: false
     property bool summary: false
     property real restWidth: 0       // reported by RestView (for status / tests)
+    property real pillWidth: 0       // live, animated width of the pill (tests)
 
     property bool osdActive: false
     property string osdIcon: ""
@@ -82,13 +83,16 @@ Singleton {
             return "ok"
         }
         // Show/hide the hover glance without a pointer (also handy for testing).
+        // Rotate perspectives without a scroll wheel: step = 1 / -1
+        function perspective(step: int): string { Perspectives.rotate(step); return Perspectives.current }
+        function pill(): string { return String(Math.round(root.pillWidth * 10) / 10) }
         function glance(on: bool): string { root.summary = on; return "ok" }
         function stayAwake(on: bool): string { Session.inhibitIdle = on; return "ok" }
         function reloadTheme(): string { Theme.reload(); return "ok" }
         function toggleTheme(): string { Themes.toggleMode(); return "ok" }
         function status(): string {
             return JSON.stringify({
-                shown: root.shown, layer: root.layer, panel: root.panel, restWidth: root.restWidth,
+                shown: root.shown, layer: root.layer, panel: root.panel, restWidth: root.restWidth, perspective: Perspectives.current,
                 dnd: Notifs.dnd, notifications: Notifs.count,
                 media: Media.active ? Media.title : null,
                 recording: Recorder.recording, weather: Weather.ok ? Weather.temp : null

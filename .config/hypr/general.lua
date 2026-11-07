@@ -13,6 +13,17 @@ do
     end
 end
 
+-- Without a GPU render node (e.g. the Kessel VM) everything is drawn in
+-- software: skip blur and use cheap shadows there. Real hardware keeps the full look.
+local function has_render_node()
+    for i = 128, 135 do
+        local f = io.open("/dev/dri/renderD" .. i, "r")
+        if f then f:close(); return true end
+    end
+    return false
+end
+local SOFTWARE = not has_render_node()
+
 hl.config({
     general = {
         gaps_in     = 4,
@@ -33,13 +44,13 @@ hl.config({
         active_opacity   = 1.0,
         inactive_opacity = 0.97,
         shadow = {
-            enabled      = true,
+            enabled      = not SOFTWARE,
             range        = 8,
             render_power = 3,
             color        = 0x99000000,
         },
         blur = {
-            enabled  = true,
+            enabled  = not SOFTWARE,
             size     = 5,
             passes   = 2,
             vibrancy = 0.17,

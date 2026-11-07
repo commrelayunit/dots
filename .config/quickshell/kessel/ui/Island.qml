@@ -21,7 +21,15 @@ PanelWindow {
     anchors.top: true
     margins.top: Theme.islandMargin
     implicitWidth: 1100           // pill (≤ ~800) + the two side buttons
-    implicitHeight: Math.min(screen ? screen.height - 40 : 700, 700)
+    // Keep the surface a small strip while resting (the compositor blurs behind the
+    // whole surface every frame — expensive without a GPU). Grow at once when
+    // something tall opens; shrink only after the closing spring has settled.
+    readonly property real tallHeight: Math.min(screen ? screen.height - 40 : 700, 700)
+    readonly property bool needsTall: layer === "panel" || layer === "notification" || layer === "summary"
+    property bool tall: false
+    onNeedsTallChanged: { if (needsTall) { shrinkTimer.stop(); tall = true } else shrinkTimer.restart() }
+    Timer { id: shrinkTimer; interval: 900; onTriggered: win.tall = win.needsTall }
+    implicitHeight: tall ? tallHeight : Theme.islandHeight + 44   // room for the perspective tag
     exclusiveZone: Theme.islandHeight + Theme.islandMargin
     color: "transparent"
     mask: Region {
@@ -81,6 +89,44 @@ PanelWindow {
         onClicked: IslandState.openPanel("notifications")
     }
 
+    // Perspective name, shown briefly *below* the island while scrolling through
+    // perspectives (it never takes over the pill, so the morph goes straight on).
+    Rectangle {
+        id: perspTag
+        readonly property bool on: Perspectives.recentlyScrolled && win.layer === "rest"
+        anchors.horizontalCenter: pill.horizontalCenter
+        y: pill.height + (on ? 8 : 0)
+        width: tagRow.implicitWidth + 20
+        height: 24
+        radius: 12
+        color: Theme.island
+        border.width: 1
+        border.color: Theme.a(Theme.text, 0.08)
+        opacity: on ? 1 : 0
+        visible: opacity > 0.01
+        Behavior on opacity { NumberAnimation { duration: 180 } }
+        Behavior on y { SpringAnimation { spring: Theme.springStiffness; damping: 0.4; epsilon: 0.25 } }
+        Row {
+            id: tagRow
+            anchors.centerIn: parent
+            spacing: 6
+            Glyph { text: Perspectives.info.icon; size: Theme.fontSmall; color: Theme.accent; anchors.verticalCenter: parent.verticalCenter }
+            Label { text: Perspectives.info.label; size: Theme.fontSmall; anchors.verticalCenter: parent.verticalCenter }
+            Row {
+                spacing: 3
+                anchors.verticalCenter: parent.verticalCenter
+                Repeater {
+                    model: Perspectives.available
+                    Rectangle {
+                        required property var modelData
+                        width: 5; height: 5; radius: 2.5
+                        color: modelData.id === Perspectives.current ? Theme.accent : Theme.a(Theme.text, 0.25)
+                    }
+                }
+            }
+        }
+    }
+
     Rectangle {
         id: pill
         anchors.top: parent.top
@@ -92,10 +138,11 @@ PanelWindow {
         border.width: 1
         border.color: Theme.a(Theme.text, hover.hovered || win.panelOpen ? 0.12 : 0.06)
         clip: true
+        onWidthChanged: IslandState.pillWidth = width
 
-        Behavior on width  { NumberAnimation { duration: Theme.animMs; easing.type: Easing.OutBack; easing.overshoot: 0.7 } }
-        Behavior on height { NumberAnimation { duration: Theme.animMs; easing.type: Easing.OutBack; easing.overshoot: 0.7 } }
-        Behavior on radius { NumberAnimation { duration: Theme.animMs; easing.type: Easing.OutCubic } }
+        Behavior on width  { SpringAnimation { spring: Theme.springStiffness; damping: Theme.springDamping; mass: Theme.springMass; epsilon: 0.25 } }
+        Behavior on height { SpringAnimation { spring: Theme.springStiffness; damping: Theme.springDamping; mass: Theme.springMass; epsilon: 0.25 } }
+        Behavior on radius { SpringAnimation { spring: Theme.springStiffness; damping: 0.5; mass: Theme.springMass; epsilon: 0.25 } }
 
         HoverHandler {
             id: hover
@@ -114,7 +161,10 @@ PanelWindow {
             focus: true
             active: win.panelOpen
             opacity: status === Loader.Ready ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: Theme.fadeMs } }
+            scale: status === Loader.Ready ? 1 : 0.94
+            transformOrigin: Item.Top
+            Behavior on opacity { NumberAnimation { duration: Theme.fadeMs; easing.type: Easing.OutCubic } }
+            Behavior on scale { SpringAnimation { spring: Theme.springStiffness * 1.2; damping: 0.45; epsilon: 0.002 } }
             source: {
                 switch (IslandState.panel) {
                 case "launcher":  return "panels/Launcher.qml"

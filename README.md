@@ -35,7 +35,9 @@ dot-files/
 
 ## The island
 
-A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`). It **rests** on workspaces · music · clock · weather · CPU/RAM/network · battery, with live chips for recording, timers, Do Not Disturb and notifications. Two round buttons float beside it: **⚙ left** opens quick settings, and **🔔 right** opens notifications (with a count badge; it shows a crossed-out bell while Do Not Disturb is on). It **morphs** into:
+A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`). It **rests** on workspaces · music · clock · weather · CPU/RAM/network · battery, with live chips for recording, timers, Do Not Disturb and notifications. **Perspectives:** scroll over the island to rotate between them: **Overview** (the default), **Music** (spinning cover, scrolling title · artist, a live cava visualizer that rests as a dot row when paused, time left, play/pause, and a progress line along the bottom edge), **System** (CPU/RAM/↓/↑ sparklines, uptime) and **Minimal** (time and date). Music switches in by itself when playback starts and back out after 8 s paused. Morphing uses spring physics (`springStiffness` / `springDamping` in `Theme.qml`).
+
+Two round buttons float beside it: **⚙ left** opens quick settings, and **🔔 right** opens notifications (with a count badge; it shows a crossed-out bell while Do Not Disturb is on). It **morphs** into:
 
 | Opens with | Panel |
 | --- | --- |
@@ -66,6 +68,10 @@ Hardware-dependent sections (battery, power profiles, brightness, Wi‑Fi, Bluet
 - **If a locker ever dies** (Hyprland shows "the lockscreen app died"), recover from SSH or another TTY: `hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()'`, or start hyprlock (`allow_session_lock_restore` is on). Tested.
 - **Login (SDDM)**: `sddm-theme/kessel` is the same design for the Qt6 greeter, with a session picker and user switching. `~/Scripts/sddm-theme.sh test` previews it in a window; `install` / `uninstall` (sudo) copy the theme, current wallpaper and `~/.face`, and select it via `/etc/sddm.conf.d/10-kessel.conf`.
 - **Cursor**: Bibata-Modern-Classic, as in end-4 (AUR `bibata-cursor-theme-bin`, installed with `--with-aur`).
+
+## Performance note (VMs)
+
+Without a GPU render node (Kessel has none), `general.lua` turns off blur and shadows automatically, because Hyprland draws in software there. The island also keeps its surface a small strip while resting. Together these took Hyprland from ~110% to ~9% CPU on Kessel. Real hardware keeps blur and shadows.
 
 ## Displays
 

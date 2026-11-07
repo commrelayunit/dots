@@ -25,7 +25,13 @@ case "${1:-start}" in
         running && exit 0
         systemctl --user stop dunst.service 2>/dev/null || true
         export QS_ICON_THEME="${QS_ICON_THEME:-Papirus-Dark}"
-        qs -n -c "$cfg" -d >/dev/null 2>&1 ;;
+        qs -n -c "$cfg" -d >/dev/null 2>&1
+        # A config error makes Quickshell exit right away — say so instead of failing silently.
+        for _ in 1 2 3 4 5 6 7 8 9 10; do sleep 0.3; running && exit 0; done
+        err="$(qs log -c "$cfg" 2>/dev/null | grep -E 'caused by' | tail -1 | sed 's/.*caused by //')"
+        notify-send -u critical -a Island "Island failed to start" "${err:-see: qs log -c $cfg}" 2>/dev/null || true
+        echo "island: failed to start: ${err:-unknown}" >&2
+        exit 1 ;;
     stop)
         # Close any open panel first: tearing down a focused text field crashes
         # Qt 6.12 at shutdown (QInputMethod::commit in ~QQuickItem).
