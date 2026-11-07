@@ -50,6 +50,7 @@ Singleton {
     readonly property real fontBig: 22
 
     readonly property int islandHeight: 36
+    readonly property int screenCornerRadius: 14      // 0 disables the rounded screen corners
     readonly property int islandMargin: 6
     readonly property int radius: 18
     readonly property int radiusPanel: 26

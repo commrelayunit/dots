@@ -35,7 +35,8 @@ Singleton {
 
     readonly property var panels: ["launcher", "clipboard", "control", "notifications", "notes", "overview", "power", "timer", "wallpaper", "board", "media", "mixer"]
 
-    readonly property string layer: Alarm.ringing ? "alarm"
+    readonly property string layer: Polkit.active ? "polkit"
+        : Alarm.ringing ? "alarm"
         : panel !== "" ? "panel"
         : Notifs.popup !== null ? "notification"
         : osdActive ? "osd"
@@ -95,6 +96,9 @@ Singleton {
         // Graceful exit: drop keyboard focus from every text field first —
         // Qt 6.12 crashes tearing down a focused text input (QInputMethod::commit).
         function quit(): string { root.panel = ""; root.quitting = true; return "ok" }
+        function updatesCheck(): string { Updates.check(); return "ok" }
+        function polkitStatus(): string { return Polkit.registered ? "registered" : "not-registered" }
+        function polkitCancel(): string { Polkit.cancel(); return "ok" }
         function timer(seconds: int): string { Timers.startSeconds(seconds); return "ok" }
         function dismissAlarm(): string { Alarm.dismiss(); return "ok" }
         function glance(on: bool): string { root.summary = on; return "ok" }
@@ -104,7 +108,7 @@ Singleton {
         function status(): string {
             return JSON.stringify({
                 shown: root.shown, layer: root.layer, panel: root.panel, restWidth: root.restWidth, perspective: Perspectives.current,
-                dnd: Notifs.dnd, notifications: Notifs.count,
+                dnd: Notifs.dnd, notifications: Notifs.count, updates: Updates.count, polkit: Polkit.registered,
                 media: Media.active ? Media.title : null,
                 recording: Recorder.recording, weather: Weather.ok ? Weather.temp : null
             })

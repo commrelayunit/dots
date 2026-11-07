@@ -15,7 +15,9 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wayvnc 127.0.0.1 5900")
 
     -- Desktop plumbing
-    hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
+    -- Polkit agent: the island registers itself; island.sh starts polkit-gnome
+    -- whenever the island isn't running (exactly one agent per session).
+    if not ENABLE_ISLAND then hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1") end
     hl.exec_cmd("hyprpaper")
     -- wallpaper + light/dark theme from the last session (needs hyprpaper up first)
     hl.exec_cmd("sleep 1; " .. HOME .. "/.config/hypr/scripts/theme.sh restore")

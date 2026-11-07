@@ -24,6 +24,14 @@ Item {
         Row { spacing: 6; anchors.verticalCenter: parent.verticalCenter
             Chip { icon: Icons.upload; text: Stats.compact(Stats.txRate); anchors.verticalCenter: parent.verticalCenter }
             Spark { values: Stats.txHist; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter } }
+        Row { visible: Stats.temp >= 0; spacing: 6; anchors.verticalCenter: parent.verticalCenter
+            Chip { icon: Icons.thermo; text: Math.round(Stats.temp) + "°"; tint: Stats.temp > 85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+            Spark { values: Stats.tempHist; max: 1; tint: Stats.temp > 85 ? Theme.red : Theme.yellow; anchors.verticalCenter: parent.verticalCenter } }
+        Repeater {
+            model: Stats.disks.slice(0, 2)
+            Chip { required property var modelData; icon: Icons.disk; text: Stats.pct(modelData.frac) + " " + (modelData.mount === "/" ? "/" : modelData.mount.split("/").pop())
+                   tint: modelData.frac > 0.9 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+        }
         Chip { icon: Icons.timer; text: "up " + User.uptime; anchors.verticalCenter: parent.verticalCenter }
     }
 }

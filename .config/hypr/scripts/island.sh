@@ -17,6 +17,12 @@ fi
 if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
     WAYLAND_DISPLAY="$(cd "$XDG_RUNTIME_DIR" && ls wayland-[0-9] 2>/dev/null | head -1)"; export WAYLAND_DISPLAY
 fi
+# Polkit: exactly one agent per session. The island is the agent while it runs;
+# polkit-gnome takes over whenever it doesn't (stopped, failed, or disabled).
+GNOME_AGENT=/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+gnome_agent_on()  { pgrep -x polkit-gnome-au >/dev/null || { [[ -x $GNOME_AGENT ]] && setsid -f "$GNOME_AGENT" >/dev/null 2>&1; }; }
+gnome_agent_off() { for p in $(pgrep -x polkit-gnome-au); do kill "$p" 2>/dev/null; done; sleep 0.2; }
+
 have() { command -v qs >/dev/null 2>&1 && [[ -f "$HOME/.config/quickshell/$cfg/shell.qml" ]]; }
 running() { qs list --all 2>/dev/null | grep -q "/quickshell/$cfg/shell.qml"; }
 case "${1:-start}" in
@@ -24,10 +30,20 @@ case "${1:-start}" in
         have || exit 0
         running && exit 0
         systemctl --user stop dunst.service 2>/dev/null || true
+        gnome_agent_off
         export QS_ICON_THEME="${QS_ICON_THEME:-Papirus-Dark}"
         qs -n -c "$cfg" -d >/dev/null 2>&1
         # A config error makes Quickshell exit right away — say so instead of failing silently.
-        for _ in 1 2 3 4 5 6 7 8 9 10; do sleep 0.3; running && exit 0; done
+        for _ in 1 2 3 4 5 6 7 8 9 10; do
+            sleep 0.3
+            if running; then
+                # make sure someone is the polkit agent
+                sleep 0.5
+                [[ "$(qs -c "$cfg" ipc call island polkitStatus 2>/dev/null)" == registered ]] || gnome_agent_on
+                exit 0
+            fi
+        done
+        gnome_agent_on
         err="$(qs log -c "$cfg" 2>/dev/null | grep -E 'caused by' | tail -1 | sed 's/.*caused by //')"
         notify-send -u critical -a Island "Island failed to start" "${err:-see: qs log -c $cfg}" 2>/dev/null || true
         echo "island: failed to start: ${err:-unknown}" >&2
@@ -37,9 +53,11 @@ case "${1:-start}" in
         # Qt 6.12 at shutdown (QInputMethod::commit in ~QQuickItem).
         # Graceful: the island drops focus from text fields, then quits itself.
         if qs -c "$cfg" ipc call island quit >/dev/null 2>&1; then
-            for _ in $(seq 1 20); do running || exit 0; sleep 0.1; done
+            for _ in $(seq 1 20); do running || break; sleep 0.1; done
         fi
-        qs kill -c "$cfg" >/dev/null 2>&1 || true ;;   # fallback; never pkill -f: too broad
+        running && { qs kill -c "$cfg" >/dev/null 2>&1 || true; }   # fallback; never pkill -f: too broad
+        [[ ${1:-} == stop ]] && gnome_agent_on
+        true ;;
     restart) "$0" stop; sleep 0.4; "$0" start ;;
     status)  qs list --all 2>/dev/null ;;
     *)       echo "usage: $0 start|stop|restart|status" >&2; exit 2 ;;

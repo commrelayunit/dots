@@ -25,7 +25,7 @@ PanelWindow {
     // whole surface every frame — expensive without a GPU). Grow at once when
     // something tall opens; shrink only after the closing spring has settled.
     readonly property real tallHeight: Math.min(screen ? screen.height - 40 : 700, 700)
-    readonly property bool needsTall: layer === "panel" || layer === "notification" || layer === "summary" || layer === "alarm"
+    readonly property bool needsTall: layer === "panel" || layer === "notification" || layer === "summary" || layer === "alarm" || layer === "polkit"
     property bool tall: false
     onNeedsTallChanged: { if (needsTall) { shrinkTimer.stop(); tall = true } else shrinkTimer.restart() }
     Timer { id: shrinkTimer; interval: 900; onTriggered: win.tall = win.needsTall }
@@ -37,11 +37,12 @@ PanelWindow {
         Region { item: gearBtn }
         Region { item: bellBtn }
         Region { item: privacyPill }
+        Region { item: updatesPill }
     }
 
     WlrLayershell.namespace: "kessel-island"
     WlrLayershell.layer: WlrLayer.Top
-    WlrLayershell.keyboardFocus: panelOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: panelOpen || layer === "polkit" ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     IdleInhibitor { window: win; enabled: Session.inhibitIdle }
 
@@ -70,7 +71,8 @@ PanelWindow {
     onPanelOpenChanged: { armTimer.armed = false; if (panelOpen) armTimer.restart() }
 
     // The view that currently defines the pill's size.
-    readonly property Item current: layer === "alarm" ? alarmView
+    readonly property Item current: layer === "polkit" ? polkitView
+        : layer === "alarm" ? alarmView
         : panelOpen ? panelLoader
         : layer === "notification" ? notifView
         : layer === "osd" ? osdView
@@ -126,6 +128,37 @@ PanelWindow {
         }
         HoverHandler { id: privHover }
         Hint { visible: privHover.hovered && text !== ""; text: [Privacy.mic ? "Microphone: " + Privacy.micApps : "", Privacy.camera ? "Camera in use" : "", Privacy.screen ? "Screen is being shared" : ""].filter(s => s).join("\n") }
+    }
+
+    // Pending updates: green pill (after the privacy pill when that's showing)
+    Rectangle {
+        id: updatesPill
+        y: (Theme.islandHeight - height) / 2
+        x: privacyPill.visible ? privacyPill.x + privacyPill.width + 6 : bellBtn.x + bellBtn.width + 8
+        height: 26
+        width: updRow.implicitWidth + 16
+        radius: 13
+        color: Theme.a(Theme.green, uma.containsMouse ? 0.28 : 0.18)
+        border.width: 1
+        border.color: Theme.a(Theme.green, 0.7)
+        opacity: Updates.count > 0 ? 1 : 0
+        visible: opacity > 0.01
+        scale: Updates.count > 0 ? 1 : 0.6
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Behavior on scale { SpringAnimation { spring: Theme.springStiffness; damping: 0.4; epsilon: 0.01 } }
+        Behavior on x { SpringAnimation { spring: Theme.springStiffness; damping: Theme.springDamping; epsilon: 0.25 } }
+        Row {
+            id: updRow
+            anchors.centerIn: parent
+            spacing: 5
+            Glyph { text: Icons.packageUp; color: Theme.green; size: Theme.fontSmall + 1; optical: true; anchors.verticalCenter: parent.verticalCenter }
+            Label { text: Updates.count; color: Theme.green; size: Theme.fontSmall; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+        }
+        MouseArea { id: uma; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Updates.runUpdate() }
+        Hint {
+            visible: uma.containsMouse
+            text: `${Updates.official} official · ${Updates.aur} AUR — click to update\n` + Updates.names.slice(0, 8).join(", ") + (Updates.count > 8 ? " …" : "")
+        }
     }
 
     Rectangle {
@@ -214,6 +247,7 @@ PanelWindow {
         SummaryView { id: summaryView; shown: win.current === summaryView; minWidth: restView.implicitWidth }
         OsdView     { id: osdView;     shown: win.current === osdView }
         AlarmView { id: alarmView; shown: win.current === alarmView }
+        PolkitView { id: polkitView; shown: win.current === polkitView }
         NotificationView { id: notifView; shown: win.current === notifView; minWidth: restView.implicitWidth }
 
         Loader {

@@ -284,6 +284,23 @@ PanelBase {
                         Label { text: Stats.memUsedGiB.toFixed(1) + "G"; size: Theme.fontSmall; color: Theme.subtext }
                     }
                     Row {
+                        visible: Stats.temp >= 0
+                        width: parent.width; spacing: 8
+                        Glyph { text: Icons.thermo; width: 18; color: Theme.subtext }
+                        Bar { width: parent.width - 80; value: Math.min(1, Stats.temp / 100); anchors.verticalCenter: parent.verticalCenter; fill: Stats.temp > 85 ? Theme.red : Theme.yellow }
+                        Label { text: Math.round(Stats.temp) + "°C"; size: Theme.fontSmall; color: Theme.subtext }
+                    }
+                    Repeater {
+                        model: Stats.disks.slice(0, 3)
+                        Row {
+                            required property var modelData
+                            width: sys.width; spacing: 8
+                            Glyph { text: Icons.disk; width: 18; color: Theme.subtext }
+                            Bar { width: parent.width - 80; value: modelData.frac; anchors.verticalCenter: parent.verticalCenter; fill: modelData.frac > 0.9 ? Theme.red : Theme.accent2 }
+                            Label { text: Stats.gib(modelData.size - modelData.used) + " free"; size: Theme.fontSmall; color: Theme.subtext }
+                        }
+                    }
+                    Row {
                         spacing: 16
                         Chip { icon: Net.icon; text: Net.label }
                         Chip { icon: Icons.download; text: Stats.human(Stats.rxRate) }

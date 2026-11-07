@@ -7,6 +7,12 @@ import "ui"
 import "services"
 
 ShellRoot {
+    // rounded screen corners (Theme.screenCornerRadius; 0 = off)
+    Variants {
+        model: Theme.screenCornerRadius > 0 ? Quickshell.screens : []
+        ScreenCorners { required property var modelData; screen: modelData }
+    }
+
     Variants {
         model: Quickshell.screens
         Island {

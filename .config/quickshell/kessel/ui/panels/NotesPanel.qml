@@ -298,13 +298,21 @@ PanelBase {
                                 PropertyChanges { target: card; z: 100; scale: 1.03; opacity: 0.95 }
                             }
 
+                            // priority stripe
+                            readonly property int prio: Board.prio(card.modelData)
+                            Rectangle {
+                                visible: card.prio > 0
+                                width: 4; radius: 2
+                                x: 4; y: 8; height: parent.height - 16
+                                color: card.prio === 3 ? Theme.red : card.prio === 2 ? Theme.yellow : Theme.accent
+                            }
                             Text {
                                 id: cardText
                                 visible: !card.editing
-                                x: 12
+                                x: 14
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width - 24 - (cma.containsMouse ? 70 : 0)
-                                text: card.modelData
+                                width: parent.width - 26 - (cma.containsMouse ? 92 : 0)
+                                text: Board.label(card.modelData)
                                 wrapMode: Text.Wrap
                                 color: Theme.text
                                 font.family: Theme.font
@@ -317,15 +325,17 @@ PanelBase {
                                 x: 12
                                 anchors.verticalCenter: parent.verticalCenter
                                 width: parent.width - 24
-                                text: card.modelData
+                                text: Board.label(card.modelData)
                                 wrapMode: TextInput.Wrap
                                 color: Theme.text
                                 font.family: Theme.font
                                 font.pointSize: Theme.fontSmall + 0.5
                                 selectionColor: Theme.a(Theme.accent, 0.4)
-                                onAccepted: { Board.rename(colRect.colId, card.index, text); card.editing = false }
+                                // keep the priority prefix when the text is edited
+                                function withPrio(t) { const p = Board.prio(card.modelData); return (p ? "!".repeat(p) + " " : "") + t }
+                                onAccepted: { Board.rename(colRect.colId, card.index, withPrio(text)); card.editing = false }
                                 Keys.onEscapePressed: card.editing = false
-                                onActiveFocusChanged: if (!activeFocus && card.editing) { Board.rename(colRect.colId, card.index, text); card.editing = false }
+                                onActiveFocusChanged: if (!activeFocus && card.editing) { Board.rename(colRect.colId, card.index, withPrio(text)); card.editing = false }
                             }
                             MouseArea {
                                 id: cma
@@ -345,6 +355,9 @@ PanelBase {
                                 anchors.right: parent.right; anchors.rightMargin: 6
                                 anchors.verticalCenter: parent.verticalCenter
                                 spacing: 0
+                                IconButton { size: 22; iconSize: Theme.fontSmall - 1; icon: Icons.flag
+                                             tint: card.prio === 3 ? Theme.red : card.prio === 2 ? Theme.yellow : Theme.accent; active: card.prio > 0
+                                             onClicked: Board.cyclePrio(colRect.colId, card.index) }
                                 IconButton { size: 22; iconSize: Theme.fontSmall - 1; icon: Icons.chevronL; visible: colRect.colId !== "todo"; onClicked: Board.shift(colRect.colId, card.index, -1) }
                                 IconButton { size: 22; iconSize: Theme.fontSmall - 1; icon: Icons.chevronR; visible: colRect.colId !== "done"; onClicked: Board.shift(colRect.colId, card.index, 1) }
                                 IconButton { size: 22; iconSize: Theme.fontSmall - 1; icon: Icons.close; tint: Theme.red; onClicked: Board.remove(colRect.colId, card.index) }

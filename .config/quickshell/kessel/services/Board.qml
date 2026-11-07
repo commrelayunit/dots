@@ -57,6 +57,15 @@ Singleton {
     function commit(c) { cards = c; Quickshell.execDetached(["mkdir", "-p", path.substring(0, path.lastIndexOf("/"))]); file.setText(serialize(c)) }
     function clone() { return { todo: cards.todo.slice(), doing: cards.doing.slice(), done: cards.done.slice() } }
 
+    // Priority lives in the text as a prefix: "!!! " high, "!! " medium, "! " low.
+    function prio(t) { const m = (t || "").match(/^(!{1,3})\s/); return m ? m[1].length : 0 }
+    function label(t) { return (t || "").replace(/^!{1,3}\s+/, "") }
+    function cyclePrio(col, i) {
+        const c = clone(), t = c[col][i], p = (prio(t) + 1) % 4
+        c[col][i] = (p ? "!".repeat(p) + " " : "") + label(t)
+        commit(c)
+    }
+
     function add(col, text) { text = (text || "").trim(); if (!text) return; const c = clone(); c[col].push(text); commit(c) }
     function remove(col, i) { const c = clone(); c[col].splice(i, 1); commit(c) }
     function rename(col, i, text) { text = (text || "").trim(); if (!text) return remove(col, i); const c = clone(); c[col][i] = text; commit(c) }

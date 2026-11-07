@@ -6,6 +6,7 @@ Rectangle {
     id: root
     property alias text: input.text
     property string placeholder: "Search"
+    property string icon: Icons.search
     property alias input: input
     signal accepted()
     signal up()
@@ -17,7 +18,7 @@ Rectangle {
     border.width: 1
     border.color: input.activeFocus ? Theme.a(Theme.accent, 0.6) : "transparent"
 
-    Glyph { id: ic; text: Icons.search; color: Theme.subtext; anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter }
+    Glyph { id: ic; text: root.icon; color: Theme.subtext; anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter }
     TextInput {
         id: input
         anchors.left: ic.right

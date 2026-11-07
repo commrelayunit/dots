@@ -14,6 +14,44 @@ Singleton {
     property real memTotalGiB: 0
     property real rxRate: 0       // bytes/s
     property real txRate: 0
+    // temperature: hottest CPU-ish sensor (°C), -1 when the machine reports none (VMs)
+    property real temp: -1
+    property var tempHist: []
+    // real filesystems (deduplicated by device): [{ mount, size, used, frac }]
+    property var disks: []
+
+    Process {
+        id: tempProc
+        command: ["sh", "-c", 'for h in /sys/class/hwmon/hwmon*; do n=$(cat "$h/name" 2>/dev/null); case $n in coretemp|k10temp|zenpower|cpu_thermal|acpitz|thinkpad|soc_thermal) for t in "$h"/temp*_input; do [ -r "$t" ] && cat "$t"; done;; esac; done; for z in /sys/class/thermal/thermal_zone*; do case "$(cat "$z/type" 2>/dev/null)" in *x86_pkg*|*cpu*|*acpitz*|*soc*) cat "$z/temp" 2>/dev/null;; esac; done']
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const v = text.split("\n").map(Number).filter(n => n > 1000 && n < 125000)
+                root.temp = v.length ? Math.max(...v) / 1000 : -1
+                if (root.temp >= 0) root.tempHist = root.push(root.tempHist, root.temp / 100)
+            }
+        }
+    }
+    Process {
+        id: diskProc
+        command: ["sh", "-c", "df -B1 --output=source,target,size,used -x tmpfs -x devtmpfs -x efivarfs -x overlay -x squashfs 2>/dev/null | tail -n +2"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const seen = {}, out = []
+                for (const l of text.split("\n")) {
+                    const f = l.trim().split(/\s+/)
+                    if (f.length < 4 || seen[f[0]] || f[1].startsWith("/boot") || f[1] === "/efi") continue
+                    seen[f[0]] = true
+                    const size = +f[2], used = +f[3]
+                    out.push({ mount: f[1], size: size, used: used, frac: size > 0 ? used / size : 0 })
+                }
+                root.disks = out
+            }
+        }
+    }
+    Timer { interval: 5000; running: true; repeat: true; triggeredOnStart: true; onTriggered: if (!tempProc.running) tempProc.running = true }
+    Timer { interval: 60000; running: true; repeat: true; triggeredOnStart: true; onTriggered: if (!diskProc.running) diskProc.running = true }
+    function gib(b) { return (b / 1073741824).toFixed(b >= 1e11 ? 0 : 1) + "G" }
+
     // short histories (last 40 samples ≈ 80 s) for sparklines
     readonly property int histLen: 40
     property var cpuHist: []

@@ -51,6 +51,8 @@ brightnessctl
 papirus-icon-theme
 # Launcher translation runtime (scripts/translate.sh uses uv for a private Python 3.10)
 uv
+# Pending-updates pill (checkupdates)
+pacman-contrib
 # Launcher calculator (qalc) + night light
 libqalculate
 hyprsunset
