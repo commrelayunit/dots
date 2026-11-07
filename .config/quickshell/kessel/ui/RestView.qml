@@ -10,6 +10,8 @@ import "../components"
 View {
     id: root
     implicitWidth: row.implicitWidth + 32
+    onImplicitWidthChanged: IslandState.restWidth = implicitWidth
+    Component.onCompleted: IslandState.restWidth = implicitWidth
     implicitHeight: Theme.islandHeight
 
     // Click anywhere that isn't a control → quick settings.
@@ -91,10 +93,13 @@ View {
 
         // ── right wing ──────────────────────────────────────────────
         Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: Weather.ok; icon: Weather.icon; text: Weather.temp; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.cpu; text: Math.round(Stats.cpu * 100) + "%"; tint: Stats.cpu > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.memory; text: Math.round(Stats.mem * 100) + "%"; tint: Stats.mem > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Net.icon; text: Net.online ? Stats.human(Stats.rxRate) : ""; tint: Net.online ? Theme.subtext : Theme.red; anchors.verticalCenter: parent.verticalCenter }
-        Chip { visible: Power.hasBattery; icon: Power.icon; text: Math.round(Power.percent * 100) + "%"
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.cpu; text: Stats.pct(Stats.cpu); tint: Stats.cpu > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.memory; text: Stats.pct(Stats.mem); tint: Stats.mem > 0.85 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
+        // network: link icon, then fixed-width ↓ / ↑ so the island never changes size
+        Chip { clickable: true; onClicked: IslandState.openPanel("control"); icon: Net.icon; tint: Net.online ? Theme.subtext : Theme.red; anchors.verticalCenter: parent.verticalCenter }
+        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.download; text: Stats.compact(Stats.rxRate); anchors.verticalCenter: parent.verticalCenter }
+        Chip { visible: Net.online; clickable: true; onClicked: IslandState.openPanel("control"); icon: Icons.upload; text: Stats.compact(Stats.txRate); anchors.verticalCenter: parent.verticalCenter }
+        Chip { visible: Power.hasBattery; icon: Power.icon; text: Stats.pct(Power.percent)
                tint: Power.charging ? Theme.green : Power.percent < 0.15 ? Theme.red : Theme.subtext; anchors.verticalCenter: parent.verticalCenter }
 
         // live activities

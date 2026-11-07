@@ -23,6 +23,7 @@ Singleton {
     property string panel: ""
     property bool hovered: false
     property bool summary: false
+    property real restWidth: 0       // reported by RestView (for status / tests)
 
     property bool osdActive: false
     property string osdIcon: ""
@@ -87,7 +88,7 @@ Singleton {
         function toggleTheme(): string { Themes.toggleMode(); return "ok" }
         function status(): string {
             return JSON.stringify({
-                shown: root.shown, layer: root.layer, panel: root.panel,
+                shown: root.shown, layer: root.layer, panel: root.panel, restWidth: root.restWidth,
                 dnd: Notifs.dnd, notifications: Notifs.count,
                 media: Media.active ? Media.title : null,
                 recording: Recorder.recording, weather: Weather.ok ? Weather.temp : null
