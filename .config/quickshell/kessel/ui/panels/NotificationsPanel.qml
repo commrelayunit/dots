@@ -54,7 +54,7 @@ PanelBase {
             height: cal.height + 20
             radius: Theme.radiusCard
             color: Theme.card
-            Calendar { id: cal; x: 10; y: 10; width: parent.width - 20 }
+            Calendar { id: cal; y: 10; width: parent.width - 24; anchors.horizontalCenter: parent.horizontalCenter }
         }
 
         Rectangle {
@@ -82,15 +82,20 @@ PanelBase {
                     Chip { icon: Icons.wind; text: Weather.wind }
                 }
                 Row {
-                    spacing: 18
+                    id: week
+                    width: parent.width
+                    topPadding: 4
                     Repeater {
                         model: Weather.forecast
                         Column {
                             required property var modelData
-                            spacing: 2
-                            Label { text: modelData.day; size: Theme.fontSmall; color: Theme.subtext; anchors.horizontalCenter: parent.horizontalCenter }
-                            Glyph { text: Weather.iconFor(modelData.code, 12); color: Theme.yellow; anchors.horizontalCenter: parent.horizontalCenter }
-                            Label { text: `${modelData.max} ${modelData.min}`; size: Theme.fontSmall; anchors.horizontalCenter: parent.horizontalCenter }
+                            required property int index
+                            width: week.width / Math.max(1, Weather.forecast.length)
+                            spacing: 3
+                            Label { text: modelData.day; size: Theme.fontSmall - 0.5; color: index === 0 ? Theme.accent : Theme.subtext; anchors.horizontalCenter: parent.horizontalCenter }
+                            Glyph { text: modelData.icon; color: Theme.yellow; size: Theme.fontUi + 2; anchors.horizontalCenter: parent.horizontalCenter }
+                            Label { text: modelData.max; size: Theme.fontSmall; font.bold: true; anchors.horizontalCenter: parent.horizontalCenter }
+                            Label { text: modelData.min; size: Theme.fontSmall - 0.5; color: Theme.subtext; anchors.horizontalCenter: parent.horizontalCenter }
                         }
                     }
                 }

@@ -80,6 +80,8 @@ Singleton {
             root.showOsd(Session.floatMode ? Icons.floating : Icons.tiling, Session.floatMode ? "Floating" : "Tiling", 1)
             return "ok"
         }
+        // Show/hide the hover glance without a pointer (also handy for testing).
+        function glance(on: bool): string { root.summary = on; return "ok" }
         function stayAwake(on: bool): string { Session.inhibitIdle = on; return "ok" }
         function reloadTheme(): string { Theme.reload(); return "ok" }
         function toggleTheme(): string { Themes.toggleMode(); return "ok" }

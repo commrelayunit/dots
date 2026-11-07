@@ -25,9 +25,10 @@ View {
         width: root.implicitWidth - 24
         spacing: 10
 
+        // avatar · time · date/weather — centred as one group
         Row {
-            width: parent.width
-            spacing: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 12
             Avatar { size: 40; anchors.verticalCenter: parent.verticalCenter }
             Label { text: Time.time; size: Theme.fontBig; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
             Column {
@@ -41,8 +42,14 @@ View {
                 }
             }
         }
-        MediaCard { visible: Media.active; compact: true; width: parent.width }
+        MediaCard {
+            visible: Media.active
+            compact: true
+            width: Math.min(460, parent.width)
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
         Row {
+            anchors.horizontalCenter: parent.horizontalCenter
             spacing: 18
             Chip { icon: Icons.cpu; text: "CPU " + Math.round(Stats.cpu * 100) + "%" }
             Chip { icon: Icons.memory; text: `RAM ${Stats.memUsedGiB.toFixed(1)}/${Stats.memTotalGiB.toFixed(1)} GiB` }

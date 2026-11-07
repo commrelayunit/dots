@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Weather from wttr.in (JSON). One request per Config.weatherIntervalMin.
+// Weather: current conditions + location from wttr.in, 7-day forecast from
+// Open-Meteo (wttr.in's JSON only has 3 days). One request each per
+// Config.weatherIntervalMin; if Open-Meteo fails, wttr.in's 3 days are shown.
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -17,7 +19,9 @@ Singleton {
     property string humidity: ""
     property string wind: ""
     property int code: 0
-    property var forecast: []      // [{ day, max, min, code }]
+    property var forecast: []      // [{ day, max, min, icon }]
+    property string lat: ""
+    property string lon: ""
 
     readonly property string icon: iconFor(code, Time.now.getHours())
 
@@ -59,11 +63,51 @@ Singleton {
                 day: Qt.formatDate(new Date(d.date), "ddd"),
                 max: t(metric ? d.maxtempC : d.maxtempF),
                 min: t(metric ? d.mintempC : d.mintempF),
-                code: parseInt(d.hourly?.[4]?.weatherCode ?? 116)
+                icon: iconFor(parseInt(d.hourly?.[4]?.weatherCode ?? 116), 12)
             }))
             ok = true
+            lat = j.nearest_area?.[0]?.latitude ?? ""
+            lon = j.nearest_area?.[0]?.longitude ?? ""
+            if (lat !== "" && lon !== "" && !week.running) week.running = true
         } catch (e) {
             console.warn("weather: could not parse wttr.in response")
+        }
+    }
+
+    // WMO weather codes (Open-Meteo) → icons
+    function iconForWmo(c) {
+        if (c === 0) return Icons.sunny
+        if (c === 1 || c === 2) return Icons.partly
+        if (c === 3) return Icons.cloudy
+        if (c === 45 || c === 48) return Icons.fog
+        if (c >= 95) return Icons.storm
+        if ((c >= 71 && c <= 77) || c === 85 || c === 86) return Icons.snow
+        if (c >= 51) return Icons.rain
+        return Icons.cloudy
+    }
+
+    Process {
+        id: week
+        command: ["curl", "-fsS", "--max-time", "15",
+                  "https://api.open-meteo.com/v1/forecast?latitude=" + encodeURIComponent(root.lat)
+                  + "&longitude=" + encodeURIComponent(root.lon)
+                  + "&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7"
+                  + (Config.weatherUnits === "u" ? "&temperature_unit=fahrenheit" : "")]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const d = JSON.parse(text).daily
+                    const t = v => String(Math.round(v) || 0) + "°"
+                    root.forecast = d.time.map((day, i) => ({
+                        day: i === 0 ? "Today" : Qt.formatDate(new Date(day + "T12:00:00"), "ddd"),
+                        max: t(d.temperature_2m_max[i]),
+                        min: t(d.temperature_2m_min[i]),
+                        icon: root.iconForWmo(d.weather_code[i])
+                    }))
+                } catch (e) {
+                    console.warn("weather: Open-Meteo forecast unavailable, keeping wttr.in's 3 days")
+                }
+            }
         }
     }
 
