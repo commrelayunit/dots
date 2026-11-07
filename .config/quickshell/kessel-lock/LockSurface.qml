@@ -251,7 +251,7 @@ MouseArea {
                 spacing: 4
                 Repeater {
                     model: Math.min(root.context.currentText.length, 18)
-                    ShapeChar { required property int index; shapeIndex: index }
+                    ShapeChar { color: Style.accent; size: 18 }
                 }
             }
             SequentialAnimation {

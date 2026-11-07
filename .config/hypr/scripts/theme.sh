@@ -442,48 +442,16 @@ EOG
     done
 
     # ── OnlyOffice ──
-    # 1. A custom "Kessel" UI theme (Settings → Theme → Kessel). It starts from
-    #    OnlyOffice's own Night/White tokens (read from its CSS) and only swaps the
-    #    backgrounds for our base (pitch black / eggshell) and the highlights for the wallpaper accent, so text,
-    #    icons and the document canvas keep OnlyOffice's tested contrast.
-    # 2. If a built-in theme is selected instead, pick one matching light/dark
-    #    (keeping the user's choice when it already matches, e.g. Dark Contrast).
-    # 3. System title bar: the custom one draws a transparent shadow margin inside
-    #    the tiled window.
-    # OnlyOffice reads all of this at start-up: a running instance changes on restart.
-    local oo=/opt/onlyoffice/desktopeditors
+    # Pick a built-in theme matching light/dark, keeping the user's own choice when
+    # it already matches (e.g. Dark Contrast). Custom theme files only recolour its
+    # native tab strip in 10.0 (editors and start page fall back), so we don't ship
+    # one. System title bar: the custom one draws a transparent margin inside the
+    # tiled window. Read at start-up, so a running OnlyOffice changes on restart.
     local ooconf="${XDG_CONFIG_HOME:-$HOME/.config}/onlyoffice/DesktopEditors.conf"
-    local oodir="${XDG_DATA_HOME:-$HOME/.local/share}/onlyoffice/desktopeditors/uithemes"
-    if [[ -d $oo ]]; then
-        local base_id=theme-white oo_type=light base_json
-        [[ $mode == dark ]] && { base_id=theme-night; oo_type=dark; }
-        base_json="$(grep -o "\.$base_id{[^}]*}" "$oo/editors/web-apps/apps/documenteditor/main/resources/css/app.css" 2>/dev/null | head -1 |
-            sed 's/^[^{]*{//; s/}$//' | tr ';' '\n' | sed -n 's/^--\([a-z0-9-]*\):\(.*\)$/\1\t\2/p' |
-            jq -R -s 'split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}')"
-        if [[ -n $base_json && $base_json != '{}' && $base_json != null ]]; then
-            mkdir -p "$oodir"
-            jq -n --argjson base "$base_json" --arg type "$oo_type" \
-                --arg bg "$BG" --arg s1 "$SURFACE" --arg s2 "$SURFACE2" --arg p "$P" '
-              def each(prefix; v): ["document","spreadsheet","presentation","pdf","visio"] | map({(prefix + .): v}) | add;
-              { name: "Kessel", id: "theme-kessel", type: $type,
-                colors: ($base
-                  + each("toolbar-header-"; $bg)
-                  + each("highlight-toolbar-tab-underline-"; $p) + each("highlight-header-tab-underline-"; $p)
-                  + { "background-toolbar": $bg, "background-toolbar-additional": $bg,
-                      "background-normal": $bg, "background-pane": $bg, "background-pane-additional": $s1,
-                      "canvas-background": $bg, "canvas-ruler-background": $bg,
-                      "border-toolbar": $s2, "border-divider": $s2,
-                      "background-primary-dialog-button": $p, "background-accent-button": $p,
-                      "border-control-focus": $p, "border-preview-select": $p,
-                      "text-link": $p, "text-link-hover": $p, "text-link-active": $p }) }' \
-                | write "$oodir/kessel.json"
-        fi
-    fi
     if [[ -f $ooconf ]]; then
         local cur want
         cur="$(sed -n 's/^UITheme=//p' "$ooconf")"
-        if [[ $cur == theme-kessel ]]; then want=$cur
-        elif [[ $mode == dark ]]; then
+        if [[ $mode == dark ]]; then
             case $cur in theme-night|theme-dark|theme-contrast-dark) want=$cur ;; *) want=theme-night ;; esac
         else
             case $cur in theme-white|theme-light|theme-classic-light|theme-gray) want=$cur ;; *) want=theme-white ;; esac

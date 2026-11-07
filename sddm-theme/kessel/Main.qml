@@ -271,7 +271,7 @@ Item {
                 spacing: 6
                 Repeater {
                     model: Math.min(password.text.length, 24)
-                    Rectangle { width: 10; height: 10; radius: 5; color: root.accent }
+                    ShapeChar { color: root.accent; size: 18 }   // Material shapes, as on the lock screen
                 }
             }
             SequentialAnimation {

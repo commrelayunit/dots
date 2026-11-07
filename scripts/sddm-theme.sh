@@ -18,6 +18,7 @@ set -euo pipefail
 repo="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
 source "$repo/installer/common.sh"
 src="$repo/sddm-theme/kessel"
+shapes="$repo/.config/quickshell/kessel-lock/ShapeChar.qml"   # password shapes, shared with the lock screen
 dest=/usr/share/sddm/themes/kessel
 conf=/etc/sddm.conf.d/10-kessel.conf
 ts="$(date +%Y%m%d-%H%M%S)"
@@ -35,7 +36,7 @@ fi
 case $cmd in
     test)
         # preview a throwaway copy carrying the current wallpaper + theme colours
-        t="$(mktemp -d)"; cp -r "$src/." "$t/"
+        t="$(mktemp -d)"; cp -r "$src/." "$t/"; cp "$shapes" "$t/"
         w="$(wallpaper)"; [[ -r $w ]] && { rm -f "$t"/background.*; cp "$w" "$t/background.${w##*.}"; sed -i "s|^background=.*|background=background.${w##*.}|" "$t/theme.conf"; }
         tc="${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme/colors.json"
         for k in accent mode text red; do v="$(jq -r --arg k "$k" '.[$k] // empty' "$tc" 2>/dev/null || true)"; [[ -n $v ]] && sed -i "s|^$k=.*|$k=$v|" "$t/theme.conf"; done
@@ -44,7 +45,7 @@ case $cmd in
     install)
         step "Install SDDM theme → $dest"
         tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
-        cp -r "$src/." "$tmp/"
+        cp -r "$src/." "$tmp/"; cp "$shapes" "$tmp/"
         w="$(wallpaper)"
         if [[ -r $w ]]; then
             ext="${w##*.}"; rm -f "$tmp"/background.*
