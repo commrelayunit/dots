@@ -164,20 +164,28 @@ The essentials (end-4 layout; full list in `docs/SHORTCUTS.md` or **SUPER + /**)
 
 | Keys | Action |
 | --- | --- |
-| `SUPER + Return` / `SUPER + T` | Kitty |
+| `SUPER + Return` / `SUPER + T` | Kitty (runs fish) |
 | `SUPER + SHIFT + Return` | Recovery shell (`kitty bash --norc`) |
-| `SUPER + R` / `SUPER + SHIFT + Space` | Island launcher / fuzzel |
-| `SUPER + Space` | Focus mode: hide / show the island |
+| `SUPER + R` / `SUPER + SHIFT + Space` | Island launcher (calculator, URLs) / fuzzel |
+| `SUPER + E` · `SUPER + O` · `SUPER + C` · `SUPER + W` | Dolphin · Obsidian · Neovim · browser |
 | `SUPER + Q` | Close window (**never** the terminal) |
-| `SUPER + C` / `SUPER + W` | Neovim / browser |
-| `SUPER + 1…0`, `CTRL + SUPER + 1…0` | Go to workspace |
-| `SUPER + ALT + 1…0` | Send window to workspace |
-| `SUPER + S` / `SUPER + ALT + S` | Toggle scratchpad / send window there |
+| `SUPER + F` / `SUPER + D` / `SUPER + SHIFT + F` | Fullscreen / detach (float) this window / all windows floating |
+| `SUPER + 1…0`, `CTRL + SUPER + 1…0` / `SUPER + ALT + 1…0` | Go to / send window to workspace |
+| `SUPER + S` / `SUPER + ALT + S` | Scratchpad / send window there |
 | `SUPER + ←↑→↓` / `SUPER + SHIFT + ←↑→↓` | Focus / move window |
+| `SUPER + LMB drag` / `SUPER + RMB drag` | Move / resize window |
 | `SUPER + ;` / `SUPER + '` | Narrower / wider |
-| `SUPER + V`, `SUPER + .` | Clipboard, emoji picker |
-| `SUPER + SHIFT + S`, `SUPER + SHIFT + C`, `SUPER + SHIFT + R` | Screenshot region, colour picker, record region |
+| `SUPER + Space` | Focus mode (hide the island) |
+| `SUPER + A` / `SUPER + ALT + N` | Quick settings / notifications |
+| `SUPER + G` / `SUPER + SHIFT + G` | Notes / kanban board |
+| `SUPER + M` / `SUPER + SHIFT + V` | Media player / volume mixer |
+| `SUPER + P` · `SUPER + N` · `SUPER + SHIFT + N` | Play-pause · next · previous |
+| `CTRL + SUPER + V` / `SUPER + ALT + M` | Mute output / mute mic |
+| `SUPER + V` · `SUPER + .` | Clipboard · emoji picker |
+| `SUPER + SHIFT + S` · `SUPER + SHIFT + C` · `SUPER + SHIFT + R` | Screenshot region · colour picker · record region |
+| `SUPER + =` / `SUPER + −` | Zoom in / out |
 | `SUPER + L` / `SUPER + SHIFT + L` | Lock / standby |
+| `CTRL + SUPER + R` | Reload Hyprland + restart the island |
 | `SUPER + /` | All shortcuts |
 
 ## Operational verification
