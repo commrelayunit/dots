@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# dunst — the single notification path (D-Bus activated).
+[global]
+    font = JetBrainsMono Nerd Font 11
+    origin = top-right
+    offset = (14, 14)
+    width = (280, 420)
+    padding = 12
+    horizontal_padding = 14
+    frame_width = 2
+    corner_radius = 12
+    gap_size = 6
+    separator_height = 2
+    icon_position = left
+    max_icon_size = 48
+    format = "<b>%s</b>\n%b"
+    background = "#11131af0"
+    foreground = "#d8dae1"
+    frame_color = "#2a2e3a"
+    mouse_left_click = do_action, close_current
+    mouse_right_click = close_all
+
+[urgency_low]
+    timeout = 4
+[urgency_normal]
+    frame_color = "#8aadf4"
+    timeout = 6
+[urgency_critical]
+    frame_color = "#e06c75"
+    timeout = 0

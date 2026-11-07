@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# OmniGlyph (optional AUR: omniglyph, GPL-3.0-only, not vendored).
+# Launched by SUPER+period via ~/.config/hypr/scripts/omniglyph.sh.
+# Missing keys fall back to OmniGlyph defaults; restart OmniGlyph after edits.
+# settings.json (history/prefs) is runtime state and is not tracked.
+
+[shortcuts]
+quit = "escape"          # picker behaviour: Esc closes (default: ctrl+q)
+focus_search = "slash"

@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Official Arch packages for the "minimal" profile (curated from the 2026-11-07 audit).
+# One package per line; comments allowed. See docs/MIGRATION_PLAN.md §3.
+
+# Compositor, session, portals
+hyprland
+uwsm
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+# Shell UI (optional at runtime — desktop works without it)
+quickshell
+# Terminal + launcher (fixed choices)
+kitty
+fuzzel
+# Shell + prompt + font
+fish
+starship
+ttf-jetbrains-mono-nerd
+# Wallpaper, idle, lock
+hyprpaper
+hypridle
+hyprlock
+# Clipboard + screenshots
+wl-clipboard
+cliphist
+grim
+slurp
+# Audio + media
+pipewire
+pipewire-pulse
+wireplumber
+pavucontrol
+playerctl
+# Notifications (single path)
+dunst
+libnotify
+# Integration
+polkit-gnome
+qt5-wayland
+qt6-wayland
+xdg-user-dirs
+# Tooling used by scripts / installer
+jq
+git
