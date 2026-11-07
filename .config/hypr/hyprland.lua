@@ -9,7 +9,7 @@
 
 local safety = require("lib.safety")
 
-safety.load("monitors")    -- displays (VirtIO Virtual-1)
+safety.load("monitors")    -- displays: modes, scale, multi-monitor arrangement
 safety.load("env")         -- environment / toolkit integration
 safety.load("general")     -- UI / aesthetic: gaps, borders, decoration, animations, layouts
 safety.load("input")       -- keyboard, pointer, devices

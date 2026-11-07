@@ -121,11 +121,11 @@ case "${1:-}" in
     setup)
         shift
         command -v uv >/dev/null || die "uv is not installed (sudo pacman -S uv)"
-        # The prebuilt Bergamot engine needs AVX2. Generic VM CPU models (e.g. Proxmox's
-        # default "kvm64"/"QEMU Virtual CPU") don't expose it: set the VM CPU type to "host".
+        # The prebuilt Bergamot engine needs AVX2. Generic virtual CPU models
+        # (e.g. "kvm64", "QEMU Virtual CPU") don't expose it: use CPU type "host".
         if ! grep -qw avx2 /proc/cpuinfo; then
             die "this CPU has no AVX2, which the translation engine needs.
-  On a VM: set the CPU type to 'host' (Proxmox: VM → Hardware → Processors → Type), then cold-boot it.
+  On a VM: set the virtual CPU type to 'host' in your hypervisor, then cold-boot it.
   Real laptops/desktops from the last decade have AVX2."
         fi
         mkdir -p "$ROOT"

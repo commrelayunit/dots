@@ -1,7 +1,7 @@
 [SddmGreeterTheme]
 Name=Kessel
 Description=Matches the Kessel lock screen (JetBrainsMono, frosted card, bottom toolbar)
-Author=velitchko
+Author=dots contributors
 License=GPL-3.0-or-later
 Type=sddm-theme
 Version=1.0

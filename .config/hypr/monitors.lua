@@ -11,8 +11,12 @@
 
 local MAIN_MONITOR = ""      -- e.g. "Dell Inc. DELL U2723QE" (substring match)
 
--- Kessel (VM): VirtIO "Virtual-1", user-chosen 1920x1080 (was 2560x1440). Auto scale → 1.5.
-hl.monitor({ output = "Virtual-1", mode = "1920x1080", position = "0x0", scale = "auto" })
+-- Per-output mode overrides (output name → mode). Everything not listed uses its
+-- preferred mode. Virtual displays often default to an odd mode, so pin one here.
+local MODES = { ["Virtual-1"] = "1920x1080" }
+for name, mode in pairs(MODES) do
+    hl.monitor({ output = name, mode = mode, position = "0x0", scale = "auto" })
+end
 -- Everything else: preferred mode, auto scale; position set by arrange() below.
 hl.monitor({ output = "", mode = "preferred", position = "auto-right", scale = "auto" })
 
@@ -59,11 +63,7 @@ local function arrange()
 
     local x = 0
     for _, m in ipairs(order) do
-        if m.name == "Virtual-1" then
-            hl.monitor({ output = m.name, mode = "1920x1080", position = x .. "x0", scale = "auto" })
-        else
-            hl.monitor({ output = m.name, mode = "preferred", position = x .. "x0", scale = "auto" })
-        end
+        hl.monitor({ output = m.name, mode = MODES[m.name] or "preferred", position = x .. "x0", scale = "auto" })
         x = x + logical_width(m)
     end
 end

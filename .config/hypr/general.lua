@@ -13,7 +13,7 @@ do
     end
 end
 
--- Without a GPU render node (e.g. the Kessel VM) everything is drawn in
+-- Without a GPU render node (e.g. most VMs) everything is drawn in
 -- software: skip blur and use cheap shadows there. Real hardware keeps the full look.
 local function has_render_node()
     for i = 128, 135 do

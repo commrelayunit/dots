@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Network state via NetworkManager (Quickshell.Networking). Works wired-only (VM)
-// and with Wi-Fi (laptop). Password entry uses connectWithPsk.
+// Network state via NetworkManager (Quickshell.Networking). Works wired-only
+// and with Wi-Fi. Password entry uses connectWithPsk.
 pragma Singleton
 import QtQuick
 import Quickshell
