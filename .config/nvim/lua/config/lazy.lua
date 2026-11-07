@@ -18,7 +18,9 @@ require("lazy").setup({
   },
   defaults = { lazy = false, version = false },
   install = { colorscheme = { "habamax" } },
-  checker = { enabled = true, notify = false },     -- check for updates quietly (:Lazy to update)
+  concurrency = 4,                                  -- few parallel clones: dozens at once failed on a slow link
+  git = { timeout = 300 },                          -- seconds per git operation (default 120)
+  checker = { enabled = true, notify = false, concurrency = 2 },  -- update check, quietly (:Lazy to update)
   change_detection = { notify = false },
   rocks = { enabled = false },                      -- no luarocks needed
   performance = {
