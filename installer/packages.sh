@@ -25,6 +25,19 @@ step_packages() {
     run sudo pacman -S --needed "${missing[@]}"
 }
 
+# Install yay (AUR helper) from the AUR's prebuilt yay-bin, once.
+bootstrap_yay() {
+    info "yay not found — bootstrapping yay-bin from the AUR"
+    local missing; mapfile -t missing < <(for p in git base-devel; do pacman -Qq "$p" >/dev/null 2>&1 || pacman -Qqg "$p" >/dev/null 2>&1 || echo "$p"; done)
+    (( ${#missing[@]} )) && run sudo pacman -S --needed "${missing[@]}"
+    local tmp; tmp="$(mktemp -d)"
+    run git clone --depth 1 https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
+    if (( DRY_RUN )); then info "[dry-run] (cd $tmp/yay-bin && makepkg -si)"; rm -rf "$tmp"; return 0; fi
+    (cd "$tmp/yay-bin" && makepkg -si --noconfirm) || { rm -rf "$tmp"; warn "yay bootstrap failed"; return 1; }
+    rm -rf "$tmp"
+    ok "yay installed"
+}
+
 step_aur() {
     local manifest="$REPO/pkglist-aur.txt"
     step "Optional AUR packages (--with-aur)"
@@ -36,8 +49,7 @@ step_aur() {
     fi
     info "missing: ${missing[*]}"
     if ! command -v yay >/dev/null 2>&1; then
-        warn "yay not found — bootstrap it first (see README → AUR helper)"
-        return 1
+        bootstrap_yay || return 1
     fi
     run yay -S --needed "${missing[@]}"
 }

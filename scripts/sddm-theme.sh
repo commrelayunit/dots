@@ -28,6 +28,10 @@ cmd=${1:-}; shift || true
 wallpaper() { jq -r '.wallpaper // empty' "${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme/colors.json" 2>/dev/null || true; }
 accent()    { jq -r '.accent // "#8aadf4"' "${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme/colors.json" 2>/dev/null || echo "#8aadf4"; }
 
+if [[ $cmd == install || $cmd == test ]] && ! command -v sddm-greeter-qt6 >/dev/null 2>&1; then
+    die "SDDM (with its Qt6 greeter) is not installed: sudo pacman -S sddm — and enable it yourself if wanted"
+fi
+
 case $cmd in
     test)
         # preview a throwaway copy carrying the current wallpaper + theme colours

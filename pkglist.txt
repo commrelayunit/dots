@@ -39,6 +39,7 @@ polkit-gnome
 qt5-wayland
 qt6-wayland
 xdg-user-dirs
+xdg-utils
 # Island utilities: screen recording, colour picker, backlight, app icons
 wf-recorder
 hyprpicker
