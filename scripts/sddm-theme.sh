@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# ~/Scripts/sddm-theme.sh — the Kessel login screen (matches the lock screen).
+#
+#   sddm-theme.sh test        preview in a window (no root, changes nothing)
+#   sddm-theme.sh install     copy theme + current wallpaper + ~/.face, select it (sudo)
+#   sddm-theme.sh uninstall   back to SDDM's default theme (sudo)
+#   …add --dry-run to install/uninstall to only print the commands
+#
+# System files touched (only by install/uninstall):
+#   /usr/share/sddm/themes/kessel/        theme
+#   /usr/share/sddm/faces/$USER.face.icon avatar (from ~/.face, if present)
+#   /etc/sddm.conf.d/10-kessel.conf       [Theme] Current=kessel (+ cursor)
+# Existing files are backed up to /etc/sddm.conf.d/*.kessel-bak-<ts> first.
+# Recovery over SSH if the login screen ever misbehaves:
+#   sudo rm /etc/sddm.conf.d/10-kessel.conf   (takes effect at the next greeter start)
+set -euo pipefail
+repo="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+source "$repo/installer/common.sh"
+src="$repo/sddm-theme/kessel"
+dest=/usr/share/sddm/themes/kessel
+conf=/etc/sddm.conf.d/10-kessel.conf
+ts="$(date +%Y%m%d-%H%M%S)"
+
+cmd=${1:-}; shift || true
+[[ ${1:-} == --dry-run ]] && DRY_RUN=1
+
+wallpaper() { jq -r '.wallpaper // empty' "${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme/colors.json" 2>/dev/null || true; }
+accent()    { jq -r '.accent // "#8aadf4"' "${XDG_STATE_HOME:-$HOME/.local/state}/kessel/theme/colors.json" 2>/dev/null || echo "#8aadf4"; }
+
+case $cmd in
+    test)
+        w="$(wallpaper)"; [[ -r $w ]] && cp "$w" "$src/background.png"
+        exec sddm-greeter-qt6 --test-mode --theme "$src" ;;
+    install)
+        step "Install SDDM theme → $dest"
+        tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+        cp -r "$src/." "$tmp/"
+        w="$(wallpaper)"
+        if [[ -r $w ]]; then
+            ext="${w##*.}"; rm -f "$tmp"/background.*
+            cp "$w" "$tmp/background.$ext"
+            sed -i "s|^background=.*|background=background.$ext|" "$tmp/theme.conf"
+            ok "wallpaper: $w"
+        fi
+        sed -i "s|^accent=.*|accent=$(accent)|" "$tmp/theme.conf"
+        run sudo install -d -m 755 "$dest"
+        run sudo cp -r "$tmp/." "$dest/"
+        run sudo chmod -R a+rX "$dest"
+        if [[ -s $HOME/.face ]]; then
+            run sudo install -D -m 644 "$HOME/.face" "/usr/share/sddm/faces/$USER.face.icon"
+            ok "avatar: ~/.face"
+        else
+            info "no ~/.face — the theme shows a placeholder icon"
+        fi
+        cursor=""; [[ -d /usr/share/icons/Bibata-Modern-Classic ]] && cursor=$'CursorTheme=Bibata-Modern-Classic\nCursorSize=24'
+        if [[ -e $conf ]]; then run sudo cp -a "$conf" "$conf.kessel-bak-$ts"; info "backup: $conf.kessel-bak-$ts"; fi
+        run sudo install -d -m 755 /etc/sddm.conf.d
+        if (( DRY_RUN )); then
+            info "[dry-run] would write $conf"
+        else
+            printf '# written by ~/Scripts/sddm-theme.sh — remove to restore the default theme\n[Theme]\nCurrent=kessel\n%s\n' "$cursor" | sudo tee "$conf" >/dev/null
+        fi
+        ok "selected; you'll see it at the next login screen (log out, or reboot)" ;;
+    uninstall)
+        step "Remove SDDM theme"
+        if [[ -e $conf ]]; then run sudo mv "$conf" "$conf.kessel-bak-$ts"; ok "deselected (kept as $conf.kessel-bak-$ts)"; else info "$conf not present"; fi
+        run sudo rm -rf "$dest"
+        ok "SDDM falls back to its default theme" ;;
+    *) sed -n '3,19p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

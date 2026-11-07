@@ -1,0 +1,15 @@
+[SddmGreeterTheme]
+Name=Kessel
+Description=Matches the Kessel lock screen (JetBrainsMono, frosted card, bottom toolbar)
+Author=velitchko
+License=GPL-3.0-or-later
+Type=sddm-theme
+Version=1.0
+Website=
+Screenshot=
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Theme-Id=kessel
+Theme-API=2.0
+QtVersion=6

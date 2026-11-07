@@ -9,3 +9,4 @@
 # Generated at runtime
 *.log
 /backups/
+sddm-theme/kessel/background.*

@@ -62,7 +62,7 @@ The legacy `velitchko/dot-files` is **not present on Kessel** (the GitHub URL re
 | `scripts/proton/` | **archive** | rclone/Proton excluded |
 | `services/deploy-services.sh` | **drop** | Enables everything at once; violates the opt-in policy |
 | `services/user/`, `services/system/` units | **archive** | See §5; directory structure retained, nothing deployed |
-| `sddm-theme/` | **archive** | Display-manager theming deferred |
+| `sddm-theme/` | **adapt** (2026-11-07) | Recreated as `sddm-theme/kessel` matching the lock screen; installed only by `scripts/sddm-theme.sh install` |
 | `sieve-filter-*.txt` | **archive** | Mail filters; not desktop config. Review for personal data before re-adding |
 | `utilities.md` | **archive** | Notes; review later |
 
@@ -148,3 +148,5 @@ Each one would be a separate opt-in stage with its own unit review, a dry run, a
 | Original bind layout | end-4/dots-hyprland layout | User muscle memory. Binds were re-implemented, not copied |
 | Static palette | Wallpaper-derived accents (matugen, official repo) on fixed pitch-black / eggshell bases | `theme.sh`; state in `~/.local/state/kessel/theme` |
 | Single display | Automatic 2- and 3-display arrangement | Tested on Kessel with headless outputs |
+| hyprlock as the locker | Quickshell `kessel-lock` (separate process), hyprlock as automatic fallback | User's own lock-surface design made standalone; secure-lock confirmation, crash-restore and SSH recovery tested |
+| No display-manager theming | `sddm-theme/kessel` (opt-in script, sudo) | Matches the lock screen; tested in `--test-mode` |
