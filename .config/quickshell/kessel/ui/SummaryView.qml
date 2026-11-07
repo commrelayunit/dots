@@ -14,7 +14,7 @@ View {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        onClicked: IslandState.openPanel(Media.active ? "control" : "notifications")
+        onClicked: IslandState.openPanel("control")   // quick settings; the clock opens notifications
     }
 
     Column {
