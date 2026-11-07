@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Round button that floats beside the island (gear / bell), same material as the pill.
+import QtQuick
+import ".."
+
+Rectangle {
+    id: root
+    property string icon: ""
+    property bool active: false
+    property int badge: 0
+    property color tint: Theme.accent
+    signal clicked()
+
+    width: Theme.islandHeight
+    height: Theme.islandHeight
+    radius: height / 2
+    color: active ? Theme.a(tint, 0.25) : (ma.containsMouse ? Qt.lighter(Theme.island, Theme.dark ? 2.2 : 0.96) : Theme.island)
+    border.width: 1
+    border.color: active ? Theme.a(tint, 0.7) : Theme.a(Theme.text, ma.containsMouse ? 0.14 : 0.06)
+    Behavior on color { ColorAnimation { duration: Theme.fadeMs } }
+
+    Glyph {
+        anchors.centerIn: parent
+        text: root.icon
+        size: Theme.fontUi + 3
+        color: root.active ? root.tint : Theme.text
+    }
+    // count badge
+    Rectangle {
+        visible: root.badge > 0
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.rightMargin: -3
+        anchors.topMargin: -3
+        width: Math.max(16, badgeText.implicitWidth + 8)
+        height: 16
+        radius: 8
+        color: Theme.accent
+        Label { id: badgeText; anchors.centerIn: parent; text: root.badge > 99 ? "99+" : root.badge; size: Theme.fontSmall - 2; font.bold: true; color: Theme.base }
+    }
+    MouseArea {
+        id: ma
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.clicked()
+    }
+}

@@ -35,7 +35,7 @@ dot-files/
 
 ## The island
 
-A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`). It **rests** on workspaces · music · clock · weather · CPU/RAM/network · battery, with live chips for recording, timers, Do Not Disturb and notifications. It **morphs** into:
+A dynamic island built from scratch on Quickshell (`.config/quickshell/kessel`). It **rests** on workspaces · music · clock · weather · CPU/RAM/network · battery, with live chips for recording, timers, Do Not Disturb and notifications. Two round buttons float beside it: **⚙ left** opens quick settings, and **🔔 right** opens notifications (with a count badge; it shows a crossed-out bell while Do Not Disturb is on). It **morphs** into:
 
 | Opens with | Panel |
 | --- | --- |

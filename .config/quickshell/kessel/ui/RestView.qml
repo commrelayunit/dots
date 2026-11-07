@@ -103,7 +103,5 @@ View {
         Chip { visible: Timers.swRunning; icon: Icons.timer; text: Time.hms(Timers.swMs / 1000); tint: Theme.purple; anchors.verticalCenter: parent.verticalCenter }
         Chip { clickable: true; onClicked: Session.toggleFloatMode(); visible: Session.floatMode; icon: Icons.floating; tint: Theme.accent3; anchors.verticalCenter: parent.verticalCenter }
         Chip { visible: Session.inhibitIdle; icon: Icons.coffee; tint: Theme.yellow; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: Notifs.dnd; icon: Icons.bellOff; tint: Theme.red; anchors.verticalCenter: parent.verticalCenter }
-        Chip { clickable: true; onClicked: IslandState.openPanel("notifications"); visible: !Notifs.dnd && Notifs.count > 0; icon: Icons.bell; text: Notifs.count; tint: Theme.accent; anchors.verticalCenter: parent.verticalCenter }
     }
 }

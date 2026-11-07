@@ -17,7 +17,6 @@ PanelBase {
 
     headerExtra: [
         IconButton { icon: Icons.overview; size: 26; iconSize: Theme.fontSmall + 2; onClicked: IslandState.openPanel("overview") },
-        IconButton { icon: Icons.bell; size: 26; iconSize: Theme.fontSmall + 2; onClicked: IslandState.openPanel("notifications") },
         IconButton { icon: Icons.power; size: 26; iconSize: Theme.fontSmall + 2; tint: Theme.red; onClicked: IslandState.openPanel("power") }
     ]
 

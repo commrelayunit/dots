@@ -20,11 +20,15 @@ PanelWindow {
     visible: IslandState.shown
     anchors.top: true
     margins.top: Theme.islandMargin
-    implicitWidth: 1000
+    implicitWidth: 1100           // pill (≤ ~800) + the two side buttons
     implicitHeight: Math.min(screen ? screen.height - 40 : 700, 700)
     exclusiveZone: Theme.islandHeight + Theme.islandMargin
     color: "transparent"
-    mask: Region { item: pill }
+    mask: Region {
+        item: pill
+        Region { item: gearBtn }
+        Region { item: bellBtn }
+    }
 
     WlrLayershell.namespace: "kessel-island"
     WlrLayershell.layer: WlrLayer.Top
@@ -55,6 +59,27 @@ PanelWindow {
         : layer === "osd" ? osdView
         : layer === "summary" ? summaryView
         : restView
+
+    // Floating side buttons: gear → quick settings, bell → notifications.
+    // They ride the pill's edges, so they glide outward as it morphs.
+    SideButton {
+        id: gearBtn
+        y: 0
+        x: pill.x - width - 8
+        icon: Icons.settings
+        active: IslandState.panel === "control"
+        onClicked: IslandState.openPanel("control")
+    }
+    SideButton {
+        id: bellBtn
+        y: 0
+        x: pill.x + pill.width + 8
+        icon: Notifs.dnd ? Icons.bellOff : Icons.bell
+        tint: Notifs.dnd ? Theme.red : Theme.accent
+        active: IslandState.panel === "notifications" || Notifs.dnd
+        badge: Notifs.dnd ? 0 : Notifs.count
+        onClicked: IslandState.openPanel("notifications")
+    }
 
     Rectangle {
         id: pill
